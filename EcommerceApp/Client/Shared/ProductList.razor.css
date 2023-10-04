@@ -1,0 +1,36 @@
+﻿.media-img {
+    max-height:200px;
+    max-width:200px;    /* set the max width and height of the image */
+    border-radius:6px; /* add a border radius to the image */
+    margin-bottom: 10px; /* add some space between each image */
+    transition:transform .2s; /* add a transition effect when hovering over the image */
+}
+    .media-img:hover {
+    transform:scale(1.1); /* increase the size of the image on hover */
+    }
+.media {
+    display: flex;
+    align-items: flex-start;
+}
+.media-body {
+    flex: 1;
+}
+.media-img-wrapper { 
+    width:200px; /* width of the image */
+    text-align:center; /* center the image */
+}
+
+.price{
+    color: green;
+}
+
+@media (max-width: 1023.98px) {
+    .media {
+        flex-direction: column;
+    }
+    .media-img-wrapper {
+        width: 100%;
+        height: auto;
+    }
+}
+

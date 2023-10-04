@@ -1,0 +1,44 @@
+﻿@inject IProductService ProductService
+
+@if (ProductService.Products == null || ProductService.Products.Count == 0)
+{
+    <span>Loading Products...</span>
+}
+else
+{
+    <ul class="list-unstyled">
+        @foreach (var product in ProductService.Products)
+        {
+            string imageSrc = "/images/img_placeholder.jpg"; // Default placeholder image
+            if (product.Image != null)
+            {
+                var base64Image = Convert.ToBase64String(product.Image);
+                imageSrc = $"data:image/jpeg;base64,{base64Image}";
+            }
+
+            <li class="media my-3 gx-3">
+                <div class="media-img-wrapper me-3">
+                    <a href="#">
+                        <img class="media-img" src="@imageSrc" alt="@product.Name" />
+                    </a>
+                </div>
+                <div class="media-body">
+                    <a href="/shop/@product.Id">
+                        <h4 class="mb-0">@product.Name</h4>
+                    </a>
+                    <p>@product.Description</p>
+                    <h5 class="price">
+                        $@product.Price
+                    </h5>
+                </div>
+            </li>
+        }
+    </ul>
+}
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        await ProductService.GetAllProductsAsync();
+    }
+}
