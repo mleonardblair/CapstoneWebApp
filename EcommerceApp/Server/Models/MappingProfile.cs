@@ -8,19 +8,19 @@ public class MappingProfile : Profile
 {
     public MappingProfile()
     {
+        // Product
         CreateMap<Product, ProductDto>();
         CreateMap<ProductDto, Product>();
+
+        // Category
         CreateMap<Category, CategoryDto>();
         CreateMap<CategoryDto, Category>();
 
-        CreateMap<AppUserDto, ApplicationUser>()
-            .ForMember(dest => dest.Id, opt => opt.Ignore()) // Ignore Id
-            .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.Email)); // Map Email to UserName
+        // AppUser
+        CreateMap<AppUserDto, ApplicationUser>();
+        CreateMap<ApplicationUser, AppUserDto>();
 
-
-        CreateMap<ApplicationUser, AppUserDto>()
-            .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.UserName)); // Map UserName to Email
-                                                                            // New mapping for Report and ReportDto
+        // Report
         CreateMap<Report, ReportDto>();
         CreateMap<ReportDto, Report>();
 
@@ -30,7 +30,7 @@ public class MappingProfile : Profile
 
         // Address
         CreateMap<Address, AddressDto>();
-        CreateMap<AddressDto, Address>().ForMember(dest => dest.Id, opt => opt.Ignore());
+        CreateMap<AddressDto, Address>();
 
 
         // Order
@@ -53,9 +53,7 @@ public class MappingProfile : Profile
         CreateMap<CartItem, CartItemDto>();
         CreateMap<CartItemDto, CartItem>();
 
-        // Report
-        CreateMap<Report, ReportDto>();
-        CreateMap<ReportDto, Report>();
+
 
 
     }
