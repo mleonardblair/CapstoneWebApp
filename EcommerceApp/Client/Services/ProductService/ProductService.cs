@@ -28,7 +28,7 @@ namespace EcommerceApp.Client.Services.ProductService
 
         public async Task<ServiceResponse<ProductDto>> CreateProductAsync(ProductDto product)
         {
-            var httpClient = _httpFactory.CreateClient("WasmStore.PublicClient");
+            var httpClient = _httpFactory.CreateClient("EcommerceApp.PublicClient");
             ServiceResponse<ProductDto> result = new ServiceResponse<ProductDto>();
 
             var productResponse = await httpClient.PostAsJsonAsync("api/products/create", product);

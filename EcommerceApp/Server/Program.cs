@@ -1,3 +1,5 @@
+using EcommerceApp.Server.Services.CategoryService;
+using EcommerceApp.Server.Services.ProductService;
 using EcommerceApp.Server.Data;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
@@ -14,6 +16,12 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
 //builder.Services.AddAutoMapper(typeof(MappingProfile).Assembly);
+
+builder.Services.AddSwaggerGen();
+builder.Services.AddEndpointsApiExplorer();
+
+builder.Services.AddScoped<IProductService,ProductService>()
+.AddScoped<ICategoryService,CategoryService>();
 
 var app = builder.Build();
 

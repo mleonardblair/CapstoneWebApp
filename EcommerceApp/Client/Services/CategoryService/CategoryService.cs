@@ -23,7 +23,7 @@ namespace EcommerceApp.Client.Services.CategoryService
         {
             try
             {
-                var httpClient = _httpFactory.CreateClient("WasmStore.PublicClient");
+                var httpClient = _httpFactory.CreateClient("EcommerceApp.PublicClient");
 
                 var response = await httpClient.GetFromJsonAsync<ServiceResponse<List<CategoryDto>>>("api/categories");
 
@@ -48,7 +48,7 @@ namespace EcommerceApp.Client.Services.CategoryService
 
         public async Task<ServiceResponse<CategoryDto>> GetCategoryByIdAsync(Guid categoryId)
         {
-            var httpClient = _httpFactory.CreateClient("WasmStore.PublicClient"); // Replace with whatever name you used to configure the client
+            var httpClient = _httpFactory.CreateClient("EcommerceApp.PublicClient"); // Replace with whatever name you used to configure the client
 
             var result = await httpClient.GetFromJsonAsync<ServiceResponse<CategoryDto>>($"api/categories/{categoryId}");
 
