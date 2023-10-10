@@ -15,7 +15,7 @@ namespace EcommerceApp.Server.Data
         public DbSet<Category> Categories { get; set; } = null!;
         public DbSet<CartItem> CartItems { get; set; } = null!;
         public DbSet<Favourite> Favourites { get; set; } = null!;
-
+        public DbSet<Product> Products { get; set; } = null!;
         public DbSet<Order> Orders { get; set; } = null!;
         public DbSet<OrderItem> OrderItems { get; set; } = null!;
         public DbSet<Payment> Payments { get; set; } = null!;
