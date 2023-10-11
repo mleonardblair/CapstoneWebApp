@@ -1,13 +1,14 @@
+using Microsoft.Extensions.DependencyInjection;
 using EcommerceApp.Server.Services.CategoryService;
 using EcommerceApp.Server.Services.ProductService;
 using EcommerceApp.Server.Data;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
-
+using AutoMapper;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-var connectionString = builder.Configuration.GetConnectionString("DevelopmentLocalConnection");
+var connectionString = builder.Configuration.GetConnectionString("AzureDBConnection");
 
 
 builder.Services.AddDbContext<AppDbContext>(options =>
@@ -15,7 +16,8 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
-//builder.Services.AddAutoMapper(typeof(MappingProfile).Assembly);
+
+builder.Services.AddAutoMapper(typeof(MappingProfile).Assembly);
 
 builder.Services.AddSwaggerGen();
 builder.Services.AddEndpointsApiExplorer();
