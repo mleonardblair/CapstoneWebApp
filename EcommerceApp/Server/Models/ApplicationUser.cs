@@ -4,8 +4,10 @@ using EcommerceApp.Shared.Models;
 
 namespace EcommerceApp.Server.Models
 {
-    public class ApplicationUser : IdentityUser
+    public class ApplicationUser
     {
+        [Key]
+        public Guid Id { get; set; }
         [Required, MaxLength(50)]
         public string FirstName { get; set; } = string.Empty;
 

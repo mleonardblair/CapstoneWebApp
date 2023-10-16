@@ -10,7 +10,7 @@ namespace EcommerceApp.Server.Models
         public Guid Id { get; set; }= Guid.NewGuid();
 
         [Required]
-        public string? ApplicationUserId { get; set; }
+        public Guid? ApplicationUserId { get; set; }
 
         [ForeignKey("ApplicationUserId")]
         public ApplicationUser? ApplicationUser { get; set; }

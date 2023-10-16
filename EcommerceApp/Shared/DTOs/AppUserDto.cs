@@ -5,7 +5,7 @@ namespace EcommerceApp.Shared.DTOs
 {
     public class AppUserDto
     {
-        public string? Id { get; set; }
+        public Guid? Id { get; set; }
 
         [Required, MaxLength(50)]
         public string FirstName { get; set; } = string.Empty;

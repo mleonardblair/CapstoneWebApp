@@ -6,7 +6,6 @@
 
 main {
     flex: 1;
-    font-family: Arial, sans-serif;
 }
 
 .sidebar {
@@ -14,43 +13,22 @@ main {
 }
 
 .top-row {
-    font-family: Arial, sans-serif;
+    background-color: #fff;
+    border-bottom: 1px solid #d6d5d5;
+    justify-content: flex-end;
+    height: 3.5rem;
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    padding: 10px 40px;
-    background-color: #000;
-    color: #ffffff;
-    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
 }
-    .top-row img{
-        height: 30px;
-    }
-    .top-row ::deep img:hover {
-        color: #ff6a00;
-        transition: background-color 0.3s;
-    }
-     .top-row ::deep .icons {
-            display: flex;
-        }
+
     .top-row ::deep a, .top-row ::deep .btn-link {
         white-space: nowrap;
+        margin-left: 1.5rem;
         text-decoration: none;
-        color:#fff;
     }
 
     .top-row ::deep a:hover, .top-row ::deep .btn-link:hover {
-        text-decoration: none;
-        color:#ff6a00;
-
-    }
-    .top-row ::deep img {
-        background-color: #000;
-        color: #fff;
-        border: none;
-        padding: 8px 8px;
-        cursor: pointer;
-        transition: background-color 0.3s;
+        text-decoration: underline;
     }
 
     .top-row ::deep a:first-child {

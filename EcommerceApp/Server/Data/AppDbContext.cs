@@ -8,24 +8,23 @@ namespace EcommerceApp.Server.Data
     {
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
     
-
-        public DbSet<Address> Addresses { get; set; }
-        public DbSet<ShoppingCart> Carts { get; set; }
+        public DbSet<Address>? Addresses { get; set; } = null!;
+        public DbSet<ShoppingCart>? Carts { get; set; } = null!;
         // Add other DbSet properties for your other models
-        public DbSet<Category> Categories { get; set; } = null!;
-        public DbSet<CartItem> CartItems { get; set; } = null!;
-        public DbSet<Favourite> Favourites { get; set; } = null!;
-        public DbSet<Product> Products { get; set; } = null!;
-        public DbSet<Order> Orders { get; set; } = null!;
-        public DbSet<OrderItem> OrderItems { get; set; } = null!;
-        public DbSet<Payment> Payments { get; set; } = null!;
-        public DbSet<ProductTag> ProductTags { get; set; } = null!;
-        public DbSet<Report> Reports { get; set; } = null!;
-        public DbSet<Review> Reviews { get; set; } = null!;
-        public DbSet<Tag> Tags { get; set; } = null!;
-        public DbSet<ApplicationUser> ApplicationUsers { get; set; } = null!;
-        public DbSet<UserAddress> UserAddresses { get; set; } = null!;
-        public DbSet<Image> Images { get; set; } = null!;
+        public DbSet<Category>? Categories { get; set; } = null!;
+        public DbSet<CartItem>? CartItems { get; set; } = null!;
+        public DbSet<Favourite>? Favourites { get; set; } = null!;
+        public DbSet<Product>? Products { get; set; } = null!;
+        public DbSet<Order>? Orders { get; set; } = null!;
+        public DbSet<OrderItem>? OrderItems { get; set; } = null!;
+        public DbSet<Payment>? Payments { get; set; } = null!;
+        public DbSet<ProductTag>? ProductTags { get; set; } = null!;
+        public DbSet<Report>? Reports { get; set; } = null!;
+        public DbSet<Review>? Reviews { get; set; } = null!;
+        public DbSet<Tag>? Tags { get; set; } = null!;
+        public DbSet<ApplicationUser>? ApplicationUsers { get; set; } = null!;
+        public DbSet<UserAddress>? UserAddresses { get; set; } = null!;
+        public DbSet<Image>? Images { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

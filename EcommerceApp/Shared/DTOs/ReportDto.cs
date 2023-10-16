@@ -9,7 +9,7 @@ namespace EcommerceApp.Shared.DTOs
     public class ReportDto
     {
         public Guid Id { get; set; }
-        public string ApplicationUserId { get; set; }
+        public Guid ApplicationUserId { get; set; }
         public Guid OrderId { get; set; }
         public DateTime TimePeriodStart { get; set; }
         public DateTime TimePeriodEnd { get; set; }
