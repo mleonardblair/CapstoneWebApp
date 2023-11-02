@@ -1,0 +1,38 @@
+﻿.small-img-container {
+    display: flex;
+    justify-content: start; /* align them to the start */
+    flex-wrap: nowrap; /* prevent them from wrapping onto the next line */
+    margin-top: 10px; /* add some space between the main image and these small images */
+}
+
+.small-img {
+    width: 150px; /* or any desired size */
+    height: 150px;
+    margin-right: 5px; /* add some space between small images */
+}
+.media-img{
+    max-width:600px;
+}
+.media-img-wrapper {
+    width: 100%;
+    height: auto;
+}
+
+@media (max-width:1023.98px) {
+    .media{
+        flex-direction:column;
+    }
+    .media-img{
+        max-width:300px;
+    }
+    .media-img-wrapper{
+        width:100%;
+        height:auto;
+    }
+    .small-img {
+        width: 100px; /* or any desired size */
+        height: 100px;
+        margin-right: 5px; /* add some space between small images */
+    }
+}
+ 

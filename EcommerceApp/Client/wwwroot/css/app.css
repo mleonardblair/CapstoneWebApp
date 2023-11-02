@@ -62,3 +62,10 @@ a, .btn-link {
     .blazor-error-boundary::after {
         content: "An error has occurred."
     }
+
+.centered-items .mud-btn {
+    font-family: 'Roboto', sans-serif;
+    text-transform: none;
+}
+
+

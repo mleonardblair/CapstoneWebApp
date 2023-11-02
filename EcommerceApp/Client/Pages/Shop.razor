@@ -1,11 +1,34 @@
 ﻿@attribute [Route(RouteConstants.Shop)]
+@page "/shop/search/{searchQuery}"
+@*Same as @page "/shop/products/category/{categoryId}*@
+@attribute [Route(RouteConstants.ShopSortedByCategory)] 
 
-@inject IProductService ProductService;
+
+@inject IProductService ProductService
 @using EcommerceApp.Client.Shared;
 
 <h3>Shop</h3>
 
 <ProductList/>
 @code {
-
+    [Parameter]
+    public string? SearchQuery { get; set; }
+    [Parameter]
+    public Guid? CategoryId { get; set; }
+    // 
+    protected override async Task OnParametersSetAsync()
+    {
+        if(SearchQuery != null)
+        {
+            await ProductService.SearchProducts(SearchQuery);
+        }
+        else if (CategoryId != null)
+        {
+            await ProductService.GetProductsByCategoryId(CategoryId.Value);
+        }
+        else
+        {
+            await ProductService.GetAllProductsAsync();
+        };
+    }
 }

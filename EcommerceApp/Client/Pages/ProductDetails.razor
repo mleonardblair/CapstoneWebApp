@@ -1,0 +1,85 @@
+﻿@attribute [Route(RouteConstants.ShopProductDetails)]
+@using EcommerceApp.Shared.DTOs;
+@inject IProductService ProductService;
+@inject ITagService TagService;
+<h3>ProductDetails</h3>
+
+@if (product == null)
+{
+    <span>@message</span>
+}
+else
+{
+    var imageSrc = product.ImageURI ?? "/images/img_placeholder.jpg";
+
+    <div class="media">
+        <div class="media-img-wrapper me-2">
+            <img class="media-img" src="@imageSrc" alt="@product.Name" />
+            <div class="small-img-container">
+                <!-- Display other images, this section can be enhanced later to dynamically load product images if available -->
+            </div>
+        </div>
+        <div class="media-body">
+            <h2 class="mb-0">@product.Name</h2>
+            <p>@product.Description</p>
+            @if (flairtags != null && flairtags.Count > 0)
+            {
+                <span>Flair Tags:</span>
+                @foreach (TagDto flair in flairtags)
+                {
+                    <span>@flair.Name</span>
+                }
+            }
+            <h4 class="price">
+                $@product.Price
+            </h4>
+        </div>
+    </div>
+}
+
+@code {
+    private ProductDto? product = null;
+    private List<TagDto> flairtags = new List<TagDto>();
+    public string message = "Your Product Loading...";
+    [Parameter]
+    public Guid ProductId { get; set; }
+
+    private async Task DeleteProduct()
+    {
+        var response = await ProductService.DeleteProductByIdAsync(ProductId);
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        var result = await ProductService.GetProductByIdAsync(ProductId);
+
+        if (!result.Success)
+        {
+            message = result.Message;
+            return;
+        }
+
+        product = result.Data;
+        flairtags = await GetSelectedProductFlairTagsAsync();
+    }
+
+    private async Task<List<TagDto>> GetSelectedProductFlairTagsAsync()
+    {
+        List<TagDto> tagDtos = new List<TagDto>();
+
+        if (product == null || product.ProductTags == null)
+            return tagDtos;
+
+        // Fetch the corresponding TagDto for each TagId
+        foreach (var tagId in product.ProductTags.Select(x => x.TagId))
+        {
+            var response = await TagService.GetTagByIdAsync(tagId);
+            if (response.Success)
+            {
+                tagDtos.Add(response.Data);
+            }
+        }
+
+        return tagDtos;
+    }
+}

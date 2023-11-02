@@ -16,7 +16,7 @@ namespace EcommerceApp.Server.Controllers
         {
             _blobServiceClient = blobServiceClient;
         }
-
+        [HttpPost]
         public async Task<BlobUploadResult> UploadToBlob(IFormFile file)
         {
             var result = new BlobUploadResult();

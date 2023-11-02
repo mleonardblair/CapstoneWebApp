@@ -17,6 +17,19 @@ namespace EcommerceApp.Server.Controllers
         {
             _categoryService = categoryService;
         }
+        [HttpDelete("{categoryId}")]
+        public async Task<ActionResult<ServiceResponse<bool>>> DeleteCategoryByIdAsync(Guid categoryId)
+        {
+            var response = await _categoryService.DeleteCategoryByIdAsync(categoryId);
+            return StatusCode(response.StatusCode, response);
+        }
+        [HttpPost]
+        public async Task<ActionResult<ServiceResponse<Category>>> PostCategoriesAsync([FromBody] CategoryDto categoryDto)
+        {
+            var response = await _categoryService.PostCategoryByIdAsync(categoryDto);
+            return StatusCode(response.StatusCode, response);
+        }
+
         [HttpPut("{categoryId}")]
         public async Task<ActionResult<ServiceResponse<CategoryDto>>> UpdateCategoryByIdAsync(Guid categoryId, [FromBody] CategoryDto categoryToUpdate)
         {

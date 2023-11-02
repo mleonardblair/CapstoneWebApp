@@ -1,5 +1,31 @@
 ﻿@page "/"
-
 <PageTitle>Homepage</PageTitle>
+@inject IJSRuntime JSRuntime
 
-<SurveyPrompt Title="How is Blazor working for you?" />
+
+<MudContainer>
+    <!-- First Section -->
+    <MudPaper id="section1" Style="height: 100vh; width: 100%;">
+@*        <SurveyPrompt Title="How is Blazor working for you?" />*@
+        <h1>First Section</h1>
+        <!-- Your content here -->
+    </MudPaper>
+
+    <!-- Second Section -->
+    <MudPaper id="section2" Style="height: 100vh; width: 100%; background-color: lightgray;">
+        <MudContainer MaxWidth="MaxWidth.Small">
+            <h1>Second Section</h1>
+            <!-- Your content here -->
+        </MudContainer>
+    </MudPaper>
+</MudContainer>
+@code {
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            Console.WriteLine("OnAfterRenderAsync called");
+            
+        }
+    }
+}

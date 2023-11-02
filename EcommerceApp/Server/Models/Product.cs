@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Newtonsoft.Json;
 
 namespace EcommerceApp.Server.Models
 {
@@ -16,9 +17,17 @@ namespace EcommerceApp.Server.Models
 
         [Required, Column(TypeName = "decimal(18,2)")]
         public decimal Price { get; set; }
+        public string ImageURI { get; set; }
+        public string ImagesJson { get; set; } = JsonConvert.SerializeObject(new string[0]);
 
-        public byte[]? Image { get; set; }
-        public List<Image> Images { get; set; } = new List<Image>();//default empty list
+        [NotMapped]
+        public string[] Images
+        {
+            get => string.IsNullOrEmpty(ImagesJson) ? new string[0] : JsonConvert.DeserializeObject<string[]>(ImagesJson);
+            set => ImagesJson = value is null ? string.Empty : JsonConvert.SerializeObject(value);
+        }
+
+
 
         [Required]
         public Guid CategoryId { get; set; }

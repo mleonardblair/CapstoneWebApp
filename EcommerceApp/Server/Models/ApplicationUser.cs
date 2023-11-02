@@ -29,6 +29,5 @@ namespace EcommerceApp.Server.Models
         public ICollection<ShoppingCart> ShoppingCarts { get; set; } = new List<ShoppingCart>();
         public ICollection<Review> Reviews { get; set; } = new List<Review>();
         public ICollection<Report> Reports { get; set; } = new List<Report>();
-        public ICollection<Product> Products { get; set; } = new List<Product>();
     }
 }

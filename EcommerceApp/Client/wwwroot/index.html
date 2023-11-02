@@ -10,20 +10,67 @@
     <link href="css/app.css" rel="stylesheet" />
     <link href="EcommerceApp.Client.styles.css" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
     <link href="_content/MudBlazor/MudBlazor.min.css" rel="stylesheet" />
+    <link href="css/loading.css" rel="stylesheet" />
 
+    <style>
+        /* Center spinner */
+        /*.spinner-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;*/ /* Ensure it's above other elements */
+        /*}*/
+
+        /* Spinner styling */
+        /*.spinner {
+            border: 8px solid rgba(0, 0, 0, 0.1);
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            border-left-color: #09f;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }*/
+        /* Center loading bar container */
+
+    </style>
 </head>
 
 <body>
-    <div id="app">Loading...</div>
+    <div class="loading-bar-container">
+        <div class="loading-bar">
+            <div class="loading-bar-progress"></div>
+        </div>
+    </div>
+    <div id="app">
+    </div>
 
     <div id="blazor-error-ui">
         An unhandled error has occurred.
         <a href="" class="reload">Reload</a>
         <a class="dismiss">🗙</a>
     </div>
-    <script src="_framework/blazor.webassembly.js"></script>
+    <script src="js/site.js"></script>
+    <script src="js/custom.js"></script>
+
     <script src="_content/MudBlazor/MudBlazor.min.js"></script>
+    <script src="_framework/blazor.webassembly.js"></script>
 </body>
 
 </html>

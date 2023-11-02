@@ -9,7 +9,8 @@
 
         // Shop Page
         public const string Shop = "/shop";
-        public const string ProductDetails = "/shop/{id}";
+        public const string ShopSortedByCategory = "/shop/{CategoryId:guid}";
+        public const string ShopProductDetails = "/shop/product/{ProductId:guid}";
 
         // Admin Routes
         public const string Admin = "/admin";

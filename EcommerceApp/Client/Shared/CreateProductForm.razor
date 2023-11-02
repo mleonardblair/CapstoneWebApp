@@ -1,142 +1,156 @@
-﻿@using EcommerceApp.Shared.DTOs;
-@using EcommerceApp.Shared.Models;
+﻿@page "/products/create"
+@using EcommerceApp.Shared.DTOs
+@using System.Net.Http.Headers;
+@inject HttpClient Http
 @inject IProductService ProductService
-@inject ICategoryService CategoryService
+@inject ICategoryService CategoryService // Added this line
 @inject NavigationManager NavigationManager
-@* Add authorization stup so only an admin role can view.*@
-<div>
-<h3>New Product</h3>
- <form @onsubmit="HandleAddProduct">
-    <div class="mb-3 row">
-        <label for="productName" class="col-sm-2 col-form-label">Name</label>
-        <div class="col-sm-10 col-md-8 col-lg-10 ">
-            <input type="text" class="form-control" id="productName" @bind="NewProduct.Name">
-        </div>
-    </div>
+@using EcommerceApp.Shared.Models
+@using Newtonsoft.Json
+@implements IDisposable 
 
-    <div class="mb-3 row">
-        <label for="exampleFormControlTextarea1" class="col-sm-2 col-form-label">Description</label>
-        <div class="col-sm-10 col-md-8 col-lg-10 ">
-            <textarea class="form-control" rows="3" id="exampleFormControlTextarea1" @bind="NewProduct.Description"></textarea>
-        </div>
-    </div>
+<h3>Create Product</h3>
+<EditForm Model="Product" OnValidSubmit="HandleValidSubmit">
+    <DataAnnotationsValidator />
+    <MudGrid>
+        <MudItem xs="12" sm="7">
+            <MudCard>
+                <MudCardContent>
 
-    <div class="mb-3 row">
-        <label for="productPrice" class="col-sm-2 col-form-label">Price</label>
-        <div class="col-sm-10 col-md-8 col-lg-10 ">
-            <input type="number" class="form-control" id="productPrice" @bind="NewProduct.Price">
-        </div>
-    </div>
-    <div class="mb-3 row">
-        <label for="productStock" class="col-sm-2 col-form-label">Stock</label>
-        <div class="col-sm-10 col-md-8 col-lg-10 ">
-            <input type="number" step=".01"class="form-control" id="productStock" @bind="NewProduct.StockQuantity">
-        </div>
-    </div>
+                    <MudTextField Label="Name" @bind-Value="Product.Name" For="@(() => Product.Name)" />
 
-    <div class="mb-3">
-        <label for="productImage" class="form-label">Image</label>
-        <InputFile id="productImage" OnChange="@OnImageUpload" class="form-control" />
-    </div>
+                    <MudTextField Label="Description" Class="mt-3" @bind-Value="Product.Description" For="@(() => Product.Description)" />
+
+                    <MudTextField Label="Price" HelperText="Enter price" Class="mt-3" @bind-Value="Product.Price" For="@(() => Product.Price)" InputType="InputType.Number" />
 
 
-    <div class="mb-3">
-        <label>Category:</label>
-        @if(categories == null)
-        {
-            <span>Loading Categories...</span>
-        }else{
-            @foreach (var category in categories)
-            {
-                <div class="form-check">
-                    <input class="form-check-input" type="radio" name="categoryGroup" value="@category.Id" @onchange="UpdateCategoryId" checked="@(NewProduct.CategoryId == category.Id)" />
-                    <label class="form-check-label">
-                        @category.Name
-                    </label>
-                </div>
-            }
-        }
-        
-    </div>
+                    <MudSelect Label="Select Category" @bind-Value="Product.CategoryId" T="Guid">
+                        <MudSelectItem Disabled="true" Value="Guid.Empty">Select Category</MudSelectItem>
+                        @foreach (var category in CategoryService.Categories)
+                        {
+                            <MudSelectItem Value="@category.Id">@category.Name</MudSelectItem>
+                        }
+                    </MudSelect>
 
 
-    <div>
-        <button class="btn btn-primary" type="submit">Add Product</button>
-    </div>
-</form>
-<div>
-    <span>@responseMessage</span>
-</div>
-    
-</div>
+                    <MudTextField Label="Stock Quantity" HelperText="Enter stock quantity" Class="mt-3" @bind-Value="Product.StockQuantity" For="@(() => Product.StockQuantity)" InputType="InputType.Number" />
+
+                    <MudFileUpload T="IBrowserFile" Accept=".png, .jpg" FilesChanged="UploadFiles2" MaximumFileCount="100">
+                        <ButtonTemplate Context="fileUploadContext">
+                            <MudButton HtmlTag="label"
+                                       Variant="Variant.Filled"
+                                       Color="Color.Primary"
+                                       StartIcon="@Icons.Material.Filled.CloudUpload"
+                                       for="@fileUploadContext">
+                                Product Image
+                            </MudButton>
+                        </ButtonTemplate>
+                    </MudFileUpload>
+                </MudCardContent>
+                <MudCardActions>
+                    <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto">Create</MudButton>
+                </MudCardActions>
+            </MudCard>
+        </MudItem>
+        <MudItem xs="12" sm="5">
+            <MudPaper Class="pa-4 mud-height-full">
+                <MudText Typo="Typo.subtitle2">Validation Summary</MudText>
+                @if (success)
+                {
+                    <MudText Color="Color.Success">Success</MudText>
+                }
+                else
+                {
+                    <MudText Color="@Color.Error">
+                        <ValidationSummary />
+                    </MudText>
+                }
+            </MudPaper>
+        </MudItem>
+        <MudItem xs="12">
+            <MudText Typo="Typo.body2" Align="Align.Center">
+                Fill out the form correctly to see the success message.
+            </MudText>
+        </MudItem>
+    </MudGrid>
+</EditForm>
+
 @code {
-    private string responseMessage = "", responseMessage2 = "";
-    private ProductDto NewProduct = new ProductDto();
-    private List<CategoryDto>? categories;  
-    @* List to hold categories from the database *@
+    private ProductDto Product { get; set; } = new ProductDto();
+    private bool success;
 
-    protected override async Task OnInitializedAsync()
+    IList<IBrowserFile> files = new List<IBrowserFile>();
+    private async Task UploadFiles(IReadOnlyList<IBrowserFile> files)
     {
-        await CategoryService.GetAllCategoriesAsync();  // Fetch categories from the database
-        categories = CategoryService.Categories;  // Assign the categories from the service to the local list
-    }
-    private void UpdateCategoryId(ChangeEventArgs e)
-    {
-        Console.WriteLine($"Category swapped to {e.Value.ToString()}");
-        NewProduct.CategoryId = Guid.Parse(e.Value.ToString());
-    }
-
-    private async Task HandleAddProduct()
-    {
-        if (NewProduct.Image != null)
+        foreach (var file in files)
         {
-            using var imageStream = new MemoryStream(NewProduct.Image);
-            Console.WriteLine($"Name: {NewProduct.Name}, Description: {NewProduct.Description}");
+            this.files.Add(file);
+            await UploadFileToServer(file);
+        }
+    }
 
-            // Call the new method here
-            var response = await ProductService.CreateProductAsync(NewProduct);
+    private async Task UploadFiles2(IBrowserFile file)
+    {
+        files.Add(file);
+        await UploadFileToServer(file);
+    }
+    // Inside your UploadFileToServer method
+    private async Task UploadFileToServer(IBrowserFile file)
+    {
+        var buffer = new byte[file.Size];
+        await file.OpenReadStream().ReadAsync(buffer);
 
-            if (response.Success)
+        var content = new MultipartFormDataContent();
+        content.Headers.ContentDisposition = new ContentDispositionHeaderValue("form-data");
+        content.Add(new ByteArrayContent(buffer), "file", file.Name);
+
+        var response = await Http.PostAsync("api/blob/upload", content);
+        if (response.IsSuccessStatusCode)
+        {
+            // Deserialize the response to ServiceResponse<BlobUploadResult> object
+            var serviceResponse = await response.Content.ReadFromJsonAsync<ServiceResponse<BlobUploadResult>>();
+
+            if (serviceResponse!= null && serviceResponse.Success)
             {
-                responseMessage = "Product successfully added.";
-                NavigationManager.NavigateTo("/shop");
+                Product.ImageURI = serviceResponse.Data.FileUrl;
+                Console.WriteLine("All went well. " + Product.ImageURI);
             }
             else
             {
-                responseMessage = $"Failed to add product: {response.Message}";
+                Console.WriteLine($"Something went wrong: {serviceResponse.Message}");
             }
         }
         else
         {
-            responseMessage = $"No image added.";
+            Console.WriteLine("It went bad");
         }
     }
-
-
-    private async Task OnImageUpload(InputFileChangeEventArgs e)
+    protected override void OnInitialized()
     {
-        try
-        {
-            var imageFile = e.File;
-            if (imageFile != null)
-            {
-                using var memoryStream = new MemoryStream();
-                await imageFile.OpenReadStream(10 * 1024 * 1024).CopyToAsync(memoryStream);
-                NewProduct.Image = memoryStream.ToArray();
-                responseMessage = "Image uploaded successfully.";
-            }
-            else
-            {
-                responseMessage = "Failed to upload image.";
-            }
-        }catch (IOException ioException)
-        {
-        responseMessage = $"File size exceeds the maximum limit. Error: {ioException.Message}";
-        }
-        catch (Exception ex)
-        {
-        responseMessage = $"An error occurred while uploading the image: {ex.Message}";
-        }
+        CategoryService.CategoriesChanged += StateHasChanged;
     }
 
+    public void Dispose()
+    {
+        CategoryService.CategoriesChanged -= StateHasChanged;
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        // Call the service to process the product data
+        // You can use ProductService to save the Product object to your database or perform any other necessary actions.
+        // For example:
+        var result = await ProductService.CreateProductAsync(Product);
+
+        if (result.Success)
+        {
+            // Product creation was successful
+            success = true;
+        }
+        else
+        {
+            // Product creation failed
+            success = false;
+        }
+    }
 }

@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EcommerceApp.Server.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20231010230025_ProductDbUpdate")]
-    partial class ProductDbUpdate
+    [Migration("20231030184137_InitialCreate")]
+    partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -70,14 +70,9 @@ namespace EcommerceApp.Server.Migrations
 
             modelBuilder.Entity("EcommerceApp.Server.Models.ApplicationUser", b =>
                 {
-                    b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<int>("AccessFailedCount")
-                        .HasColumnType("int");
-
-                    b.Property<string>("ConcurrencyStamp")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("DateCreated")
                         .HasColumnType("datetime2");
@@ -90,9 +85,6 @@ namespace EcommerceApp.Server.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<bool>("EmailConfirmed")
-                        .HasColumnType("bit");
-
                     b.Property<string>("FirstName")
                         .IsRequired()
                         .HasMaxLength(50)
@@ -103,41 +95,11 @@ namespace EcommerceApp.Server.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<bool>("LockoutEnabled")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTimeOffset?>("LockoutEnd")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("NormalizedEmail")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("NormalizedUserName")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("Password")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("PasswordHash")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("PhoneNumber")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("PhoneNumberConfirmed")
-                        .HasColumnType("bit");
-
                     b.Property<string>("RefreshToken")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("SecurityStamp")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("TwoFactorEnabled")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("UserName")
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
@@ -205,9 +167,9 @@ namespace EcommerceApp.Server.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("ApplicationUserId")
+                    b.Property<Guid?>("ApplicationUserId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("DateCreated")
                         .HasColumnType("datetime2");
@@ -227,41 +189,14 @@ namespace EcommerceApp.Server.Migrations
                     b.ToTable("Favourites");
                 });
 
-            modelBuilder.Entity("EcommerceApp.Server.Models.Image", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<byte[]>("Data")
-                        .HasColumnType("varbinary(max)");
-
-                    b.Property<DateTime>("DateCreated")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid?>("ProductId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ProductId");
-
-                    b.ToTable("Images");
-                });
-
             modelBuilder.Entity("EcommerceApp.Server.Models.Order", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("ApplicationUserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<Guid>("ApplicationUserId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("Date")
                         .HasColumnType("datetime2");
@@ -360,9 +295,6 @@ namespace EcommerceApp.Server.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("ApplicationUserId")
-                        .HasColumnType("nvarchar(450)");
-
                     b.Property<Guid>("CategoryId")
                         .HasColumnType("uniqueidentifier");
 
@@ -376,8 +308,13 @@ namespace EcommerceApp.Server.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<byte[]>("Image")
-                        .HasColumnType("varbinary(max)");
+                    b.Property<string>("ImageURI")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ImagesJson")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -391,8 +328,6 @@ namespace EcommerceApp.Server.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("ApplicationUserId");
 
                     b.HasIndex("CategoryId");
 
@@ -429,9 +364,8 @@ namespace EcommerceApp.Server.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("ApplicationUserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<Guid>("ApplicationUserId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("OrderId")
                         .HasColumnType("uniqueidentifier");
@@ -466,9 +400,9 @@ namespace EcommerceApp.Server.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("ApplicationUserId")
+                    b.Property<Guid?>("ApplicationUserId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Comment")
                         .IsRequired()
@@ -507,9 +441,9 @@ namespace EcommerceApp.Server.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("ApplicationUserId")
+                    b.Property<Guid?>("ApplicationUserId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
 
@@ -542,6 +476,64 @@ namespace EcommerceApp.Server.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Tags");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("9c5ce536-58cf-4273-9efd-065e359c5559"),
+                            DateCreated = new DateTime(2023, 10, 30, 18, 41, 36, 878, DateTimeKind.Utc).AddTicks(7368),
+                            DateModified = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Description = "Outdoor and indoor ornaments that add flair to living spaces and gardens.",
+                            Name = "Ornament"
+                        },
+                        new
+                        {
+                            Id = new Guid("a00717b1-2a69-4efa-ac73-fc98418276ae"),
+                            DateCreated = new DateTime(2023, 10, 30, 18, 41, 36, 878, DateTimeKind.Utc).AddTicks(7375),
+                            DateModified = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Description = "Items related to garden decorations and maintenance, including plants, tools, and accessories.",
+                            Name = "Garden"
+                        },
+                        new
+                        {
+                            Id = new Guid("c29a8ee2-427b-48e7-9971-6135feef8bfa"),
+                            DateCreated = new DateTime(2023, 10, 30, 18, 41, 36, 878, DateTimeKind.Utc).AddTicks(7377),
+                            DateModified = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Description = "Circular arrangements of flowers, leaves, or other materials, often used for decorative purposes or special occasions.",
+                            Name = "Wreaths"
+                        },
+                        new
+                        {
+                            Id = new Guid("4136f847-2b3e-4b3f-9746-1664acd5bc26"),
+                            DateCreated = new DateTime(2023, 10, 30, 18, 41, 36, 878, DateTimeKind.Utc).AddTicks(7383),
+                            DateModified = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Description = "A form of textile produced using knotting techniques, often used for wall hangings, plant hangers, and more.",
+                            Name = "Macrame"
+                        },
+                        new
+                        {
+                            Id = new Guid("0d15632c-d7d1-4ad7-a0ef-53cea16d8cb6"),
+                            DateCreated = new DateTime(2023, 10, 30, 18, 41, 36, 878, DateTimeKind.Utc).AddTicks(7385),
+                            DateModified = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Description = "The art of beautiful handwriting, often used in invitations, letters, and decorative texts.",
+                            Name = "Calligraphy"
+                        },
+                        new
+                        {
+                            Id = new Guid("ee54170e-682e-422c-960c-9f31e17b4687"),
+                            DateCreated = new DateTime(2023, 10, 30, 18, 41, 36, 878, DateTimeKind.Utc).AddTicks(7387),
+                            DateModified = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Description = "The craft of decorating fabric using a needle to apply thread or yarn, often used in apparel, home decor, and artworks.",
+                            Name = "Embroidery"
+                        },
+                        new
+                        {
+                            Id = new Guid("22045126-8050-465c-8c67-0dbed75104a4"),
+                            DateCreated = new DateTime(2023, 10, 30, 18, 41, 36, 878, DateTimeKind.Utc).AddTicks(7388),
+                            DateModified = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Description = "Items that serve a decorative purpose, enhancing the aesthetics of a space without serving a practical function.",
+                            Name = "Decorative"
+                        });
                 });
 
             modelBuilder.Entity("EcommerceApp.Server.Models.UserAddress", b =>
@@ -557,9 +549,8 @@ namespace EcommerceApp.Server.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("int");
 
-                    b.Property<string>("ApplicationUserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<Guid>("ApplicationUserId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("DateCreated")
                         .HasColumnType("datetime2");
@@ -597,7 +588,7 @@ namespace EcommerceApp.Server.Migrations
                     b.HasOne("EcommerceApp.Server.Models.ApplicationUser", "ApplicationUser")
                         .WithMany("Favourites")
                         .HasForeignKey("ApplicationUserId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("EcommerceApp.Server.Models.Product", "Product")
@@ -609,13 +600,6 @@ namespace EcommerceApp.Server.Migrations
                     b.Navigation("ApplicationUser");
 
                     b.Navigation("Product");
-                });
-
-            modelBuilder.Entity("EcommerceApp.Server.Models.Image", b =>
-                {
-                    b.HasOne("EcommerceApp.Server.Models.Product", null)
-                        .WithMany("Images")
-                        .HasForeignKey("ProductId");
                 });
 
             modelBuilder.Entity("EcommerceApp.Server.Models.Order", b =>
@@ -661,10 +645,6 @@ namespace EcommerceApp.Server.Migrations
 
             modelBuilder.Entity("EcommerceApp.Server.Models.Product", b =>
                 {
-                    b.HasOne("EcommerceApp.Server.Models.ApplicationUser", null)
-                        .WithMany("Products")
-                        .HasForeignKey("ApplicationUserId");
-
                     b.HasOne("EcommerceApp.Server.Models.Category", "Category")
                         .WithMany("Products")
                         .HasForeignKey("CategoryId")
@@ -679,13 +659,13 @@ namespace EcommerceApp.Server.Migrations
                     b.HasOne("EcommerceApp.Server.Models.Product", "Product")
                         .WithMany("ProductTags")
                         .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("EcommerceApp.Server.Models.Tag", "Tag")
                         .WithMany("ProductTags")
                         .HasForeignKey("TagId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Product");
@@ -698,13 +678,13 @@ namespace EcommerceApp.Server.Migrations
                     b.HasOne("EcommerceApp.Server.Models.ApplicationUser", "ApplicationUser")
                         .WithMany("Reports")
                         .HasForeignKey("ApplicationUserId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.HasOne("EcommerceApp.Server.Models.Order", "Order")
-                        .WithMany()
+                        .WithMany("Reports")
                         .HasForeignKey("OrderId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("ApplicationUser");
@@ -717,13 +697,13 @@ namespace EcommerceApp.Server.Migrations
                     b.HasOne("EcommerceApp.Server.Models.ApplicationUser", "ApplicationUser")
                         .WithMany("Reviews")
                         .HasForeignKey("ApplicationUserId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("EcommerceApp.Server.Models.Product", "Product")
                         .WithMany("Reviews")
                         .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("ApplicationUser");
@@ -747,13 +727,13 @@ namespace EcommerceApp.Server.Migrations
                     b.HasOne("EcommerceApp.Server.Models.Address", "Address")
                         .WithMany("UserAddresses")
                         .HasForeignKey("AddressId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("EcommerceApp.Server.Models.ApplicationUser", "ApplicationUser")
                         .WithMany("UserAddresses")
                         .HasForeignKey("ApplicationUserId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Address");
@@ -771,8 +751,6 @@ namespace EcommerceApp.Server.Migrations
                     b.Navigation("Favourites");
 
                     b.Navigation("Orders");
-
-                    b.Navigation("Products");
 
                     b.Navigation("Reports");
 
@@ -794,6 +772,8 @@ namespace EcommerceApp.Server.Migrations
 
                     b.Navigation("Payment")
                         .IsRequired();
+
+                    b.Navigation("Reports");
                 });
 
             modelBuilder.Entity("EcommerceApp.Server.Models.Product", b =>
@@ -801,8 +781,6 @@ namespace EcommerceApp.Server.Migrations
                     b.Navigation("CartItems");
 
                     b.Navigation("Favourites");
-
-                    b.Navigation("Images");
 
                     b.Navigation("OrderItems");
 

@@ -14,6 +14,10 @@ namespace EcommerceApp.Client.Services.ProductService
     {
         private readonly HttpClient _http;
         private readonly IHttpClientFactory _httpFactory;
+
+        // This event will be used to notify subscribers that the products have changed
+        public event Action ProductsChanged;
+
         public ProductService(HttpClient http, IHttpClientFactory httpFactory)
         {
             _httpFactory = httpFactory;
@@ -22,9 +26,7 @@ namespace EcommerceApp.Client.Services.ProductService
 
         public List<ProductDto> Products { get; set; } = new List<ProductDto>();
         public ProductDto Product { get; set; } = new ProductDto();
-
-
-
+        public string Message { get; set; } = "Loading products...";
 
         public async Task<ServiceResponse<ProductDto>> CreateProductAsync(ProductDto product)
         {
@@ -49,11 +51,18 @@ namespace EcommerceApp.Client.Services.ProductService
         }
 
 
-        public async Task GetAllProductsAsync()
+        public async Task GetAllProductsAsync(Guid? categoryId = null)
         {
-            var result = await _http.GetFromJsonAsync<ServiceResponse<List<ProductDto>>>("api/products");
+            var result = (categoryId == null || categoryId == Guid.Empty) ?
+               await _http.GetFromJsonAsync<ServiceResponse<List<ProductDto>>>("api/products") :
+               await _http.GetFromJsonAsync<ServiceResponse<List<ProductDto>>>($"api/products/category/{categoryId}");
+
+
             if (result != null && result.Data != null)
                 Products = result.Data;
+
+            // Notify subscribers that the products have changed
+            ProductsChanged.Invoke();
         }
         public async Task<ServiceResponse<ProductDto>> GetProductByIdAsync(Guid productId)
         {
@@ -144,6 +153,62 @@ namespace EcommerceApp.Client.Services.ProductService
         public Task<ServiceResponse<ProductDto>> PostProductAsync(ProductDto productDto, Stream imageFile)
         {
             throw new NotImplementedException();
+        }
+        public async Task<ServiceResponse<ProductDto>> GetProductsByCategoryId(Guid categoryId)
+        {
+            try
+            {
+                // Using server api http client - mediated 
+                var result = await _http.GetFromJsonAsync<ServiceResponse<ProductDto>>($"api/products/category/{categoryId}");
+                if (result != null && result.Data != null)
+                {
+                    return new ServiceResponse<ProductDto>
+                    {
+                        Data = result.Data,
+                        Message = result.Message,
+                        Success = result.Success
+                    };
+                }
+                else
+                {
+                    return new ServiceResponse<ProductDto>
+                    {
+                        Success = false,
+                        Message = "Failed to locate product."
+                    };
+                }
+            }
+            catch (Exception ex)
+            {
+                return new ServiceResponse<ProductDto>
+                {
+                    Success = false,
+                    Message = ex.Message
+                };
+            }
+        }
+
+        public async Task SearchProducts(string searchQuery)
+        {
+            var result = await _http
+                .GetFromJsonAsync<ServiceResponse<List<ProductDto>>>($"api/products/search/{searchQuery}");
+            if(result != null && result.Data != null)
+            {
+                Products = result.Data;
+            }
+           
+            if(Products.Count == 0)
+            {
+                Message = "No products found.";
+            }
+            ProductsChanged?.Invoke();
+        }
+
+        public async Task<List<string>> GetProductSearchSuggestions(string searchQuery)
+        {
+            var result = await _http
+                .GetFromJsonAsync<ServiceResponse<List<string>>>($"api/products/suggestions/{searchQuery}");
+            return result.Data;
         }
     }
 }

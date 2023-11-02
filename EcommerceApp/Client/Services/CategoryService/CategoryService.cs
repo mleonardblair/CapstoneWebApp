@@ -1,18 +1,19 @@
-﻿using System.Net.Http;
-using System.Net.Http.Json;
+﻿using System.Net.Http.Json;
 using EcommerceApp.Shared.DTOs;
 using EcommerceApp.Shared.Models;
-using static System.Net.WebRequestMethods;
 
 namespace EcommerceApp.Client.Services.CategoryService
 {
     public class CategoryService : ICategoryService
     {
-        public List<CategoryDto> Categories {  get; set; } = new List<CategoryDto>();
-        public CategoryDto Category { get; set; } = new CategoryDto();
-
         private readonly HttpClient _http;
         private readonly IHttpClientFactory _httpFactory;
+
+        public List<CategoryDto> Categories { get ; set; } = new List<CategoryDto>();
+        public CategoryDto Category { get; set; } = new CategoryDto();
+
+        // This event will be used to notify subscribers that the categories have changed
+        public event Action CategoriesChanged;
         public CategoryService(HttpClient http, IHttpClientFactory httpFactory)
         {
             _httpFactory = httpFactory;
@@ -25,13 +26,13 @@ namespace EcommerceApp.Client.Services.CategoryService
             {
                 var httpClient = _httpFactory.CreateClient("EcommerceApp.PublicClient");
 
-                var response = await httpClient.GetFromJsonAsync<ServiceResponse<List<CategoryDto>>>("api/categories");
-
-                if (response != null && response.Data != null)
+                var result = await httpClient.GetFromJsonAsync<ServiceResponse<List<CategoryDto>>>("api/categories");
+                if (result != null && result.Data != null)
                 {
-                    Categories = response.Data;
-                    Console.WriteLine($"Server Message: {response.Message}");
+                    Categories = result.Data;
+                    Console.WriteLine($"Server Message: {result.Message}");
                     Console.WriteLine("Successfully retrieved categories.");
+                    // Notify subscribers that the products have changed
                 }
                 else
                 {
@@ -42,6 +43,7 @@ namespace EcommerceApp.Client.Services.CategoryService
             {
                 Console.WriteLine($"An error occurred: {ex.Message}");
             }
+            CategoriesChanged?.Invoke();
         }
 
 

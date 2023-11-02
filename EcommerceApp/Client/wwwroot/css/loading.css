@@ -1,0 +1,80 @@
+﻿/* Center loading bar container */
+.loading-bar-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9998; /* Ensure it's above other elements */
+}
+
+/* Loading bar styling */
+.loading-bar {
+    background-color: rgba(0, 0, 0, 0.1); /* Background of the loading bar (unfilled part) */
+    width: 50vw; /* Half of the viewport width */
+    height: 24px;
+    border-radius: 12px;
+    position: relative;
+    overflow: hidden; /* Important to keep the progress inside */
+}
+
+.loading-bar-progress {
+    background-color: #09f;
+    background-image: linear-gradient(-45deg, rgba(0,0,255,0.2) 25%, transparent 25%, transparent 50%, rgba(0,0,255,0.2) 50%, rgba(0,0,255,0.2) 75%, transparent 75%, transparent);
+    background-size: 40px 40px;
+    animation: fillUp 1.5s forwards, moveStripes 1s linear infinite;
+    width: 0%; /* Starting width, can be modified through JS */
+    height: 100%;
+    position: absolute;
+}
+
+/* Keyframes for loading bar progress and stripe movement */
+@keyframes fillUp {
+    0% {
+        width: 0%;
+    }
+
+    100% {
+        width: 100%;
+    }
+}
+
+@keyframes moveStripes {
+    to {
+        background-position: 40px 0;
+    }
+}
+
+/* 100% text */
+.loading-bar::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    opacity: 0;
+    transition: opacity 0.3s;
+    z-index: 9999;
+}
+
+.loading-bar:hover::before {
+    content: '100%'; /* Show 100% text when hover for demonstration, you can change this behavior */
+    font-weight: bold;
+    color: black;
+    opacity: 1;
+}
+
+#app {
+    display: none;
+    opacity: 0;
+    transition: opacity 1s; /* smooth transition effect */
+}
+
+.loading-bar {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    will-change: transform;
+}

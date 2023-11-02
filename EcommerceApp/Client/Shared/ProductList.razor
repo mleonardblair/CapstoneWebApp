@@ -1,21 +1,16 @@
 ﻿@inject IProductService ProductService
-
+@implements IDisposable 
 @if (ProductService.Products == null || ProductService.Products.Count == 0)
 {
-    <span>Loading Products...</span>
+    <span>@ProductService.Message</span>
 }
 else
 {
     <ul class="list-unstyled">
         @foreach (var product in ProductService.Products)
         {
-            string imageSrc = "/images/img_placeholder.jpg"; // Default placeholder image
-            if (product.Image != null)
-            {
-                var base64Image = Convert.ToBase64String(product.Image);
-                imageSrc = $"data:image/jpeg;base64,{base64Image}";
-            }
-
+            var imageSrc = product.ImageURI ?? "/images/img_placeholder.jpg";
+            Console.WriteLine(imageSrc);
             <li class="media my-3 gx-3">
                 <div class="media-img-wrapper me-3">
                     <a href="#">
@@ -23,7 +18,7 @@ else
                     </a>
                 </div>
                 <div class="media-body">
-                    <a href="/shop/@product.Id">
+                    <a href="/shop/product/@product.Id">
                         <h4 class="mb-0">@product.Name</h4>
                     </a>
                     <p>@product.Description</p>
@@ -37,8 +32,13 @@ else
 }
 
 @code {
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
-        await ProductService.GetAllProductsAsync();
+        // Subscribe to the ProductsChanged event to re-render the component when the event is raised by the ProductService class. This is necessary because the ProductService class is a singleton and the Products property is only set once when the application starts.
+        ProductService.ProductsChanged += StateHasChanged;
+    }
+    public void Dispose()
+    {
+        ProductService.ProductsChanged -= StateHasChanged;
     }
 }

@@ -36,14 +36,8 @@ namespace EcommerceApp.Server.Models
         public DateTime DateCreated { get; set; } = DateTime.UtcNow;
 
         public ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
+        public ICollection<Report> Reports { get; set; } = new List<Report>();
         public Payment Payment { get; set; }
-    }
-    public enum OrderStatus
-    {
-        Pending,
-        Processing,
-        Completed,
-        Cancelled
     }
 
 }

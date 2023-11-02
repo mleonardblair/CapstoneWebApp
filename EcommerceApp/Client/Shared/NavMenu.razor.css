@@ -47,7 +47,7 @@
 
 .nav-item ::deep a:hover {
     background-color: rgba(255,255,255,0.1);
-    color: white;
+    color: #808080;
 }
 
 @media (min-width: 641px) {

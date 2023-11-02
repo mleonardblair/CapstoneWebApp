@@ -1,24 +1,96 @@
 ﻿@inherits LayoutComponentBase
+@inject NavigationManager NavManager
+<MudThemeProvider/>
+<MudDialogProvider/>
+<MudSnackbarProvider/>
+<MudLayout>
 
-<div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
+    
+    <MudAppBar Elevation="1" Color="Color.Dark" Dense="false">
 
-    <main>
-        <div class="top-row px-4">
-            <div class="me-3"><a href="https://docs.microsoft.com/aspnet/">Shop</a></div>
-            <div class="me-3"> <a href="https://docs.microsoft.com/aspnet/">Gallery</a></div>
-            <div class="me-3"><a href="https://docs.microsoft.com/aspnet/">FAQ</a></div>
-            <div class="me-3"><a href="https://docs.microsoft.com/aspnet/">About Us</a></div>
-            <div class="icons">
-                <a href="#"><img src="/search-svgrepo-com.svg" alt="Search Icon"></a>
-                <a href="#"><img src="/cart-icon.svg" alt="Cart Icon"></a>
-                <a href="#"><img src="/user-icon.svg" alt="User Icon"></a>
-            </div>
+        @if (IsShopPage)
+            {
+                <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => ToggleDrawer())" />
+            }
+    
+            <!-- Wrapper for centered items -->
+        <div class="top-row">
+            <MudButton Color="Color.Inherit" OnClick="@ShopClicked" Class="nav-button">Shop</MudButton>
+            <MudButton Color="Color.Inherit" OnClick="@GalleryClicked" Class="nav-button">Gallery</MudButton>
+            <MudButton Color="Color.Inherit" OnClick="@FAQClicked" Class="nav-button">FAQ</MudButton>
+            <MudButton Color="Color.Inherit" OnClick="@AboutUsClicked" Class="nav-button">About Us</MudButton>
+            <MudButton Color="Color.Inherit" OnClick="@ContactUsClicked" Class="nav-button">Contact Us</MudButton>
+
+            <MudIconButton Icon="@Icons.Material.Filled.Search" Color="Color.Inherit" OnClick="@SearchClicked" Style="transition: color 0.3s;" />
+            <MudIconButton Icon="@Icons.Material.Filled.Person" Color="Color.Inherit" OnClick="@ProfileClicked" Style="transition: color 0.3s;" />
+            <MudIconButton Icon="@Icons.Material.Filled.ShoppingCart" Color="Color.Inherit" OnClick="@CartClicked" Style="transition: color 0.3s;" />
         </div>
-        <article class="content px-4">
-            @Body
-        </article>
-    </main>
-</div>
+        </MudAppBar>
+        
+    @if (IsShopPage)
+    {
+        <MudDrawer @bind-Open="@open" Elevation="1" Variant="@DrawerVariant.Responsive">
+            <MudDrawerHeader>
+                <MudText Typo="Typo.h6">My App</MudText>
+            </MudDrawerHeader>
+            <NavMenu/>
+        </MudDrawer>
+    }
+
+    <MudMainContent>
+        <MudContainer MaxWidth="MaxWidth.Medium">
+        @Body
+        </MudContainer>
+    </MudMainContent>
+</MudLayout>
+@code {
+    bool open = false;
+
+    // Check if the current URL contains the "shop" segment
+    bool IsShopPage => NavManager.Uri.Contains("/shop");
+
+    void ToggleDrawer()
+    {
+        open = !open;
+    }
+    bool _drawerOpen = false;
+    private void ShopClicked()
+    {
+        NavManager.NavigateTo("/shop");
+        // Your logic for Shop
+    }
+
+    private void GalleryClicked()
+    {
+        // Your logic for Gallery
+    }
+
+    private void FAQClicked()
+    {
+        // Your logic for FAQ
+    }
+
+    private void AboutUsClicked()
+    {
+        // Your logic for About Us
+    }
+
+    private void ContactUsClicked()
+    {
+        // Your logic for Contact Us
+    }
+
+    private void SearchClicked()
+    {
+        // Your logic for Search
+    }
+
+    private void ProfileClicked()
+    {
+        // Your logic for Profile
+    }
+    private void CartClicked()
+    {
+        // Your logic for Profile
+    }
+}

@@ -1,4 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace EcommerceApp.Shared.DTOs
@@ -12,11 +14,12 @@ namespace EcommerceApp.Shared.DTOs
         public string Description { get; set; } = string.Empty;
         [Required, Column(TypeName = "decimal(18,2)")]
         public decimal Price { get; set; }
-        public byte[]? Image { get; set; }
+        public string ImageURI { get; set; } = string.Empty;
+        public string[] Images { get; set; } = new string[0];
         [Required]
         public Guid CategoryId { get; set; }
         [Required]
         public int StockQuantity { get; set; }
-        public List<Guid> TagIds { get; set; } = new List<Guid>();
+        public ICollection<ProductTagDto> ProductTags { get; set; } = new List<ProductTagDto>();
     }
 }

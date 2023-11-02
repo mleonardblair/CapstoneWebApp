@@ -27,14 +27,32 @@ namespace EcommerceApp.Server.Controllers
             var response = await _productService.GetAllProductsAsync();
             return Ok(response);
         }
-
+        [HttpGet("category/{categoryId}")]
+        public async Task<ActionResult<ServiceResponse<Product>>> GetProductsByCategoryId(Guid categoryId)
+        {
+            var response = await _productService.GetProductsByCategoryId(categoryId);
+            return Ok(response);
+        }
+        [HttpGet("search/{searchQuery}")]
+        public async Task<ActionResult<ServiceResponse<Product>>> SearchProducts(string searchQuery)
+        {
+            var response = await _productService.SearchProducts(searchQuery);
+            return Ok(response);
+        }
         [HttpGet("{productId}")]
         public async Task<ActionResult<ServiceResponse<Product>>> GetProductByIdAsync(Guid productId)
         {
             var response = await _productService.GetProductByIdAsync(productId);
             return Ok(response);
         }
-      
+
+        [HttpGet("suggestions/{searchQuery}")]
+        public async Task<ActionResult<ServiceResponse<List<string>>>> GetProductSearchSuggestions(string searchQuery)
+        {
+            var response = await _productService.GetProductSearchSuggestions(searchQuery);
+            return Ok(response);
+        }
+
         [HttpPost("Create")]
         public async Task<ActionResult<ServiceResponse<ProductDto>>> CreateProductAsync(ProductDto productDto)
         {
@@ -44,7 +62,7 @@ namespace EcommerceApp.Server.Controllers
             return NotFound(response);
         }
 
-        [HttpPost]
+        /*[HttpPost]
         public async Task<ActionResult<ServiceResponse<ProductDto>>> PostProductAsync([FromForm] ProductDto productDto, [FromForm] IFormFile imageFile)
         {
 
@@ -63,10 +81,8 @@ namespace EcommerceApp.Server.Controllers
             if (response.Success)
                 return Ok(response);
             return NotFound(response);
-        }
+        }*/
 
-
-        
         [HttpDelete("{productId}")]
         public async Task<ActionResult<ServiceResponse<bool>>> DeleteProductByIdAsync(Guid productId)
         {
@@ -75,8 +91,6 @@ namespace EcommerceApp.Server.Controllers
                 return Ok(response);
             return NotFound(response);
         }
-
-
 
         [HttpPut("{productId}")]
         public async Task<ActionResult<ServiceResponse<ProductDto>>> UpdateProductByIdAsync(Guid productId, [FromBody] ProductDto product)

@@ -1,16 +1,22 @@
 ﻿using AutoMapper;
+using System.Text.Json;
 using EcommerceApp.Server.Models;
 using EcommerceApp.Shared;
 using EcommerceApp.Shared.DTOs;
 using EcommerceApp.Shared.Models;
+using Newtonsoft.Json;
 
 public class MappingProfile : Profile
 {
     public MappingProfile()
     {
         // Product
-        CreateMap<Product, ProductDto>();
-        CreateMap<ProductDto, Product>();
+        CreateMap<Product, ProductDto>()
+            .ForMember(dest => dest.Images, opt => opt.MapFrom(src => src.Images ?? new string[0]));
+
+        CreateMap<ProductDto, Product>()
+            .ForMember(dest => dest.ImagesJson, opt => opt.MapFrom(src => src.Images == null ? "[]" : JsonConvert.SerializeObject(src.Images)))
+            .ForMember(dest => dest.Images, opt => opt.Ignore());
 
         // Category
         CreateMap<Category, CategoryDto>();
@@ -53,8 +59,12 @@ public class MappingProfile : Profile
         CreateMap<CartItem, CartItemDto>();
         CreateMap<CartItemDto, CartItem>();
 
+        // ProductTags
+        CreateMap<ProductTag, ProductTagDto>();
+        CreateMap<ProductTagDto, ProductTag>();
 
 
 
     }
+
 }

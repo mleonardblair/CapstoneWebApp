@@ -1,9 +1,19 @@
 ﻿@using EcommerceApp.Client.Shared
-@page "/admin/products/create"
+@using EcommerceApp.Shared.DTOs
+@inject ICategoryService CategoryService // Inject the CategoryService
+
+@page "/shop/products/create"
+
 <PageTitle> Create New Product</PageTitle>
+
 
 <CreateProductForm/>
 
+
 @code {
 
+    protected override async Task OnInitializedAsync()
+    {
+        await CategoryService.GetAllCategoriesAsync();
+    }
 }
