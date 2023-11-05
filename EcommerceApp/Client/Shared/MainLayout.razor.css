@@ -1,100 +1,44 @@
-.page {
-    position: relative;
+.links,.icons {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
 }
-
-main {
-    flex: 1;
-    font-family: Arial, sans-serif;
-}
-
-.top-row {
-    font-family: Arial, sans-serif;
+.links {
+    /* Align the link buttons to the start (left) */
+    justify-content: flex-start;
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 40px;
-    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
-}
-    .top-row img{
-        height: 30px;
-    }
-    .top-row ::deep img:hover {
-        color: #ff6a00;
-        transition: background-color 0.3s;
-    }
-     .top-row ::deep .icons {
-            display: flex;
-        }
-    .top-row ::deep a, .top-row ::deep .btn-link {
-        white-space: nowrap;
-        text-decoration: none;
-        color:#fff;
-    }
-
-    .top-row ::deep a:hover, .top-row ::deep .btn-link:hover {
-        text-decoration: none;
-        color:#ff6a00;
-
-    }
-    .top-row ::deep img {
-        color: #fff;
-        border: none;
-        padding: 8px 8px;
-        cursor: pointer;
-    }
-
-    .top-row ::deep a:first-child {
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-@media (max-width: 959px) {
-    .nav-button {
-        display: none;
-    }
 }
 
-@media (max-width: 640.98px) {
-    .top-row:not(.auth) {
-        display: none;
-    }
-
-    .top-row.auth {
-        justify-content: space-between;
-    }
-
-    .top-row ::deep a, .top-row ::deep .btn-link {
-        margin-left: 0;
-    }
+.icons {
+    /* Align the icons to the end (right) */
+    justify-content: flex-end;
+    display: flex;
+}
+/* Extra small devices */
+@media (max-width: 599.98px) {
+    /* CSS rules for extra small devices go here */
 }
 
-@media (min-width: 641px) {
-    .page {
-        flex-direction: row;
-    }
+/* Small devices */
+@media (min-width: 600px) and (max-width: 959.98px) {
+    /* CSS rules for small devices go here */
+}
 
-    .sidebar {
-        width: 250px;
-        height: 100vh;
-        position: sticky;
-        top: 0;
-    }
+/* Medium devices */
+@media (min-width: 960px) and (max-width: 1279.98px) {
+    /* CSS rules for medium devices go here */
+}
 
-    .top-row {
-        position: sticky;
-        top: 0;
-        z-index: 1;
-    }
+/* Large devices */
+@media (min-width: 1280px) and (max-width: 1919.98px) {
+    /* CSS rules for large devices go here */
+}
 
-    .top-row.auth ::deep a:first-child {
-        flex: 1;
-        text-align: right;
-        width: 0;
-    }
+/* Extra Large devices */
+@media (min-width: 1920px) and (max-width: 2559.98px) {
+    /* CSS rules for extra large devices go here */
+}
 
-    .top-row, article {
-        padding-left: 2rem !important;
-        padding-right: 1.5rem !important;
-    }
+/* Extra Extra Large devices */
+@media (min-width: 2560px) {
+    /* CSS rules for extra extra large devices go here */
 }

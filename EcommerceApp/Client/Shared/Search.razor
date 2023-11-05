@@ -1,0 +1,51 @@
+﻿@inject IProductService ProductService
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
+
+<div class="input-group">
+    <input @bind-value="searchQuery"
+           @bind-value:event="oninput"
+           type="search"
+           list="products"
+           @onkeyup="HandleSearch"
+           class="form-control"
+           placeholder="Search..."
+           @ref="searchInput"/>
+           <datalist id="products" >
+              @foreach(var suggestion in suggestions){
+                   <option value="@suggestion"/>
+               }
+           </datalist>
+           <div class="input-group-append">
+               <button class="btn btn-primary" @onclick="SearchProducts">
+            <MudIconButton Icon="@Icons.Material.Filled.Search" Color="Color.Inherit" OnClick="@SearchProducts" Style="transition: color 0.3s;" />
+                </button>
+           </div>
+</div>
+@code {
+    private string searchQuery = string.Empty;
+    private List<string> suggestions = new List<string>();
+    protected ElementReference searchInput;
+
+    protected override async Task OnAfterRenderAsync(bool onFirstRender){
+        if(onFirstRender){
+            await searchInput.FocusAsync();
+        };
+    }
+
+
+    private async Task SearchProducts(){
+        NavigationManager.NavigateTo($"/shop/search/{searchQuery}");
+    }
+
+    public async Task HandleSearch(KeyboardEventArgs args)
+    {
+        if(args.Key == "Enter"){
+            await SearchProducts();
+        }
+        else if(searchQuery.Length > 1)
+        {
+            suggestions = await ProductService.GetProductSearchSuggestions(searchQuery);
+        }
+    }
+}

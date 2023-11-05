@@ -1,0 +1,60 @@
+﻿.input-group {
+    display: flex;
+    align-items: center;
+    border-radius: 8px;
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+    background-color: none;
+    overflow: hidden;
+    /* Change this value to adjust the size. */
+    max-width: 250px; /* Allow it to be smaller, but not larger than the container */
+}
+
+    .input-group input[type="search"].form-control {
+        flex: 1;
+        padding: 12px 15px;
+        border: none;
+        transition: width 0.3s ease-in-out, opacity 0.3s ease;
+        outline: none;
+        font-family: Arial, sans-serif;
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .input-group input[type="search"]:focus {
+        outline: none;
+        border: none;
+        box-shadow: none; /* Sometimes the focus state is represented by a box-shadow */
+    }
+
+    .input-group .btn-primary {
+        background-color: #4800ff;
+        padding:0;
+        margin:0;
+        border: none;
+        cursor: pointer;
+        transition: background-color 0.3s;
+        z-index: 1;
+    }
+
+    .input-group:hover input[type="search"].form-control {
+        width: auto;
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .input-group .btn-primary:hover {
+        background-color: #62b76c;
+    }
+
+@media (max-width: 599.98px) {
+    .input-group {
+        display: flex;
+        align-items: center;
+        border-radius: 8px;
+        box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+        background-color: none;
+        overflow: hidden;
+        /* Change this value to adjust the size. */
+        max-width: auto; /* Allow it to be smaller, but not larger than the container */
+    }
+}

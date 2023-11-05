@@ -1,96 +1,137 @@
 ﻿@inherits LayoutComponentBase
 @inject NavigationManager NavManager
-<MudThemeProvider/>
-<MudDialogProvider/>
-<MudSnackbarProvider/>
+<MudThemeProvider Theme="MyCustomTheme" />
+
+<MudDialogProvider />
+<MudSnackbarProvider />
 <MudLayout>
+    <MudAppBar Elevation="1" DisableGutters="true" Color="Color.Dark" Dense="false" Fixed="true">
+        <!-- Hamburger menu icon for mobile view -->
+        <MudIconButton Icon="@Icons.Filled.Menu" OnClick="@ToggleMenu">
+        </MudIconButton>
+         <div class="links">
+            <MudHidden md-down>
+                <!-- Wrapper for centered items -->
 
-    
-    <MudAppBar Elevation="1" Color="Color.Dark" Dense="false">
-
-        @if (IsShopPage)
-            {
-                <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => ToggleDrawer())" />
-            }
-    
-            <!-- Wrapper for centered items -->
-        <div class="top-row">
-            <MudButton Color="Color.Inherit" OnClick="@ShopClicked" Class="nav-button">Shop</MudButton>
-            <MudButton Color="Color.Inherit" OnClick="@GalleryClicked" Class="nav-button">Gallery</MudButton>
-            <MudButton Color="Color.Inherit" OnClick="@FAQClicked" Class="nav-button">FAQ</MudButton>
-            <MudButton Color="Color.Inherit" OnClick="@AboutUsClicked" Class="nav-button">About Us</MudButton>
-            <MudButton Color="Color.Inherit" OnClick="@ContactUsClicked" Class="nav-button">Contact Us</MudButton>
-
-            <MudIconButton Icon="@Icons.Material.Filled.Search" Color="Color.Inherit" OnClick="@SearchClicked" Style="transition: color 0.3s;" />
+                    <!-- Desktop links -->
+                    <MudButtonGroup Spacing="Spacing.Margin.Dense" Class="nav-buttons">
+                        <MudButton Color="Color.Inherit" OnClick="@ShopClicked" Class="nav-button">Shop</MudButton>
+                        <MudButton Color="Color.Inherit" OnClick="@GalleryClicked" Class="nav-button">Gallery</MudButton>
+                        <MudButton Color="Color.Inherit" OnClick="@FAQClicked" Class="nav-button">FAQ</MudButton>
+                        <MudButton Color="Color.Inherit" OnClick="@AboutUsClicked" Class="nav-button">About Us</MudButton>
+                        <MudButton Color="Color.Inherit" OnClick="@ContactUsClicked" Class="nav-button">Contact Us</MudButton>
+                    </MudButtonGroup>
+            </MudHidden>
+        </div>
+        <div class="icons">
+            <Search/>
             <MudIconButton Icon="@Icons.Material.Filled.Person" Color="Color.Inherit" OnClick="@ProfileClicked" Style="transition: color 0.3s;" />
             <MudIconButton Icon="@Icons.Material.Filled.ShoppingCart" Color="Color.Inherit" OnClick="@CartClicked" Style="transition: color 0.3s;" />
         </div>
-        </MudAppBar>
-        
-    @if (IsShopPage)
+    </MudAppBar>
+    @if (MenuOpen)
     {
-        <MudDrawer @bind-Open="@open" Elevation="1" Variant="@DrawerVariant.Responsive">
-            <MudDrawerHeader>
-                <MudText Typo="Typo.h6">My App</MudText>
-            </MudDrawerHeader>
-            <NavMenu/>
-        </MudDrawer>
+        <div class="menu-dropdown">
+            <MudList>
+                <MudListItem>
+                    <MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Home" Href="/shop" Class="full-width-link">Home</MudNavLink>
+                </MudListItem>
+            <MudListItem><MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Store" OnClick="@ShopClicked">Shop</MudNavLink></MudListItem>
+            <MudListItem><MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Image" OnClick="@GalleryClicked">Gallery</MudNavLink></MudListItem>
+            <MudListItem>
+                <MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.AllInclusive"
+                            OnClick="@AboutUsClicked">About Us</MudNavLink>
+            </MudListItem>
+                        <MudListItem>
+                <MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.QuestionMark" OnClick="@FAQClicked">FAQ</MudNavLink>
+            </MudListItem>
+            <MudListItem>
+                <MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.AlternateEmail" OnClick="@ContactUsClicked">Contact Us</MudNavLink>
+            </MudListItem>
+            </MudList>
+        </div>
     }
+   
 
     <MudMainContent>
-        <MudContainer MaxWidth="MaxWidth.Medium">
-        @Body
+        <MudContainer>
+            @Body
         </MudContainer>
     </MudMainContent>
 </MudLayout>
+<style>
+    .menu-dropdown {
+        width: 100%;
+        background: #f0f0f0; /* example color */
+        z-index: 2; /* to ensure it's above other content */
+        box-shadow: 0 2px 4px rgba(0,0,0,.2); /* optional, for drop shadow */
+    }
+
+    .main-content-push-down {
+        margin-top: /* height of your dropdown menu */;
+    }
+
+    .full-width-link {
+        color:blue;
+        display: block; /* Make the link block level */
+        width: 100%; /* Set the width to fill the container */
+        height: 100%; /* Set the height to fill the container */
+        text-decoration: none; /* Optional: to remove the underline from links */
+    }
+
+</style>
 @code {
-    bool open = false;
+    private bool MenuOpen = false;
 
-    // Check if the current URL contains the "shop" segment
-    bool IsShopPage => NavManager.Uri.Contains("/shop");
+    private string _mainContentClass;
+    private string MainContentClass
+    {
+        get => _mainContentClass;
+        set
+        {
+            if (_mainContentClass != value)
+            {
+                _mainContentClass = value;
+                StateHasChanged();
+            }
+        }
+    }
+    private void ToggleMenu()
+    {
+        MenuOpen = !MenuOpen;
+        MainContentClass = MenuOpen ? "main-content-push-down" : "";
+    }
+    protected override void OnInitialized()
+    {
+        // Ensuring the main content has enough padding to not be hidden under the AppBar.
+        MainContentClass = "pt-5"; // assuming 5 is enough padding to clear the AppBar
+    }
+    private void HomeClicked() => NavManager.NavigateTo("/");
+    private void ShopClicked() => NavManager.NavigateTo("/shop");
+    private void GalleryClicked() => NavManager.NavigateTo("/gallery");
+    private void FAQClicked() => NavManager.NavigateTo("/faq");
+    private void AboutUsClicked() => NavManager.NavigateTo("/aboutus");
+    private void ContactUsClicked() => NavManager.NavigateTo("/contactus");
+    private void ProfileClicked() => NavManager.NavigateTo("/profile");
+    private void CartClicked() => NavManager.NavigateTo("/cart");
 
-    void ToggleDrawer()
-    {
-        open = !open;
-    }
-    bool _drawerOpen = false;
-    private void ShopClicked()
-    {
-        NavManager.NavigateTo("/shop");
-        // Your logic for Shop
-    }
-
-    private void GalleryClicked()
-    {
-        // Your logic for Gallery
-    }
-
-    private void FAQClicked()
-    {
-        // Your logic for FAQ
-    }
-
-    private void AboutUsClicked()
-    {
-        // Your logic for About Us
-    }
-
-    private void ContactUsClicked()
-    {
-        // Your logic for Contact Us
-    }
-
-    private void SearchClicked()
-    {
-        // Your logic for Search
-    }
-
-    private void ProfileClicked()
-    {
-        // Your logic for Profile
-    }
-    private void CartClicked()
-    {
-        // Your logic for Profile
-    }
+    MudTheme MyCustomTheme = new MudTheme()
+        {
+            Typography = new Typography()
+            {
+                Default = new Default()
+                {
+                    FontFamily = new[] { "Roboto", "sans-serif" }
+                }
+            },
+            Palette = new PaletteLight()
+            {
+                Dark = Colors.Grey.Darken4
+            },
+            LayoutProperties = new LayoutProperties()
+            {
+                AppbarHeight = "64px",
+                DrawerWidthLeft = "250px", // A more typical drawer width
+            }
+        };
 }

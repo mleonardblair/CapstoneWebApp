@@ -1,0 +1,65 @@
+﻿/* Default AppbarHeight for mobile devices */
+.mud-appbar {
+    height: 64px; /* or whatever default height you want */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.mud-button-label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    line-height: 1.75;
+    letter-spacing: 0.02857em;
+    text-transform: lowercase;
+    color:white;
+}
+
+.transition-drawer .mud-drawer-content {
+    transition: transform 0.3s ease-in-out;
+}
+/* drawer icon*/
+.mud-icon-root.mud-svg-icon{
+    color:white;
+}
+
+/* AppbarHeight for tablets (small devices) */
+@media (max-width: 599.98px) {
+    header.mud-appbar.mud-appbar-fixed-top.mud-elevation-1.mud-theme-dark {
+        padding: 8px;
+    }
+}
+/* AppbarHeight for tablets (small devices) */
+@media (min-width: 600px) {
+
+    .mud-toolbar .mud-toolbar-appbar {
+        color: black;
+    }
+    .mud-appbar {
+        height: 64px; /* adjust this value as needed */
+     // padding: 8px 16px; /* adjust this value as needed */
+    }
+    .mud-appbar .mud-toolbar-appbar {
+        height: 64px;
+
+    }
+    .mud-appbar.mud-appbar-fixed-top {
+        sticky: 0;
+        top: 0;
+        right: 0;
+        left: 0;
+    }
+}
+
+/* AppbarHeight for desktop (medium devices) */
+@media (min-width: 960px) {
+    .mud-appbar {
+        height: 64px; /* adjust this value as needed */
+    }
+}
+
+/* AppbarHeight for large desktop (large devices) */
+@media (min-width: 1280px) {
+    .mud-appbar {
+        height: 64px; /* adjust this value as needed */
+    }
+}
