@@ -1,38 +1,54 @@
-﻿.small-img-container {
+﻿.media {
     display: flex;
-    justify-content: start; /* align them to the start */
-    flex-wrap: nowrap; /* prevent them from wrapping onto the next line */
-    margin-top: 10px; /* add some space between the main image and these small images */
+    align-items: flex-start; /* Aligns children to the start of the cross axis, which is the top */
 }
 
-.small-img {
-    width: 150px; /* or any desired size */
-    height: 150px;
-    margin-right: 5px; /* add some space between small images */
-}
-.media-img{
-    max-width:600px;
-}
 .media-img-wrapper {
-    width: 100%;
-    height: auto;
+    width: 600px; /* Fixed width for the image wrapper */
+    height: 600px; /* Fixed height, to create a square frame */
+    overflow: hidden; /* Prevents images from overflowing */
+    margin-right: 10px; /* Adjusted spacing to the right */
+    display: flex; /* Flex to help with centering the image */
+    align-items: center; /* Aligns children (image) vertically */
+    justify-content: center; /* Centers children (image) horizontally */
+    flex-shrink: 0; /* Prevents the image wrapper from shrinking */
 }
 
-@media (max-width:1023.98px) {
-    .media{
-        flex-direction:column;
+.media-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Ensures the image covers the area without distorting */
+    border-radius: 6px;
+    transition: transform .2s ease-out, transform-origin .2s ease-out;
+}
+
+    .media-img:hover {
+        transform: scale(1.1); /* Increases the size of the image on hover */
     }
-    .media-img{
-        max-width:300px;
+
+.media-body {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start; /* Aligns the content to the top of the flex container */
+}
+
+/* Rest of your provided styles */
+.price {
+    color: green;
+}
+
+@media (max-width: 1023.98px) {
+    .media {
+        flex-direction: column;
     }
-    .media-img-wrapper{
-        width:100%;
-        height:auto;
+
+    .media-img-wrapper,
+    .media-img {
+        width: 100%; /* Full width on smaller screens */
+        height: auto; /* Height is auto to maintain the aspect ratio */
     }
-    .small-img {
-        width: 100px; /* or any desired size */
-        height: 100px;
-        margin-right: 5px; /* add some space between small images */
+
+    .media-body {
+        /* If you want to adjust the order of the body content in relation to the image on smaller screens, you can do so here */
     }
 }
- 

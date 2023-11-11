@@ -8,6 +8,7 @@ using System.Net.Http;
 using EcommerceApp.Server.Data;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
+using EcommerceApp.Server.Services.TagService;
 
 namespace EcommerceApp.Server.Services.ProductService
 {
@@ -15,13 +16,15 @@ namespace EcommerceApp.Server.Services.ProductService
     {
         private readonly AppDbContext _context;
         private readonly IMapper _mapper;
+        private readonly ITagService _tagService;
         private readonly BlobServiceClient _blobServiceClient;
         private readonly string _blobContainerName;
 
-        public ProductService(AppDbContext context, IMapper mapper, IConfiguration configuration)
+        public ProductService(AppDbContext context, IMapper mapper, IConfiguration configuration, ITagService TagService)
         {
             _context = context;
             _mapper = mapper;
+            _tagService = TagService;
 
             var connectionString = configuration.GetConnectionString("AzureBlobStorage");
             _blobServiceClient = new BlobServiceClient(connectionString);
@@ -63,31 +66,61 @@ namespace EcommerceApp.Server.Services.ProductService
         }
         public async Task<ServiceResponse<ProductDto>> CreateProductAsync(ProductDto productDto)
         {
-            // Map the product to a DTO
-            var product = _mapper.Map<Product>(productDto);
-            var response = new ServiceResponse<ProductDto>();
+            using var transaction = await _context.Database.BeginTransactionAsync();
 
-            // Blob Upload
-           /* var blobClient = _blobServiceClient.GetBlobContainerClient(_blobContainerName).GetBlobClient(Guid.NewGuid().ToString());
-            await blobClient.UploadAsync(imageStream, new BlobHttpHeaders { ContentType = "image/png" });
-            productDto.ImageURI = blobClient.Uri.ToString();*/
-            await _context.Products.AddAsync(product);
-            // Save the product
-            var result = await _context.SaveChangesAsync();
-            if (result <= 0)
+            try
             {
-                response.Success = false;
-                response.Message = "Failed to add product.";
-            }
-            else
-            {
-                // if successful Map the Product back to a ProductDTO
+                // Map the product DTO to a Product entity
+                var product = _mapper.Map<Product>(productDto);
+
+                // Add the product to the context
+                await _context.Products.AddAsync(product);
+
+                // Save changes to insert the product
+                await _context.SaveChangesAsync();
+
+                if (productDto.TagNames != null && productDto.TagNames.Count > 0)
+                {
+                    // Iterate over the tag names and get or create tags
+                    foreach (var tagName in productDto.TagNames)
+                    {
+                        // Communicates inter-service on server, so doesn't return a DTO.
+                        var tag = await _tagService.GetOrCreateTagAsync(tagName);
+
+                        // Create and add a new ProductTag association
+                        var productTag = new ProductTag { ProductId = product.Id, TagId = tag.Id };
+                        await _context.ProductTags.AddAsync(productTag);
+                    }
+
+                    // Save changes for tags and product-tags associations
+                    await _context.SaveChangesAsync();
+                }
+
+                // Commit the transaction
+                await transaction.CommitAsync();
+
+                // Map back to DTO and return success response
                 var productDtoOut = _mapper.Map<ProductDto>(product);
-                response.Data = productDtoOut;
-                response.Message = "Product successfully added.";
+                return new ServiceResponse<ProductDto>
+                {
+                    Data = productDtoOut,
+                    Message = "Product successfully added."
+                };
             }
-            return response;
+            catch (Exception)
+            {
+                // Rollback the transaction if any exception occurs
+                await transaction.RollbackAsync();
+                return new ServiceResponse<ProductDto>
+                {
+                    Success = false,
+                    Message = "Failed to add product."
+                };
+            }
         }
+
+
+
         /*public async Task<ServiceResponse<ProductDto>> PostProductAsync(ProductDto productDto, IFormFile? imageFile = null)
         {
             var response = new ServiceResponse<ProductDto>();
@@ -175,7 +208,38 @@ namespace EcommerceApp.Server.Services.ProductService
             }
             return response;
         }
-        
+        /// <summary>
+        /// Gets a list of all products filtered by category id.
+        /// </summary>
+        /// <param name="categoryId"></param>
+        /// <returns></returns>
+        public async Task<ServiceResponse<ProductPaginationResponse>> GetAllProductsAsync(Guid categoryId)
+        {
+            var response = new ServiceResponse<ProductPaginationResponse>();
+            try
+            {
+                var products = await _context.Products!
+                   .Include(p => p.ProductTags)
+                   .ToListAsync();
+
+                if (products == null || !products.Any())
+                {
+                    response.Success = false;
+                    response.Message = "No products found.";
+                }
+                else
+                {
+                    response.Data.Products = _mapper.Map<List<ProductDto>>(products);
+                    response.Message = "Products retrieved successfully.";
+                }
+            }
+            catch (Exception ex)
+            {
+                response.Success = false;
+                response.Message = $"An error occurred: {ex.Message}, StackTrace: {ex.StackTrace}, InnerException: {ex.InnerException?.Message}";
+            }
+            return response;
+        }
         public async Task<ServiceResponse<List<ProductDto>>> GetAllProductsAsync()
         {
             var response = new ServiceResponse<List<ProductDto>>();
@@ -203,6 +267,88 @@ namespace EcommerceApp.Server.Services.ProductService
             }
             return response;
         }
+
+        /// <summary>
+        /// Overload for getallproducts that will return a paginated list of products.
+        /// </summary>
+        /// <param name="page"></param>
+        /// <param name="pageSize"></param>
+        /// <returns></returns>
+        public async Task<ServiceResponse<ProductPaginationResponse>> GetAllProductsAsync(int page, int pageSize)
+        {
+            var response = new ServiceResponse<ProductPaginationResponse>();
+            try
+            {
+                int totalProducts = await _context.Products.CountAsync();
+                var totalPages = (int)Math.Ceiling(totalProducts / (double)pageSize);
+
+                var products = await _context.Products
+                    .Skip((page - 1) * pageSize)
+                    .Take(pageSize)
+                    .Include(p => p.ProductTags)
+                    .ToListAsync();
+
+                if (products == null || !products.Any())
+                {
+                    response.Success = false;
+                    response.Message = "No products found.";
+                }
+                else
+                {
+                    response.Data = new ProductPaginationResponse
+                    {
+                        Products = _mapper.Map<List<ProductDto>>(products),
+                        CurrentPage = page,
+                        Pages = totalPages
+                    };
+                    response.Message = "Products retrieved successfully.";
+                }
+            }
+            catch (Exception ex)
+            {
+                response.Success = false;
+                response.Message = $"An error occurred: {ex.Message}";
+            }
+            return response;
+        }
+
+
+        /// <summary>
+        /// Overload for getallproducts that will return a paginated list of products + category filtering.
+        /// </summary>
+        /// <param name="page"></param>
+        /// <param name="pageSize"></param>
+        /// <param name="categoryId"></param>
+        /// <returns></returns>
+        public async Task<ServiceResponse<ProductPaginationResponse>> GetAllProductsAsync(int page, int pageSize, Guid categoryId)
+        {
+            var response = new ServiceResponse<ProductPaginationResponse>();
+            try
+            {
+                var products = await _context.Products!
+                   .Include(p => p.ProductTags)
+                   .ToListAsync();
+
+                if (products == null || !products.Any())
+                {
+                    response.Success = false;
+                    response.Message = "No products found.";
+                }
+                else
+                {
+                    response.Data.Products = _mapper.Map<List<ProductDto>>(products);
+                    response.Message = "Products retrieved successfully.";
+                }
+            }
+            catch (Exception ex)
+            {
+                response.Success = false;
+                response.Message = $"An error occurred: {ex.Message}, StackTrace: {ex.StackTrace}, InnerException: {ex.InnerException?.Message}";
+            }
+            return response;
+        }
+
+
         public async Task<ServiceResponse<bool>> DeleteProductByIdAsync(Guid productId)
         {
             var response = new ServiceResponse<bool>();
@@ -312,11 +458,38 @@ namespace EcommerceApp.Server.Services.ProductService
             return response;
         }
 
-        public async Task<ServiceResponse<List<ProductDto>>> SearchProducts(string searchQuery)
+        public async Task<ServiceResponse<ProductPaginationResponse>> SearchProducts(string searchQuery, int page)
         {
-            var response = new ServiceResponse<List<ProductDto>>()
+            var pageResults = 2f;
+            var numberOfPages = Math.Ceiling( (await FindProductsBySearchQuery(searchQuery) )
+                .Count / pageResults);
+            // This is the query that will be used to find the products that match the search query
+            // and will be used to find the
+            // al number of pages for the search results pagination
+            // and will be used to find the products for the requested page number
+            var products = await _context.Products
+                                .Include(p => p.ProductTags)
+                                .ThenInclude(pt => pt.Tag)
+                                .Where(p => p.Name.ToLower().Contains(searchQuery.ToLower())
+                                 || p.Description.ToLower().Contains(searchQuery.ToLower())
+                                 || p.ProductTags.Any(pt => pt.Tag.Name.ToLower()
+                                .Contains(searchQuery.ToLower())))
+                                .Skip((page - 1) * (int)pageResults)
+                                .Take((int)pageResults)
+                                .ToListAsync();
+            // Need to map back to DTO list
+            var productDtos = _mapper.Map<List<ProductDto>>(products);
+           
+            var response = new ServiceResponse<ProductPaginationResponse>()
             {
-                Data = await FindProductsBySearchQuery(searchQuery)
+                Data = new ProductPaginationResponse
+                {
+                    Products = productDtos,
+                    Pages = (int)numberOfPages,
+                    CurrentPage = page,
+                },
+                Message = "Products retrieved successfully."
+
             };
             // Need to map to 
           
@@ -373,6 +546,11 @@ namespace EcommerceApp.Server.Services.ProductService
             {
                 Data = result
             };
+        }
+
+        public Task<ServiceResponse<ProductDto>> GetProductByIdAsync(int page, int pageSize, Guid productId)
+        {
+            throw new NotImplementedException();
         }
     }
 

@@ -14,10 +14,6 @@ namespace EcommerceApp.Client.Services.ProductService
     {
         private readonly HttpClient _http;
         private readonly IHttpClientFactory _httpFactory;
-
-        // This event will be used to notify subscribers that the products have changed
-        public event Action ProductsChanged;
-
         public ProductService(HttpClient http, IHttpClientFactory httpFactory)
         {
             _httpFactory = httpFactory;
@@ -28,6 +24,13 @@ namespace EcommerceApp.Client.Services.ProductService
         public ProductDto Product { get; set; } = new ProductDto();
         public string Message { get; set; } = "Loading products...";
 
+        public string LastSearchQuery { get; set; } = string.Empty;
+        public int CurrentPage { get; set; } = 1;
+        public int PageSize { get; set; } = 4;
+        public int PageCount { get; set; } = 0;
+
+        // This event will be used to notify subscribers that the products have changed
+        public event Action ProductsChanged;
         public async Task<ServiceResponse<ProductDto>> CreateProductAsync(ProductDto product)
         {
             var httpClient = _httpFactory.CreateClient("EcommerceApp.PublicClient");
@@ -50,7 +53,6 @@ namespace EcommerceApp.Client.Services.ProductService
             return result;
         }
 
-
         public async Task GetAllProductsAsync(Guid? categoryId = null)
         {
             var result = (categoryId == null || categoryId == Guid.Empty) ?
@@ -59,7 +61,52 @@ namespace EcommerceApp.Client.Services.ProductService
 
 
             if (result != null && result.Data != null)
+            {
                 Products = result.Data;
+            }
+            CurrentPage = 1;
+            PageCount = 0;
+
+            // Could set some 404 Message "Nothing Here Yet" or something like that
+            if (Products.Count == 0)
+                Message = "No products found.";
+
+            // Notify subscribers that the products have changed
+            ProductsChanged.Invoke();
+        }
+
+        /// <summary>
+        /// Overloaded method for GetAllProducts, essentially for pagination ui display purposes for user navigvation.
+        /// </summary>
+        /// <param name="page"></param>
+        /// <param name="pageSize"></param>
+        /// <param name="categoryId"></param>
+        /// <returns></returns>
+        public async Task GetAllProductsAsync(int page, int pageSize, Guid? categoryId = null)
+        {
+            // conditionally show the products by category or not
+            ServiceResponse<ProductPaginationResponse> result;
+
+            if (categoryId == null || categoryId == Guid.Empty)
+            {
+                result = await _http.GetFromJsonAsync<ServiceResponse<ProductPaginationResponse>>($"api/products/page={page}&pageSize={pageSize}");
+            }
+            else
+            {
+               result = await _http.GetFromJsonAsync<ServiceResponse<ProductPaginationResponse>>($"api/products/category/{categoryId}/page={page}&pageSize={pageSize}");
+
+            }
+
+            if (result != null && result.Data != null)
+            {
+                Products = result.Data.Products;
+            }
+            CurrentPage = result.Data.CurrentPage;
+            PageCount = result.Data.Pages;
+
+            // Could set some 404 Message "Nothing Here Yet" or something like that
+            if (Products.Count == 0)
+                Message = "No products found.";
 
             // Notify subscribers that the products have changed
             ProductsChanged.Invoke();
@@ -112,19 +159,19 @@ namespace EcommerceApp.Client.Services.ProductService
                 }
                 else
                 {
-                    return new ServiceResponse<bool> 
-                    { 
-                        Success = false, 
-                        Message = "Failed to delete product." 
+                    return new ServiceResponse<bool>
+                    {
+                        Success = false,
+                        Message = "Failed to delete product."
                     };
                 }
             }
             catch (Exception ex)
             {
-                return new ServiceResponse<bool> 
-                { 
-                    Success = false, 
-                    Message = ex.Message 
+                return new ServiceResponse<bool>
+                {
+                    Success = false,
+                    Message = ex.Message
                 };
             }
         }
@@ -150,37 +197,29 @@ namespace EcommerceApp.Client.Services.ProductService
             }
         }
 
-        public Task<ServiceResponse<ProductDto>> PostProductAsync(ProductDto productDto, Stream imageFile)
-        {
-            throw new NotImplementedException();
-        }
-        public async Task<ServiceResponse<ProductDto>> GetProductsByCategoryId(Guid categoryId)
+        public async Task<ServiceResponse<List<ProductDto>>> GetProductsByCategoryId(Guid categoryId)
         {
             try
             {
-                // Using server api http client - mediated 
-                var result = await _http.GetFromJsonAsync<ServiceResponse<ProductDto>>($"api/products/category/{categoryId}");
-                if (result != null && result.Data != null)
+                var response = await _http.GetFromJsonAsync<ServiceResponse<List<ProductDto>>>($"api/products/category/{categoryId}");
+                if (response != null && response.Data != null)
                 {
-                    return new ServiceResponse<ProductDto>
-                    {
-                        Data = result.Data,
-                        Message = result.Message,
-                        Success = result.Success
-                    };
+                    Products = response.Data;
+                    ProductsChanged?.Invoke(); // Make sure to invoke the change event
+                    return response;
                 }
                 else
                 {
-                    return new ServiceResponse<ProductDto>
+                    return new ServiceResponse<List<ProductDto>>
                     {
                         Success = false,
-                        Message = "Failed to locate product."
+                        Message = "No products found in this category."
                     };
                 }
             }
             catch (Exception ex)
             {
-                return new ServiceResponse<ProductDto>
+                return new ServiceResponse<List<ProductDto>>
                 {
                     Success = false,
                     Message = ex.Message
@@ -188,27 +227,68 @@ namespace EcommerceApp.Client.Services.ProductService
             }
         }
 
+
         public async Task SearchProducts(string searchQuery)
         {
+            LastSearchQuery = searchQuery;
             var result = await _http
-                .GetFromJsonAsync<ServiceResponse<List<ProductDto>>>($"api/products/search/{searchQuery}");
-            if(result != null && result.Data != null)
+                .GetFromJsonAsync<ServiceResponse<ProductPaginationResponse>>($"api/products/search/{searchQuery}");
+
+            if (result != null && result.Data != null)
             {
-                Products = result.Data;
+                Products = result.Data.Products;// These are <ProductDto> 's  =)
             }
-           
-            if(Products.Count == 0)
+
+            if (Products.Count == 0)
             {
                 Message = "No products found.";
             }
             ProductsChanged?.Invoke();
         }
+        public async Task SearchProducts(string searchQuery, int page)
+        {
+            LastSearchQuery = searchQuery;
+            var result = await _http
+                .GetFromJsonAsync<ServiceResponse<ProductPaginationResponse>>($"api/products/search/{searchQuery}/{page}");
 
+            if (result != null && result.Data != null)
+            {
+                Products = result.Data.Products;// These are <ProductDto> 's  =)
+                CurrentPage = result.Data.CurrentPage;
+                PageCount = result.Data.Pages;
+            }
+
+            if (Products.Count == 0)
+            {
+                Message = "No products found.";
+            }
+            ProductsChanged?.Invoke();
+        }
+        public async Task SearchProducts(string searchQuery, int page, int pagesize)
+        {
+            LastSearchQuery = searchQuery;
+            var result = await _http
+                .GetFromJsonAsync<ServiceResponse<ProductPaginationResponse>>($"api/products/search/{searchQuery}/{page}");
+
+            if (result != null && result.Data != null)
+            {
+                Products = result.Data.Products;// These are <ProductDto> 's  =)
+                CurrentPage = result.Data.CurrentPage;
+                PageCount = result.Data.Pages;
+            }
+
+            if (Products.Count == 0)
+            {
+                Message = "No products found.";
+            }
+            ProductsChanged?.Invoke();
+        }
         public async Task<List<string>> GetProductSearchSuggestions(string searchQuery)
         {
             var result = await _http
                 .GetFromJsonAsync<ServiceResponse<List<string>>>($"api/products/suggestions/{searchQuery}");
             return result.Data;
         }
+
     }
 }

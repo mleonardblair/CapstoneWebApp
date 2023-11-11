@@ -8,7 +8,7 @@ namespace EcommerceApp.Server.Models
         public Guid Id { get; set; } = Guid.NewGuid();
 
         [Required, MaxLength(50)]
-        public string? Name { get; set; }
+        public string Name { get; set; } = string.Empty;
 
         [MaxLength(1000)]
         public string? Description { get; set; }

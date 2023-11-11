@@ -1,36 +1,43 @@
-﻿.media-img {
-    max-height:200px;
-    max-width:200px;    /* set the max width and height of the image */
-    border-radius:6px; /* add a border radius to the image */
-    margin-bottom: 10px; /* add some space between each image */
-    transition:transform .2s; /* add a transition effect when hovering over the image */
-}
-    .media-img:hover {
-    transform:scale(1.1); /* increase the size of the image on hover */
-    }
-.media {
+﻿.media {
     display: flex;
     align-items: flex-start;
-}
-.media-body {
-    flex: 1;
-}
-.media-img-wrapper { 
-    width:200px; /* width of the image */
-    text-align:center; /* center the image */
+    flex-wrap: wrap; /* Ensures that items can wrap as needed */
 }
 
-.price{
-    color: green;
+.media-body {
+    flex: 1; /* Allows the text container to fill the available space */
 }
+
+.media-img-wrapper {
+    width: 200px;
+    padding-top: 200px; /* 1:1 Aspect Ratio */
+    position: relative; /* For absolute positioning of the image */
+    text-align: center;
+    overflow: hidden; /* Prevents images from overflowing */
+}
+
+.media-img {
+    max-width: 100%;
+    max-height: 100%;
+    border-radius: 6px;
+    transition: transform .2s;
+    object-fit: cover; /* Cover might work better than contain */
+    position: absolute; /* Absolute position */
+    top: 0;
+    left: 0;
+}
+
+    .media-img:hover {
+        transform: scale(1.1);
+    }
 
 @media (max-width: 1023.98px) {
     .media {
         flex-direction: column;
     }
+
     .media-img-wrapper {
         width: 100%;
-        height: auto;
+        padding-top: 56.25%; /* 16:9 Aspect Ratio */
     }
 }
-

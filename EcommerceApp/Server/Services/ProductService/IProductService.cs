@@ -9,8 +9,14 @@ namespace EcommerceApp.Server.Services.ProductService
     /// </summary>
     public interface IProductService
     {
+
         Task<ServiceResponse<List<ProductDto>>> GetAllProductsAsync();
+        Task<ServiceResponse<ProductPaginationResponse>> GetAllProductsAsync(Guid categoryId);
+        Task<ServiceResponse<ProductPaginationResponse>> GetAllProductsAsync(int page, int pageSize, Guid categoryId);
+        Task<ServiceResponse<ProductPaginationResponse>> GetAllProductsAsync(int page, int pageSize);
         Task<ServiceResponse<ProductDto>> GetProductByIdAsync(Guid productId);
+        // Overloaded method for pagination.
+        Task<ServiceResponse<ProductDto>> GetProductByIdAsync(int page, int pageSize, Guid productId);
         // Postman Debugging and Testing.
         Task<ServiceResponse<ProductDto>> PostProductAsync(ProductDto productDto, IFormFile imageFile);
         /*        Task<ServiceResponse<ProductDto>> CreateProductAsync(ProductDto productDto, Stream imageStream);*/
@@ -18,7 +24,7 @@ namespace EcommerceApp.Server.Services.ProductService
         Task<ServiceResponse<ProductDto>> UpdateProductByIdAsync(Guid productId, ProductDto productDto);
         Task<ServiceResponse<bool>> DeleteProductByIdAsync(Guid productId);
         Task<ServiceResponse<List<ProductDto>>> GetProductsByCategoryId(Guid categoryId);
-        Task<ServiceResponse<List<ProductDto>>> SearchProducts(string searchQuery);
+        Task<ServiceResponse<ProductPaginationResponse>> SearchProducts(string searchQuery, int page);
         Task<ServiceResponse<List<string>>> GetProductSearchSuggestions(string searchQuery);
     }
 }

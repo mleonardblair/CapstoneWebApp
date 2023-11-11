@@ -8,7 +8,7 @@ namespace EcommerceApp.Client.Services.CategoryService
     {
         private readonly HttpClient _http;
         private readonly IHttpClientFactory _httpFactory;
-
+        public string Message { get; set; } = "Loading categories...";
         public List<CategoryDto> Categories { get ; set; } = new List<CategoryDto>();
         public CategoryDto Category { get; set; } = new CategoryDto();
 

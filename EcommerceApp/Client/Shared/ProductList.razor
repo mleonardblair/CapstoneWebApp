@@ -1,5 +1,7 @@
 ﻿@inject IProductService ProductService
+@inject NavigationManager NavigationManager
 @implements IDisposable 
+
 @if (ProductService.Products == null || ProductService.Products.Count == 0)
 {
     <span>@ProductService.Message</span>
@@ -29,16 +31,39 @@ else
             </li>
         }
     </ul>
+    <div class="d-flex flex-column align-center">
+        <MudPagination
+            Size="Size.Medium"
+            Variant="Variant.Text"
+            Color="Color.Primary"
+            Class="my-3"
+            Align="Align.Center"
+            Style="position: fixed; bottom: 0;" 
+            Count="ProductService.PageCount"
+            SelectedChanged="HandlePageChanged"/>
+     </div>
+    
 }
 
 @code {
+
     protected override void OnInitialized()
     {
         // Subscribe to the ProductsChanged event to re-render the component when the event is raised by the ProductService class. This is necessary because the ProductService class is a singleton and the Products property is only set once when the application starts.
         ProductService.ProductsChanged += StateHasChanged;
     }
+
     public void Dispose()
     {
         ProductService.ProductsChanged -= StateHasChanged;
     }
+
+    private void HandlePageChanged(int newPage)
+    {
+        ProductService.CurrentPage = newPage;
+        // add one to the current page and navigation that direction.
+        //ProductService.CurrentPage = ProductService.CurrentPage += 1;
+        NavigationManager.NavigateTo("shop/products/{newPage}");
+    }
+
 }

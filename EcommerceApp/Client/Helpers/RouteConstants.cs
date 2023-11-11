@@ -9,8 +9,15 @@
 
         // Shop Page
         public const string Shop = "/shop";
-        public const string ShopSortedByCategory = "/shop/{CategoryId:guid}";
+        public const string ShopSortedByCategory = "/shop/category/{CategoryId:guid}";
         public const string ShopProductDetails = "/shop/product/{ProductId:guid}";
+        public const string ShopCreateProduct = "/shop/products/create";
+        public const string ShopEditProduct = "/shop/products/edit/{id}";
+        public const string ShopPagination = "/shop/products/{Page:int}";
+
+        // Shop Page Search Products
+        public const string ShopSearchProducts = "/shop/search/{SearchQuery}";
+        public const string ShopSearchProductsPagination = "/shop/search/{SearchQuery}/{Page:int}";
 
         // Admin Routes
         public const string Admin = "/admin";

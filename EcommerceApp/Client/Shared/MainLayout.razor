@@ -1,5 +1,5 @@
 ﻿@inherits LayoutComponentBase
-@inject NavigationManager NavManager
+@inject NavigationManager NavigationManager
 <MudThemeProvider Theme="MyCustomTheme" />
 
 <MudDialogProvider />
@@ -7,22 +7,23 @@
 <MudLayout>
     <MudAppBar Elevation="1" DisableGutters="true" Color="Color.Dark" Dense="false" Fixed="true">
         <!-- Hamburger menu icon for mobile view -->
-        <MudIconButton Icon="@Icons.Filled.Menu" OnClick="@ToggleMenu">
+        <MudHidden Breakpoint="Breakpoint.MdAndUp">
+        <MudIconButton Icon="@Icons.Material.Filled.Menu" OnClick="@ToggleMenu">
         </MudIconButton>
+        </MudHidden>
          <div class="links">
-            <MudHidden md-down>
+            <MudHidden Breakpoint="Breakpoint.SmAndDown">
                 <!-- Wrapper for centered items -->
-
                     <!-- Desktop links -->
-                    <MudButtonGroup Spacing="Spacing.Margin.Dense" Class="nav-buttons">
-                        <MudButton Color="Color.Inherit" OnClick="@ShopClicked" Class="nav-button">Shop</MudButton>
-                        <MudButton Color="Color.Inherit" OnClick="@GalleryClicked" Class="nav-button">Gallery</MudButton>
-                        <MudButton Color="Color.Inherit" OnClick="@FAQClicked" Class="nav-button">FAQ</MudButton>
-                        <MudButton Color="Color.Inherit" OnClick="@AboutUsClicked" Class="nav-button">About Us</MudButton>
-                        <MudButton Color="Color.Inherit" OnClick="@ContactUsClicked" Class="nav-button">Contact Us</MudButton>
-                    </MudButtonGroup>
+                <MudButtonGroup Color="Color.Primary" Variant="Variant.Text">
+                    <MudButton Color="Color.Inherit" OnClick="@ShopClicked" Class="nav-button">Shop</MudButton>
+                    <MudButton Color="Color.Inherit" OnClick="@GalleryClicked" Class="nav-button">Gallery</MudButton>
+                    <MudButton Color="Color.Inherit" OnClick="@FAQClicked" Class="nav-button">FAQ</MudButton>
+                    <MudButton Color="Color.Inherit" OnClick="@AboutUsClicked" Class="nav-button">About Us</MudButton>
+                    <MudButton Color="Color.Inherit" OnClick="@ContactUsClicked" Class="nav-button">Contact Us</MudButton>
+                </MudButtonGroup>
             </MudHidden>
-        </div>
+            </div>
         <div class="icons">
             <Search/>
             <MudIconButton Icon="@Icons.Material.Filled.Person" Color="Color.Inherit" OnClick="@ProfileClicked" Style="transition: color 0.3s;" />
@@ -33,56 +34,27 @@
     {
         <div class="menu-dropdown">
             <MudList>
-                <MudListItem>
-                    <MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Home" Href="/shop" Class="full-width-link">Home</MudNavLink>
-                </MudListItem>
-            <MudListItem><MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Store" OnClick="@ShopClicked">Shop</MudNavLink></MudListItem>
-            <MudListItem><MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Image" OnClick="@GalleryClicked">Gallery</MudNavLink></MudListItem>
-            <MudListItem>
+                 <MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Home" Href="/" Class="full-width-link">Home</MudNavLink>
+                <MudNavLink  Class="menu-nav-link" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Store" OnClick="@ShopClicked">Shop</MudNavLink>
+                <MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Image" OnClick="@GalleryClicked">Gallery</MudNavLink>
                 <MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.AllInclusive"
-                            OnClick="@AboutUsClicked">About Us</MudNavLink>
-            </MudListItem>
-                        <MudListItem>
+                            OnClick="@AboutUsClicked">About Us</MudNavLink>    
                 <MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.QuestionMark" OnClick="@FAQClicked">FAQ</MudNavLink>
-            </MudListItem>
-            <MudListItem>
                 <MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.AlternateEmail" OnClick="@ContactUsClicked">Contact Us</MudNavLink>
-            </MudListItem>
             </MudList>
         </div>
     }
    
 
-    <MudMainContent>
-        <MudContainer>
+    <MudMainContent Style="padding-top: 0">
+        <MudContainer Class="@containerClass">
             @Body
         </MudContainer>
     </MudMainContent>
 </MudLayout>
-<style>
-    .menu-dropdown {
-        width: 100%;
-        background: #f0f0f0; /* example color */
-        z-index: 2; /* to ensure it's above other content */
-        box-shadow: 0 2px 4px rgba(0,0,0,.2); /* optional, for drop shadow */
-    }
-
-    .main-content-push-down {
-        margin-top: /* height of your dropdown menu */;
-    }
-
-    .full-width-link {
-        color:blue;
-        display: block; /* Make the link block level */
-        width: 100%; /* Set the width to fill the container */
-        height: 100%; /* Set the height to fill the container */
-        text-decoration: none; /* Optional: to remove the underline from links */
-    }
-
-</style>
 @code {
     private bool MenuOpen = false;
-
+    private string containerClass = "";
     private string _mainContentClass;
     private string MainContentClass
     {
@@ -96,6 +68,7 @@
             }
         }
     }
+
     private void ToggleMenu()
     {
         MenuOpen = !MenuOpen;
@@ -105,15 +78,21 @@
     {
         // Ensuring the main content has enough padding to not be hidden under the AppBar.
         MainContentClass = "pt-5"; // assuming 5 is enough padding to clear the AppBar
+        var uri = new Uri(NavigationManager.Uri);
+        if (uri.LocalPath == "/gallery")
+        {
+            Console.WriteLine("Special Padding Set");
+            containerClass = "home-container-padding";
+        }
     }
-    private void HomeClicked() => NavManager.NavigateTo("/");
-    private void ShopClicked() => NavManager.NavigateTo("/shop");
-    private void GalleryClicked() => NavManager.NavigateTo("/gallery");
-    private void FAQClicked() => NavManager.NavigateTo("/faq");
-    private void AboutUsClicked() => NavManager.NavigateTo("/aboutus");
-    private void ContactUsClicked() => NavManager.NavigateTo("/contactus");
-    private void ProfileClicked() => NavManager.NavigateTo("/profile");
-    private void CartClicked() => NavManager.NavigateTo("/cart");
+    private void HomeClicked() => NavigationManager.NavigateTo("/");
+    private void ShopClicked() => NavigationManager.NavigateTo("/shop");
+    private void GalleryClicked() => NavigationManager.NavigateTo("/gallery");
+    private void FAQClicked() => NavigationManager.NavigateTo("/faq");
+    private void AboutUsClicked() => NavigationManager.NavigateTo("/aboutus");
+    private void ContactUsClicked() => NavigationManager.NavigateTo(RouteConstants.ShopCreateProduct);
+    private void ProfileClicked() => NavigationManager.NavigateTo("/profile");
+    private void CartClicked() => NavigationManager.NavigateTo("/cart");
 
     MudTheme MyCustomTheme = new MudTheme()
         {
@@ -121,6 +100,7 @@
             {
                 Default = new Default()
                 {
+
                     FontFamily = new[] { "Roboto", "sans-serif" }
                 }
             },

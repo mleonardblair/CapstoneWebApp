@@ -10,7 +10,10 @@ namespace EcommerceApp.Client.Services.TagService
     {
         private readonly HttpClient _http;
         private readonly IHttpClientFactory _httpFactory;
-
+        // This event will be used to notify subscribers that the products have changed
+        public event Action TagsChanged;
+        public string Message { get; set; } = "Loading tags...";
+        public List<TagDto> Tags { get; set; } = new List<TagDto>();
         public TagService(HttpClient http, IHttpClientFactory httpFactory)
         {
             _httpFactory = httpFactory;
@@ -27,9 +30,23 @@ namespace EcommerceApp.Client.Services.TagService
             throw new NotImplementedException();
         }
 
-        public Task<ServiceResponse<List<TagDto>>> GetAllTagsAsync()
+        public async Task GetAllTagsAsync()
         {
-            throw new NotImplementedException();
+            var result =
+             await _http.GetFromJsonAsync<ServiceResponse<List<TagDto>>>("api/tags");
+
+            if (result != null && result.Data != null)
+            {
+                Tags = result.Data;
+            }
+
+            // Could set some 404 Message "Nothing Here Yet" or something like that
+            if (Tags.Count == 0)
+                Message = "No tags found.";
+            else
+                Message = string.Empty;
+            // Notify subscribers that the tags have changed
+            TagsChanged?.Invoke();
         }
 
         public async Task<ServiceResponse<TagDto>> GetTagByIdAsync(Guid tagId)

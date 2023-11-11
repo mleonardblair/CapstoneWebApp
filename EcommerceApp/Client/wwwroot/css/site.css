@@ -1,10 +1,4 @@
-﻿/* Default AppbarHeight for mobile devices */
-.mud-appbar {
-    height: 64px; /* or whatever default height you want */
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
+﻿
 .mud-button-label {
     font-size: 0.875rem;
     font-weight: 500;
@@ -13,7 +7,18 @@
     text-transform: lowercase;
     color:white;
 }
+mud-toolbar mud-toolbar-appbar {
+    display: flex;
 
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+}
+.mud-icon-button {
+    display: flex; /* This will align the icon properly within the appbar */
+    flex-direction:row;
+    justify-content: space-between;
+}
 .transition-drawer .mud-drawer-content {
     transition: transform 0.3s ease-in-out;
 }
@@ -21,39 +26,137 @@
 .mud-icon-root.mud-svg-icon{
     color:white;
 }
+.mud-button-group-root {
+    display: flex;
+    justify-content:space-between;
+}
+.mud-container.home-container-padding {
+    padding-right: 0px !important;
+    padding-left: 0px !important;
+}
+/* CONTROLS THE GALLERY CAROUSEL OVERRIDES MUDBLAZOR DEFAULT BEHAVIOR*/
+.mud-carousel {
+    /* Rotate the container */
+    transform: rotate(-90deg) translateX(-100%);
+    /* Set the transform origin to the top left corner */
+    transform-origin: top left;
+    /* Set the position to absolute to position the carousel */
+    position: absolute;
+    /* Set top position to the height of the navbar */
+    top: 68px;
+    /* Set left position to 0 */
+    left: 0;
+    /* Set width to the viewport height minus navbar height, adjust if necessary */
+    width: calc(100vh - 68px);
+    /* Set height to the full width of the viewport */
+    height: calc(100vw - 4px);
+}
+
+/* Adjust the individual content items */
+.carousel-content {
+    /* Rotate the content to make it upright */
+    transform: rotate(90deg);
+    /* Set the transform origin to the center */
+    transform-origin: center;
+    /* Content will be centered using 'd-flex' and 'mx-auto my-auto' */
+}
+
+/* Ensure the carousel item fills the rotated container */
+.mud-carousel-item {
+    /* The width should be 100% of the carousel's height after rotation */
+    width: 100%;
+    /* The height should be the same as the carousel width before rotation */
+    /*height: calc(100vh - 64px);*/
+}
+@keyframes slideInUp {
+    from {
+        transform: translateY(100%);
+    }
+
+    to {
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideOutUp {
+    from {
+        transform: translateY(0);
+    }
+
+    to {
+        transform: translateY(-100%);
+    }
+}
+.gallery-page.mud-progress-linear-bar {
+    background-color: darkorange; /* Use the specific shade of orange you prefer */
+    height:4px;
+}
 
 /* AppbarHeight for tablets (small devices) */
 @media (max-width: 599.98px) {
-    header.mud-appbar.mud-appbar-fixed-top.mud-elevation-1.mud-theme-dark {
+    header .mud-appbar.mud-appbar-fixed-top.mud-elevation-1.mud-theme-dark {
         padding: 8px;
     }
-}
-/* AppbarHeight for tablets (small devices) */
-@media (min-width: 600px) {
-
-    .mud-toolbar .mud-toolbar-appbar {
-        color: black;
+    .mud-progress-linear.horizontal.mud-progress-linear-small{
+        height: 12px;
     }
-    .mud-appbar {
-        height: 64px; /* adjust this value as needed */
-     // padding: 8px 16px; /* adjust this value as needed */
+    /* CONTROLS THE GALLERY CAROUSEL OVERRIDES MUDBLAZOR DEFAULT BEHAVIOR*/
+    .mud-carousel {
+        /* Rotate the container */
+        height: calc(100vw);
     }
-    .mud-appbar .mud-toolbar-appbar {
-        height: 64px;
-
+    .mud-appbar .mud-toolbar-appbar
+    .mud-toolbar {
+        flex-direction: column;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .mud-toolbar {
+        padding:0 8px;
     }
     .mud-appbar.mud-appbar-fixed-top {
-        sticky: 0;
+        position: sticky;
         top: 0;
         right: 0;
         left: 0;
     }
 }
+/* AppbarHeight for tablets (small devices) */
+@media (min-width: 600px) {
+    .mud-container.home-container-padding {
+        padding-right: 0px !important;
+        padding-left: 0px !important;
+    }
+    .mud-toolbar {
+        padding: 0 8px;
+        flex-direction: row;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .mud-toolbar .mud-toolbar-appbar {
+        color: black;
+    }
+    .mud-appbar.mud-appbar-fixed-top {
+        position: sticky;
+        top: 0;
+        right: 0;
+        left: 0;
+    }
+    .mud-carousel {
+/* Rotate the container */
+        height: calc(100vw);
+    }
 
 /* AppbarHeight for desktop (medium devices) */
 @media (min-width: 960px) {
     .mud-appbar {
         height: 64px; /* adjust this value as needed */
+    }
+    .mud-container.home-container-padding {
+        padding-right: 0px !important;
+        padding-left: 0px !important;
     }
 }
 
@@ -61,5 +164,12 @@
 @media (min-width: 1280px) {
     .mud-appbar {
         height: 64px; /* adjust this value as needed */
+    }
+    .mud-container.home-container-padding {
+        padding-right: 0px !important;
+        padding-left: 0px !important;
+    }
+    .mud-container-maxwidth-lg.home-container-padding {
+        max-width:100vw;
     }
 }

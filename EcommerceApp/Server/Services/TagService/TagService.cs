@@ -47,6 +47,30 @@ namespace EcommerceApp.Server.Services.TagService
 
             return response;
         }
+
+        public async Task<Tag> GetOrCreateTagAsync(string tagName)
+        {
+            // Check if a tag with the given name already exists.
+            var tag = await _context.Tags.FirstOrDefaultAsync(t => t.Name.ToLower() == tagName.ToLower());
+
+            // If the tag exists, return it.
+            if (tag != null)
+            {
+                return tag;
+            }
+
+            // If the tag does not exist, create a new one.
+            tag = new Tag 
+            { 
+                Name = tagName 
+            };
+            await _context.Tags.AddAsync(tag);
+            await _context.SaveChangesAsync();
+
+            return tag;
+        }
+
+
         public async Task<ServiceResponse<bool>> DeleteTagByIdAsync(Guid tagId, bool confirmCascadeDelete = false)
         {
             var response = new ServiceResponse<bool>();

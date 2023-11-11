@@ -34,8 +34,9 @@
     }
 
 
-    private async Task SearchProducts(){
-        NavigationManager.NavigateTo($"/shop/search/{searchQuery}");
+    private async Task SearchProducts()
+    {
+        NavigationManager.NavigateTo($"/shop/search/{searchQuery}/1");
     }
 
     public async Task HandleSearch(KeyboardEventArgs args)

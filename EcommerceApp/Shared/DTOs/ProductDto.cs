@@ -21,5 +21,6 @@ namespace EcommerceApp.Shared.DTOs
         [Required]
         public int StockQuantity { get; set; }
         public ICollection<ProductTagDto> ProductTags { get; set; } = new List<ProductTagDto>();
+        public List<string> TagNames { get; set; } = new List<string>();
     }
 }

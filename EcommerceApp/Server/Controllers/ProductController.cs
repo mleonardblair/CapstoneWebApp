@@ -27,18 +27,47 @@ namespace EcommerceApp.Server.Controllers
             var response = await _productService.GetAllProductsAsync();
             return Ok(response);
         }
+        /// <summary>
+        /// Overloaded route for pagination.
+        /// </summary>
+        /// <param name="page"></param>
+        /// <param name="pageSize"></param>
+        /// <returns></returns>
+        [HttpGet("page={page}&pageSize={pageSize}")]
+        public async Task<ActionResult<ServiceResponse<ProductPaginationResponse>>> GetAllProductsAsync(int page, int pageSize)
+        {
+            var response = await _productService.GetAllProductsAsync(page, pageSize);
+            return Ok(response);
+        }
+
+        /// <summary>
+        /// Overloaded route for pagination + category filtering.
+        /// </summary>
+        /// <param name="page"></param>
+        /// <param name="pageSize"></param>
+        /// <param name="categoryId"></param>
+        /// <returns></returns>
+        [HttpGet("category/{categoryId}/page={page}&pageSize={pageSize}")]
+        public async Task<ActionResult<ServiceResponse<ProductPaginationResponse>>> GetAllProductsAsync(int page, int pageSize, Guid categoryId)
+        {
+            var response = await _productService.GetAllProductsAsync(page, pageSize, categoryId);
+            return Ok(response);
+        }
+
         [HttpGet("category/{categoryId}")]
-        public async Task<ActionResult<ServiceResponse<Product>>> GetProductsByCategoryId(Guid categoryId)
+        public async Task<ActionResult<ServiceResponse<List<Product>>>> GetProductsByCategoryId(Guid categoryId)
         {
             var response = await _productService.GetProductsByCategoryId(categoryId);
             return Ok(response);
         }
-        [HttpGet("search/{searchQuery}")]
-        public async Task<ActionResult<ServiceResponse<Product>>> SearchProducts(string searchQuery)
+
+        [HttpGet("search/{searchQuery}/{page}")]
+        public async Task<ActionResult<ServiceResponse<ProductPaginationResponse>>> SearchProducts(string searchQuery, int page)
         {
-            var response = await _productService.SearchProducts(searchQuery);
+            var response = await _productService.SearchProducts(searchQuery, page);
             return Ok(response);
         }
+
         [HttpGet("{productId}")]
         public async Task<ActionResult<ServiceResponse<Product>>> GetProductByIdAsync(Guid productId)
         {
@@ -102,6 +131,7 @@ namespace EcommerceApp.Server.Controllers
             }
             return BadRequest(response); // or NotFound(response) based on your logic
         }
+
 
     }
 }

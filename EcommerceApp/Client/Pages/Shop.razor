@@ -1,34 +1,54 @@
-﻿@attribute [Route(RouteConstants.Shop)]
-@page "/shop/search/{searchQuery}"
-@*Same as @page "/shop/products/category/{categoryId}*@
-@attribute [Route(RouteConstants.ShopSortedByCategory)] 
-
-
+﻿@attribute [Route(RouteConstants.Shop)]  
+@attribute [Route(RouteConstants.ShopSortedByCategory)]
+@attribute [Route(RouteConstants.ShopSearchProducts)]
+@attribute [Route(RouteConstants.ShopSearchProductsPagination)]
 @inject IProductService ProductService
 @using EcommerceApp.Client.Shared;
+@*<MudText Typo="Typo.h3">Shop</MudText>*@
 
-<h3>Shop</h3>
+<div class="page">
+    <div class="sidebar">
+        <ShopSidebar/>
+    </div>
+    <div class="main-content">
+        <ProductList/>
+    </div>
+</div>
 
-<ProductList/>
 @code {
     [Parameter]
-    public string? SearchQuery { get; set; }
+    public string? SearchQuery { get; set; } = null;
     [Parameter]
-    public Guid? CategoryId { get; set; }
-    // 
+    public Guid? CategoryId { get; set; } = null;
+
+    /// <summary>
+    /// Parameter for URL Synchronization fetches from the URI the page number and sets it to the Page property
+    /// Because the page is set, it automatically fires the lifecycle method OnParametersSetAsync which recalls the ProductService to fetch the products.
+    /// </summary>
+    [Parameter]
+    public int Page { get; set; } = 1;
+
+
     protected override async Task OnParametersSetAsync()
     {
+        int page = ProductService.CurrentPage; // Fetch the CurrentPage from ProductService
+        int pageSize = ProductService.PageSize; // Fetch the PageSize from ProductService
+
         if(SearchQuery != null)
         {
-            await ProductService.SearchProducts(SearchQuery);
+            await ProductService.SearchProducts(SearchQuery, Page);
         }
         else if (CategoryId != null)
         {
-            await ProductService.GetProductsByCategoryId(CategoryId.Value);
+            await ProductService.GetAllProductsAsync(Page, pageSize, CategoryId.Value);
         }
         else
         {
-            await ProductService.GetAllProductsAsync();
+            Console.WriteLine($"Page: {page}");
+            Console.WriteLine($"Page: {Page}");
+            Console.WriteLine($"Page: {ProductService.CurrentPage}");
+            await ProductService.GetAllProductsAsync(page, pageSize);
         };
     }
+
 }

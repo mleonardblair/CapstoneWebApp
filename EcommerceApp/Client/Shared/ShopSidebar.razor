@@ -1,0 +1,57 @@
+﻿@inject ICategoryService CategoryService // Inject the CategoryService;
+@inject ITagService TagService;
+
+<MudText Typo="Typo.h5">Categories</MudText>
+@if (CategoryService.Categories == null)
+{
+    <MudText Typo="Typo.body1">@CategoryService.Message</MudText>
+}
+else
+{
+    <MudNavMenu>
+        @foreach (var category in CategoryService.Categories)
+        {
+            <MudNavLink 
+                Style="margin: 24px 0;"
+                Href="@($"shop/category/{category.Id}")" 
+                Match="NavLinkMatch.Prefix">
+                @category.Name
+            </MudNavLink>
+        }
+    </MudNavMenu>
+}
+
+
+<MudText Typo="Typo.h5">Tags</MudText>
+
+@if (TagService.Tags == null || TagService.Tags.Count == 0)
+{
+    <MudText Typo="Typo.body1">@TagService.Message</MudText>
+}
+else
+{
+    <MudChipSet>
+        @foreach (var tag in TagService.Tags)
+        {
+            @if (!TagColors.ContainsKey(tag.Name))
+            {
+                TagColors[tag.Name] = MudMethods.GetRandomColor(TagColors);
+            }
+            <MudChip Variant="Variant.Text"
+             Text="@tag.Name"
+             Href="@($"shop/tag/{tag.Id}")"
+             Color="@TagColors[tag.Name]"
+             @key="tag.Id">
+            </MudChip>
+        }
+    </MudChipSet>
+}
+
+@code {
+    private Dictionary<string, MudBlazor.Color> TagColors = new Dictionary<string, MudBlazor.Color>();
+    protected override async Task OnInitializedAsync()
+    {
+      await CategoryService.GetAllCategoriesAsync();
+      await TagService.GetAllTagsAsync();
+    }
+}

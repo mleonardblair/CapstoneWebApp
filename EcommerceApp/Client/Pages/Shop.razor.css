@@ -1,26 +1,45 @@
-﻿body{
-
+﻿body {
 }
-.page {
-    position: relative;
+.header-container {
     display: flex;
-    flex-direction: column;
-}
-.sidebar {
-    background-image: linear-gradient(180deg, rgb(5, 39, 103) 0%, #3a0647 70%);
-}
-@media (max-width: 640.98px) {
+    justify-content: center; /* This will center the h3 tag horizontally */
 }
 
-@media (min-width: 641px) {
-    .page {
-        flex-direction: row;
+.page {
+    display: flex;
+    flex-wrap: wrap; /* This allows items to wrap to the next line on smaller screens */
+}
+/* Sidebar styling */
+.sidebar {
+    background-color: #f4f4f4; /* Replace with your desired color */
+    width: 250px; /* Fixed width for the sidebar */
+    height: calc(100vh - 64px); /* Full height */
+    position: relative; /* Stick to the top when you scroll */
+    top: 0; /* Top edge of the viewport */
+    overflow-y: auto; /* Enable scrolling if the content is taller than the screen */
+}
+/* Main content styling */
+.main-content {
+    flex-grow: 1; /* Take up the remaining space */
+    flex-basis: 0; /* Start growing from zero width */
+    padding: 1rem; /* Spacing around the content */
+    min-width: 0; /* Make sure it can shrink below its content's intrinsic width */
+}
+
+@media (max-width: 599.98px) {
+    .sidebar {
+        width: 100%; /* Sidebar takes full width */
+        height: auto; /* Height is automatic, based on content */
+        position: relative; /* No longer sticky */
     }
 
-    .sidebar {
-        width: 250px;
-        height: 100vh;
-        position: sticky;
-        top: 0;
+    .main-content {
+        width: 100%; /* Content takes full width */
+    }
+}
+
+@media (min-width: 600px) {
+    .page {
+        flex-direction: row; /* Align sidebar and content in a row */
     }
 }

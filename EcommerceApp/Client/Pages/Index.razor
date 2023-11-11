@@ -1,31 +1,64 @@
 ﻿@page "/"
-<PageTitle>Homepage</PageTitle>
+@using MudBlazor.Services
 @inject IJSRuntime JSRuntime
+<MudBreakpointProvider OnBreakpointChanged="HandleBreakpointChange"></MudBreakpointProvider>
 
 
+<PageTitle>Homepage</PageTitle>
 <MudContainer>
     <!-- First Section -->
-    <MudPaper id="section1" Style="height: 100vh; width: 100%;">
-@*        <SurveyPrompt Title="How is Blazor working for you?" />*@
-        <h1>First Section</h1>
+    <MudPaper Style="@_paperStyle"
+        Class="section" 
+        Elevation="3" 
+        Align="Align.Left">
+        <MudText Typo="Typo.h1">First Section</MudText>
         <!-- Your content here -->
     </MudPaper>
 
     <!-- Second Section -->
-    <MudPaper id="section2" Style="height: 100vh; width: 100%; background-color: lightgray;">
-        <MudContainer MaxWidth="MaxWidth.Small">
-            <h1>Second Section</h1>
+    <MudPaper Style="@_paperStyle" Class="section" Elevation="3" Align="Align.Right">
+       
+            <MudText Typo="Typo.h1">Second Section</MudText>
             <!-- Your content here -->
-        </MudContainer>
     </MudPaper>
 </MudContainer>
+@*<style>
+    @media (max-width: 599.98px) {
+    section {
+        height: calc(100vh - 56px - 64px); /* Adjusts the height of each section */
+    }
+}
+@media (min-width: 600px) {
+    section {
+        height: calc(100vh - 64px - 64px); /* Adjusts the height of each section */
+    }
+}
+</style>*@
 @code {
+    private string _paperStyle = "height: 200px;"; // Default height
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
             Console.WriteLine("OnAfterRenderAsync called");
-            
+
         }
+    }
+    private void HandleBreakpointChange(Breakpoint breakpoint)
+    {
+        switch (breakpoint)
+        {
+            case Breakpoint.Xs:
+            case Breakpoint.Sm:
+                _paperStyle = "height: calc(100vh - 56px - 64px);";
+                break;
+            case Breakpoint.Md:
+            case Breakpoint.Lg:
+            case Breakpoint.Xl:
+                _paperStyle = "height: calc(100vh - 64px - 64px);";
+                break;
+                // Include cases for other breakpoints if necessary
+        }
+        
     }
 }

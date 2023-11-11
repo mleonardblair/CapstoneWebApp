@@ -1,6 +1,6 @@
-﻿@page "/products/create"
-@using EcommerceApp.Shared.DTOs
+﻿@using EcommerceApp.Shared.DTOs
 @using System.Net.Http.Headers;
+@using EcommerceApp.Client.Helpers;
 @inject HttpClient Http
 @inject IProductService ProductService
 @inject ICategoryService CategoryService // Added this line
@@ -8,15 +8,14 @@
 @using EcommerceApp.Shared.Models
 @using Newtonsoft.Json
 @implements IDisposable 
-
-<h3>Create Product</h3>
+<MudBreakpointProvider OnBreakpointChanged="@OnBreakpointChanged">
+<MudText Typo="Typo.h3">Create Product Form</MudText>
 <EditForm Model="Product" OnValidSubmit="HandleValidSubmit">
     <DataAnnotationsValidator />
     <MudGrid>
         <MudItem xs="12" sm="7">
             <MudCard>
                 <MudCardContent>
-
                     <MudTextField Label="Name" @bind-Value="Product.Name" For="@(() => Product.Name)" />
 
                     <MudTextField Label="Description" Class="mt-3" @bind-Value="Product.Description" For="@(() => Product.Description)" />
@@ -35,21 +34,51 @@
 
                     <MudTextField Label="Stock Quantity" HelperText="Enter stock quantity" Class="mt-3" @bind-Value="Product.StockQuantity" For="@(() => Product.StockQuantity)" InputType="InputType.Number" />
 
+                    <MudTextField @bind-Value="CurrentTagInput"
+                                  Immediate="true"
+                                  Label="Add Tags"
+                                  HelperText="Type a tag and press space to add it"
+                                  AdornmentIcon="@Icons.Material.Filled.Tag"
+                                  Adornment="Adornment.End"
+                                  OnKeyPress="@HandleTagInputKeyPress" />
+
+                    <MudChipSet>
+                        @foreach (var tag in Product.TagNames)
+                        {
+                            <MudChip Text="@tag" Color="@TagColors[tag]" OnClose="() => RemoveTag(tag)" @key="tag"></MudChip>
+                        }
+                    </MudChipSet>
+
+
                     <MudFileUpload T="IBrowserFile" Accept=".png, .jpg" FilesChanged="UploadFiles2" MaximumFileCount="100">
                         <ButtonTemplate Context="fileUploadContext">
-                            <MudButton HtmlTag="label"
-                                       Variant="Variant.Filled"
-                                       Color="Color.Primary"
-                                       StartIcon="@Icons.Material.Filled.CloudUpload"
-                                       for="@fileUploadContext">
-                                Product Image
+                            <MudButton 
+                                FullWidth="@fullWidth"
+                                HtmlTag="label"
+                                Variant="Variant.Filled"
+                                Color="Color.Primary"
+                                StartIcon="@Icons.Material.Filled.CloudUpload"
+                                for="@fileUploadContext">
+                                    Product Image
                             </MudButton>
                         </ButtonTemplate>
                     </MudFileUpload>
                 </MudCardContent>
+
                 <MudCardActions>
-                    <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto">Create</MudButton>
+                    <MudButton FullWidth="@fullWidth" ButtonType="ButtonType.Submit" Disabled="@_processing" OnClick="ProcessSubmit" Variant="Variant.Filled" Color="Color.Primary">
+                        @if (_processing)
+                        {
+                            <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true" />
+                            <MudText Class="ms-2">Checking</MudText>
+                        }
+                        else
+                        {
+                            <MudText>Submit</MudText>
+                        }
+                    </MudButton>
                 </MudCardActions>
+
             </MudCard>
         </MudItem>
         <MudItem xs="12" sm="5">
@@ -74,12 +103,25 @@
         </MudItem>
     </MudGrid>
 </EditForm>
-
+</MudBreakpointProvider>
 @code {
+    // A list to keep the colors corresponding to the tags
+    private Dictionary<string, MudBlazor.Color> TagColors = new Dictionary<string, MudBlazor.Color>();
     private ProductDto Product { get; set; } = new ProductDto();
     private bool success;
-
+    private List<string> Tags { get; set; } = new List<string>();
+    private string CurrentTagInput { get; set; } = string.Empty;
     IList<IBrowserFile> files = new List<IBrowserFile>();
+    private bool _processing = false;
+    private bool fullWidth = false;
+    private void OnBreakpointChanged(Breakpoint breakpoint)
+    {
+        // Set 'fullWidth' based on the current breakpoint
+        fullWidth = (breakpoint == Breakpoint.Xs || breakpoint == Breakpoint.Sm) ? true : false;
+
+        // This ensures the component updates when the breakpoint changes
+        StateHasChanged();
+    }
     private async Task UploadFiles(IReadOnlyList<IBrowserFile> files)
     {
         foreach (var file in files)
@@ -88,17 +130,24 @@
             await UploadFileToServer(file);
         }
     }
-
+    private async Task ProcessSubmit()
+    {
+        _processing = true;
+        await HandleValidSubmit(); 
+        await Task.Delay(1000);
+        _processing = false;
+    }
     private async Task UploadFiles2(IBrowserFile file)
     {
         files.Add(file);
         await UploadFileToServer(file);
     }
+
     // Inside your UploadFileToServer method
     private async Task UploadFileToServer(IBrowserFile file)
     {
         var buffer = new byte[file.Size];
-        await file.OpenReadStream().ReadAsync(buffer);
+        await file.OpenReadStream(5120000).ReadAsync(buffer);
 
         var content = new MultipartFormDataContent();
         content.Headers.ContentDisposition = new ContentDispositionHeaderValue("form-data");
@@ -122,9 +171,10 @@
         }
         else
         {
-            Console.WriteLine("It went bad");
+            Console.WriteLine("It went bad. Contact site administrator.");
         }
     }
+
     protected override void OnInitialized()
     {
         CategoryService.CategoriesChanged += StateHasChanged;
@@ -134,6 +184,38 @@
     {
         CategoryService.CategoriesChanged -= StateHasChanged;
     }
+
+    private void HandleTagInputKeyPress(KeyboardEventArgs e)
+    {
+        if (e.Key == " " || e.Key == ",")
+        {
+            var tagToAdd = CurrentTagInput.Trim().TrimEnd(',');
+            if (!string.IsNullOrWhiteSpace(tagToAdd) && !Product.TagNames.Contains(tagToAdd))
+            {
+                Product.TagNames.Add(tagToAdd);
+   
+                // Assign a color if it's a new tag
+                if (!TagColors.ContainsKey(tagToAdd))
+                {
+                    TagColors[tagToAdd] = Helpers.MudMethods.GetRandomColor(TagColors);
+                }
+
+                CurrentTagInput = string.Empty; // Clear the input field
+                StateHasChanged(); // Update the UI to reflect the new tag and its color
+            }
+        }
+    }
+
+    private void RemoveTag(string tag)
+    {
+        if (Product.TagNames.Contains(tag))
+        {
+            Product.TagNames.Remove(tag);
+            TagColors.Remove(tag); // Don't forget to remove the color as well
+            StateHasChanged(); // Update the UI
+        }
+    }
+
 
     private async Task HandleValidSubmit()
     {

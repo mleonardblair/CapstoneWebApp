@@ -1,18 +1,60 @@
-.links,.icons {
+.links, .icons {
     display: flex;
-    flex-direction: row;
+    align-items: center;
 }
+
 .links {
-    /* Align the link buttons to the start (left) */
-    justify-content: flex-start;
-    display: flex;
+    flex: 1; /* This will allow the .links container to grow and fill available space */
+    justify-content: center;
 }
 
 .icons {
-    /* Align the icons to the end (right) */
     justify-content: flex-end;
-    display: flex;
 }
+.menu-dropdown {
+    width: 100%;
+    background: #f0f0f0; /* example color */
+    z-index: 2; /* to ensure it's above other content */
+    box-shadow: 0 2px 4px rgba(0,0,0,.2); /* optional, for drop shadow */
+}
+
+
+
+.full-width-link {
+    color: blue;
+    display: block; /* Make the link block level */
+    width: 100%; /* Set the width to fill the container */
+    height: 100%; /* Set the height to fill the container */
+    text-decoration: none; /* Optional: to remove the underline from links */
+}
+.nav-button {
+    transition: all 0.3s ease; /* Smooth transition for all properties */
+}
+
+    .nav-button:hover {
+        background-color: #ffffff; /* Change to your preferred hover background color */
+        color: #000000; /* Change to your preferred hover text color */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Elevate with shadow */
+        transform: scale(1.05); /* Slightly increase the size */
+        position: relative; /* Needed for pseudo-elements positioning */
+    }
+
+    /* Example of animated underline */
+    .nav-button::after {
+        content: '';
+        display: block;
+        width: 0;
+        height: 2px;
+        background: #000000; /* Change to your preferred underline color */
+        transition: width 0.3s;
+        position: absolute;
+        bottom: -5px; /* Adjust the position as needed */
+    }
+
+    .nav-button:hover::after {
+        width: 100%; /* Underline grows to full width */
+    }
+
 /* Extra small devices */
 @media (max-width: 599.98px) {
     /* CSS rules for extra small devices go here */

@@ -19,27 +19,40 @@ else
                 <!-- Display other images, this section can be enhanced later to dynamically load product images if available -->
             </div>
         </div>
-        <div class="media-body">
+        <MudElement class="container media-body">
             <h2 class="mb-0">@product.Name</h2>
             <p>@product.Description</p>
-            @if (flairtags != null && flairtags.Count > 0)
+            @if (TagDtos != null && TagDtos.Count > 0)
             {
-                <span>Flair Tags:</span>
-                @foreach (TagDto flair in flairtags)
-                {
-                    <span>@flair.Name</span>
-                }
+                <MudChipSet>
+                    @foreach (var tag in TagDtos)
+                    {
+                        @if (!TagColors.ContainsKey(tag.Name))
+                        {
+                            TagColors[tag.Name] = MudMethods.GetRandomColor(TagColors);
+                        }
+                        <MudChip 
+                            Variant="Variant.Text"
+                            Text="@tag.Name" 
+                            Color="@TagColors[tag.Name]" 
+                            OnClose="() => RemoveTag(tag)" 
+
+                            @key="tag.Id">
+                        </MudChip>
+                    }
+                </MudChipSet>
             }
             <h4 class="price">
                 $@product.Price
             </h4>
-        </div>
+        </MudElement>
     </div>
 }
-
+@*TODO USE ON CLOSE BEHAVIOUR ON THE SHOP BASE PAGE*@
 @code {
+    private Dictionary<string, MudBlazor.Color> TagColors = new Dictionary<string, MudBlazor.Color>();
     private ProductDto? product = null;
-    private List<TagDto> flairtags = new List<TagDto>();
+    private List<TagDto> TagDtos = new List<TagDto>();
     public string message = "Your Product Loading...";
     [Parameter]
     public Guid ProductId { get; set; }
@@ -60,7 +73,16 @@ else
         }
 
         product = result.Data;
-        flairtags = await GetSelectedProductFlairTagsAsync();
+        TagDtos = await GetSelectedProductFlairTagsAsync();
+
+        // Ensure each tag has a color associated with it
+        //foreach (var tag in TagDtos)
+        //{
+        //    if (!TagColors.ContainsKey(tag.Name))
+        //    {
+        //        TagColors[tag.Name] = MudMethods.GetRandomColor(TagColors);
+        //    }
+        //}
     }
 
     private async Task<List<TagDto>> GetSelectedProductFlairTagsAsync()
@@ -82,4 +104,14 @@ else
 
         return tagDtos;
     }
+    private void RemoveTag(TagDto tag)
+    {
+        if (TagDtos.Contains(tag))
+        {
+            TagDtos.Remove(tag);
+            TagColors.Remove(tag.Name); // Don't forget to remove the color as well
+            StateHasChanged(); // Update the UI
+        }
+    }
+
 }
