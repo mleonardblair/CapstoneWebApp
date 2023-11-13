@@ -6,11 +6,13 @@
 <MudSnackbarProvider />
 <MudLayout>
     <MudAppBar Elevation="1" DisableGutters="true" Color="Color.Dark" Dense="false" Fixed="true">
+        
         <!-- Hamburger menu icon for mobile view -->
         <MudHidden Breakpoint="Breakpoint.MdAndUp">
-        <MudIconButton Icon="@Icons.Material.Filled.Menu" OnClick="@ToggleMenu">
-        </MudIconButton>
+            <MudIconButton Icon="@Icons.Material.Filled.Menu" OnClick="@ToggleMenu" Class="my-custom-hover-button">
+            </MudIconButton>
         </MudHidden>
+
          <div class="links">
             <MudHidden Breakpoint="Breakpoint.SmAndDown">
                 <!-- Wrapper for centered items -->
@@ -24,11 +26,14 @@
                 </MudButtonGroup>
             </MudHidden>
             </div>
+
         <div class="icons">
             <Search/>
-            <MudIconButton Icon="@Icons.Material.Filled.Person" Color="Color.Inherit" OnClick="@ProfileClicked" Style="transition: color 0.3s;" />
-            <MudIconButton Icon="@Icons.Material.Filled.ShoppingCart" Color="Color.Inherit" OnClick="@CartClicked" Style="transition: color 0.3s;" />
+            <MudIconButton Class="my-custom-hover-button" Icon="@Icons.Material.Filled.Person" Color="Color.Inherit" OnClick="@ProfileClicked" Style="transition: color 0.3s;" />
+            <CartCounter></CartCounter>
+
         </div>
+
     </MudAppBar>
     @if (MenuOpen)
     {
@@ -44,10 +49,10 @@
             </MudList>
         </div>
     }
-   
-
+  
     <MudMainContent Style="padding-top: 0">
         <MudContainer Class="@containerClass">
+
             @Body
         </MudContainer>
     </MudMainContent>
@@ -106,7 +111,8 @@
             },
             Palette = new PaletteLight()
             {
-                Dark = Colors.Grey.Darken4
+                Dark = Colors.Grey.Darken4,
+                Warning = "#ff0000"//Colors.Red.Default
             },
             LayoutProperties = new LayoutProperties()
             {

@@ -9,6 +9,7 @@ using EcommerceApp.Server.Data;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 using EcommerceApp.Server.Services.TagService;
+using Microsoft.EntityFrameworkCore.Infrastructure.Internal;
 
 namespace EcommerceApp.Server.Services.ProductService
 {
@@ -213,9 +214,9 @@ namespace EcommerceApp.Server.Services.ProductService
         /// </summary>
         /// <param name="categoryId"></param>
         /// <returns></returns>
-        public async Task<ServiceResponse<ProductPaginationResponse>> GetAllProductsAsync(Guid categoryId)
+        public async Task<ServiceResponse<List<ProductDto>>> GetAllProductsAsync(Guid categoryId)
         {
-            var response = new ServiceResponse<ProductPaginationResponse>();
+            var response = new ServiceResponse<List<ProductDto>>();
             try
             {
                 var products = await _context.Products!
@@ -229,7 +230,7 @@ namespace EcommerceApp.Server.Services.ProductService
                 }
                 else
                 {
-                    response.Data.Products = _mapper.Map<List<ProductDto>>(products);
+                    response.Data = _mapper.Map<List<ProductDto>>(products);
                     response.Message = "Products retrieved successfully.";
                 }
             }
@@ -325,18 +326,42 @@ namespace EcommerceApp.Server.Services.ProductService
             var response = new ServiceResponse<ProductPaginationResponse>();
             try
             {
-                var products = await _context.Products!
+
+                // Filter the products by category first
+                var query = _context.Products.AsQueryable();
+                if (categoryId != Guid.Empty)
+                {
+                    query = query.Where(p => p.CategoryId == categoryId);
+                }
+
+                // Now get the count of products after filtering
+                int totalProducts = await query.CountAsync();
+                var totalPages = (int)Math.Ceiling(totalProducts / (double)pageSize);
+
+                // Then get the actual page of products
+                var products = await query
+                   .Skip((page - 1) * pageSize)
+                   .Take(pageSize)
                    .Include(p => p.ProductTags)
                    .ToListAsync();
+
+
 
                 if (products == null || !products.Any())
                 {
                     response.Success = false;
                     response.Message = "No products found.";
+                    response.Data.CurrentPage = 1;
+                    response.Data.Pages = 0;
                 }
                 else
                 {
-                    response.Data.Products = _mapper.Map<List<ProductDto>>(products);
+                    response.Data = new ProductPaginationResponse
+                    {
+                        Products = _mapper.Map<List<ProductDto>>(products),
+                        CurrentPage = page,
+                        Pages = totalPages
+                    };
                     response.Message = "Products retrieved successfully.";
                 }
             }

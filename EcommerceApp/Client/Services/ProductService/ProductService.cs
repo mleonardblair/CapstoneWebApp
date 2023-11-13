@@ -13,10 +13,8 @@ namespace EcommerceApp.Client.Services.ProductService
     public class ProductService : IProductService
     {
         private readonly HttpClient _http;
-        private readonly IHttpClientFactory _httpFactory;
-        public ProductService(HttpClient http, IHttpClientFactory httpFactory)
+        public ProductService(HttpClient http)
         {
-            _httpFactory = httpFactory;
             _http = http;
         }
 
@@ -33,10 +31,9 @@ namespace EcommerceApp.Client.Services.ProductService
         public event Action ProductsChanged;
         public async Task<ServiceResponse<ProductDto>> CreateProductAsync(ProductDto product)
         {
-            var httpClient = _httpFactory.CreateClient("EcommerceApp.PublicClient");
             ServiceResponse<ProductDto> result = new ServiceResponse<ProductDto>();
 
-            var productResponse = await httpClient.PostAsJsonAsync("api/products/create", product);
+            var productResponse = await _http.PostAsJsonAsync("api/products/create", product);
             if (productResponse.IsSuccessStatusCode)
             {
                 var newProduct = await productResponse.Content.ReadFromJsonAsync<ProductDto>();
@@ -85,17 +82,11 @@ namespace EcommerceApp.Client.Services.ProductService
         public async Task GetAllProductsAsync(int page, int pageSize, Guid? categoryId = null)
         {
             // conditionally show the products by category or not
-            ServiceResponse<ProductPaginationResponse> result;
+            var result = (categoryId == null || categoryId == Guid.Empty) ?
+                 await _http.GetFromJsonAsync<ServiceResponse<ProductPaginationResponse>>($"api/products/page={page}&pageSize={pageSize}") 
+               : await _http.GetFromJsonAsync<ServiceResponse<ProductPaginationResponse>>($"api/products/category/{categoryId}/page={page}&pageSize={pageSize}");
 
-            if (categoryId == null || categoryId == Guid.Empty)
-            {
-                result = await _http.GetFromJsonAsync<ServiceResponse<ProductPaginationResponse>>($"api/products/page={page}&pageSize={pageSize}");
-            }
-            else
-            {
-               result = await _http.GetFromJsonAsync<ServiceResponse<ProductPaginationResponse>>($"api/products/category/{categoryId}/page={page}&pageSize={pageSize}");
-
-            }
+            
 
             if (result != null && result.Data != null)
             {

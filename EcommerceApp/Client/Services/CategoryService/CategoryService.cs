@@ -7,16 +7,14 @@ namespace EcommerceApp.Client.Services.CategoryService
     public class CategoryService : ICategoryService
     {
         private readonly HttpClient _http;
-        private readonly IHttpClientFactory _httpFactory;
         public string Message { get; set; } = "Loading categories...";
         public List<CategoryDto> Categories { get ; set; } = new List<CategoryDto>();
         public CategoryDto Category { get; set; } = new CategoryDto();
 
         // This event will be used to notify subscribers that the categories have changed
         public event Action CategoriesChanged;
-        public CategoryService(HttpClient http, IHttpClientFactory httpFactory)
+        public CategoryService(HttpClient http)
         {
-            _httpFactory = httpFactory;
             _http = http;
         }
 
@@ -24,9 +22,8 @@ namespace EcommerceApp.Client.Services.CategoryService
         {
             try
             {
-                var httpClient = _httpFactory.CreateClient("EcommerceApp.PublicClient");
 
-                var result = await httpClient.GetFromJsonAsync<ServiceResponse<List<CategoryDto>>>("api/categories");
+                var result = await _http.GetFromJsonAsync<ServiceResponse<List<CategoryDto>>>("api/categories");
                 if (result != null && result.Data != null)
                 {
                     Categories = result.Data;
@@ -50,9 +47,7 @@ namespace EcommerceApp.Client.Services.CategoryService
 
         public async Task<ServiceResponse<CategoryDto>> GetCategoryByIdAsync(Guid categoryId)
         {
-            var httpClient = _httpFactory.CreateClient("EcommerceApp.PublicClient"); // Replace with whatever name you used to configure the client
-
-            var result = await httpClient.GetFromJsonAsync<ServiceResponse<CategoryDto>>($"api/categories/{categoryId}");
+            var result = await _http.GetFromJsonAsync<ServiceResponse<CategoryDto>>($"api/categories/{categoryId}");
 
             if (result == null)
             {

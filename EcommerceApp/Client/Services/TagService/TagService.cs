@@ -9,14 +9,12 @@ namespace EcommerceApp.Client.Services.TagService
     public class TagService : ITagService
     {
         private readonly HttpClient _http;
-        private readonly IHttpClientFactory _httpFactory;
         // This event will be used to notify subscribers that the products have changed
         public event Action TagsChanged;
         public string Message { get; set; } = "Loading tags...";
         public List<TagDto> Tags { get; set; } = new List<TagDto>();
-        public TagService(HttpClient http, IHttpClientFactory httpFactory)
+        public TagService(HttpClient http)
         {
-            _httpFactory = httpFactory;
             _http = http;
         }
 

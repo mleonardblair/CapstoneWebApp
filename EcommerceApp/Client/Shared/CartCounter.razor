@@ -1,0 +1,29 @@
+﻿@inject NavigationManager NavigationManager
+@inject ICartService CartService
+@inject ISyncLocalStorageService LocalStorage
+@implements IDisposable
+<MudBadge Content="@GetCartItemsCount()" Color="Color.Warning" Overlap="true" Class="my-custom-hover-button" Origin="Origin.BottomRight" Dot="false">
+    <MudIconButton Icon="@Icons.Material.Filled.ShoppingCart" Color="Color.Inherit" OnClick="@CartClicked" Style="transition: color 0.3s;" Class="cart" />
+</MudBadge>
+
+
+@code {
+    
+    private int GetCartItemsCount()
+    {
+        var cart = LocalStorage.GetItem<List<CartDto>>("cart");
+        return cart != null ? cart.Count : 0;
+    }
+
+
+    protected override void OnInitialized(){
+        CartService.OnChange += StateHasChanged;
+    }
+
+
+    public void Dispose()
+    {
+        CartService.OnChange -= StateHasChanged;
+    }
+    private void CartClicked() => NavigationManager.NavigateTo("/cart");
+}

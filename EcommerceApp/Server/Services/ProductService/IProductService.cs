@@ -11,7 +11,7 @@ namespace EcommerceApp.Server.Services.ProductService
     {
 
         Task<ServiceResponse<List<ProductDto>>> GetAllProductsAsync();
-        Task<ServiceResponse<ProductPaginationResponse>> GetAllProductsAsync(Guid categoryId);
+        Task<ServiceResponse<List<ProductDto>>> GetAllProductsAsync(Guid categoryId);
         Task<ServiceResponse<ProductPaginationResponse>> GetAllProductsAsync(int page, int pageSize, Guid categoryId);
         Task<ServiceResponse<ProductPaginationResponse>> GetAllProductsAsync(int page, int pageSize);
         Task<ServiceResponse<ProductDto>> GetProductByIdAsync(Guid productId);
