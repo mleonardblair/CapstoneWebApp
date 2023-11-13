@@ -1,6 +1,7 @@
 ﻿@attribute [Route(RouteConstants.ShopProductDetails)]
 @using EcommerceApp.Shared.DTOs;
 @inject IProductService ProductService;
+@inject ICartService CartService;
 @inject ITagService TagService;
 <h3>ProductDetails</h3>
 
@@ -45,7 +46,11 @@ else
             <h4 class="price">
                 $@product.Price
             </h4>
+            <MudButton OnClick="@AddToCart">
+            Add to Cart
+            </MudButton>
         </MudElement>
+      
     </div>
 }
 @*TODO USE ON CLOSE BEHAVIOUR ON THE SHOP BASE PAGE*@
@@ -56,7 +61,25 @@ else
     public string message = "Your Product Loading...";
     [Parameter]
     public Guid ProductId { get; set; }
+    private async Task AddToCart()
+    {
+        var cartItem = new CartItemDto
+            {
+                ProductId = ProductId,
+                Id = Guid.NewGuid(),
+                Quantity = 1,
+                
 
+        };
+        await CartService.AddToCart(cartItem);
+    }
+    //{
+    //public Guid Id { get; set; }
+    //public Guid ShoppingCartId { get; set; }
+    //public Guid ProductId { get; set; }
+    //public Guid Quantity { get; set; }
+    //public DateTime DateCreated { get; set; } = DateTime.UtcNow;
+    //}
     private async Task DeleteProduct()
     {
         var response = await ProductService.DeleteProductByIdAsync(ProductId);
@@ -114,4 +137,5 @@ else
         }
     }
 
+   
 }

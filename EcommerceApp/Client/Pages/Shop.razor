@@ -36,11 +36,11 @@
 
         if(SearchQuery != null)
         {
-            await ProductService.SearchProducts(SearchQuery, Page);
+            await ProductService.SearchProducts(SearchQuery, page);
         }
-        else if (CategoryId != null)
+        else if (CategoryId != Guid.Empty && CategoryId.HasValue)
         {
-            await ProductService.GetAllProductsAsync(Page, pageSize, CategoryId.Value);
+            await ProductService.GetAllProductsAsync(page, pageSize, CategoryId);
         }
         else
         {

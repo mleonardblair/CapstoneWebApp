@@ -1,4 +1,35 @@
-﻿
+﻿@keyframes slideInFromBottom {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOutToTop {
+  from {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+}
+
+/* Class to be added to the item entering the view */
+.slide-in-up {
+  animation: slideInFromBottom 0.5s forwards;
+}
+
+/* Class to be added to the item exiting the view */
+.slide-out-up {
+  animation: slideOutToTop 0.5s forwards;
+}
+
 .mud-button-label {
     font-size: 0.875rem;
     font-weight: 500;
@@ -68,29 +99,49 @@ mud-toolbar mud-toolbar-appbar {
     /* The height should be the same as the carousel width before rotation */
     /*height: calc(100vh - 64px);*/
 }
-@keyframes slideInUp {
+@keyframes slideInFromBottom {
     from {
         transform: translateY(100%);
+        opacity: 0;
     }
 
     to {
         transform: translateY(0);
+        opacity: 1;
     }
 }
 
-@keyframes slideOutUp {
+@keyframes slideOutToTop {
     from {
         transform: translateY(0);
+        opacity: 1;
     }
 
     to {
         transform: translateY(-100%);
+        opacity: 0;
     }
 }
+
+/* Class to be added to the item entering the view */
+.slide-in-up {
+    animation: slideInFromBottom 0.5s forwards;
+}
+
+/* Class to be added to the item exiting the view */
+.slide-out-up {
+    animation: slideOutToTop 0.5s forwards;
+}
+
 .gallery-page.mud-progress-linear-bar {
     background-color: darkorange; /* Use the specific shade of orange you prefer */
     height:4px;
 }
+.my-custom-hover-button:hover {
+    background-color: rgba(255, 255, 255, 0.1); /* Red with 50% opacity */ /* Change this color to your preferred hover color */
+    /* Add other hover styles if needed */
+}
+
 
 /* AppbarHeight for tablets (small devices) */
 @media (max-width: 599.98px) {
@@ -171,5 +222,8 @@ mud-toolbar mud-toolbar-appbar {
     }
     .mud-container-maxwidth-lg.home-container-padding {
         max-width:100vw;
+    }
+    .mud-container.mud-container-maxwidth-lg {
+        padding:0;
     }
 }
