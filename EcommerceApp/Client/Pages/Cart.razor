@@ -1,0 +1,143 @@
+﻿@attribute [Route(RouteConstants.ShoppingCart)]
+@inject ICartService CartService
+@implements IDisposable
+
+<PageTitle>Shopping Cart</PageTitle>
+<h3> Shopping Cart </h3>
+
+@if(cartProducts == null || cartProducts.Count == 0){
+    <MudText Typo="Typo.body1">
+        @message
+    </MudText>
+}else
+{
+    <MudPaper Style="display:flex; align-content:center; justify-content:center;">
+        <MudList>
+            @foreach (var product in cartProducts)
+            {
+                <MudListItem>
+                    <MudCard Class="bg-light border" Style="width:600px; margin:auto;">
+                        <MudCardContent >
+                            <MudGrid>
+                                <MudItem xs="4" md="3">
+                                    <MudImage ObjectFit="ObjectFit.Contain" Height="143" Width="123" Src="@product.ImageUrl" Alt="@product.Description" Elevation="25" Class="rounded-lg" />
+                                </MudItem>
+                                <MudItem xs="8" md="9">
+                                    <MudText Typo="Typo.subtitle1"><a href="/shop/product/@product.ProductId">@product.Title</a></MudText>
+                                    @foreach (var tag in product.Tags)
+                                    {
+                                        <MudChip Text="@tag" />
+                                    }
+                                    <!-- MudRating removed as per request -->
+                                    <MudText Typo="Typo.subtitle1">@product.Price.ToString("C")</MudText>
+                                </MudItem>
+                            </MudGrid>
+                        </MudCardContent>
+                        <MudCardActions>
+                            <div class="d-flex justify-content-start">
+                                <MudIconButton Color="Color.Dark" Icon="@Icons.Material.Filled.RemoveCircleOutline" OnClick="@( () => Decrement(product))" Size="Size.Small" />
+
+                                <MudNumericField Variant="Variant.Text"
+                                         Style="width:100px; margin:auto; text-align:center; border: 1px solid black;"
+                                    Class="px-md-2"
+                                    @bind-Value="@product.Quantity" 
+                                    ReadOnly Min="1" 
+                                    Max="99" 
+                                    DisableUnderLine
+                                    HideSpinButtons/>
+
+                                <MudIconButton Color="Color.Dark" Icon="@Icons.Material.Filled.AddCircleOutline" OnClick="@( () => Increment(product))" Size="Size.Small" />
+                            </div>
+                            <div class="d-flex justify-content-end">
+                                <MudButton Color="Color.Error" Variant="Variant.Outlined" OnClick="@( () => RemoveProductFromCart(product.ProductId))">Remove</MudButton>
+                            </div>
+                           @* <MudIcon Icon="@Icons.Material.Filled.Favorite" Title="Favorite" />*@
+                        </MudCardActions>
+                    </MudCard>
+                 </MudListItem>
+            }
+        </MudList>
+        <MudPaper>
+            @{
+                var taxRate = 0.13m; // 'm' suffix makes it a decimal literal
+                var subtotal = cartProducts.Sum(product => product.Price * product.Quantity);
+                var tax = subtotal * taxRate;
+                var total = subtotal + tax;
+            }
+            <MudText Typo="Typo.h2" Color="Color.Default">Order Summary</MudText>
+            <MudText Typo="Typo.body1" Class="d-flex justify-content-space-between">
+                <div>
+                    Subtotal:
+                </div>
+                <div>
+                      @($"${subtotal:0.##}")
+                </div>
+            </MudText>
+            <MudText Typo="Typo.body1" Class="d-flex justify-content-space-between">
+                <b>
+                    <div>
+                        Total
+                    </div>
+                    <div>
+                        @($"${total:0.##}")
+                    </div>
+
+                </b>
+            </MudText>
+        </MudPaper>
+    </MudPaper>
+}
+@code {
+    List<CartProductResponse> cartProducts = new List<CartProductResponse>();
+    string message = "Loading Cart...";
+    // Method to update the quantity of a product in the cart.
+    private void UpdateQuantity(CartProductResponse product, int newQuantity)
+    {
+        // Update the product's quantity in the cart
+        product.Quantity = newQuantity;
+        // Add this line to refresh the UI
+        StateHasChanged();
+    }
+    private async Task RemoveProductFromCart(Guid productId)
+    {
+        await CartService.RemoveProductFromCart(productId);
+        await LoadCart();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        CartService.OnChange += StateHasChanged; // Subscribe to the event
+        await LoadCart();
+    }
+
+    public void Dispose() // Don't forget to implement IDisposable
+    {
+        CartService.OnChange -= StateHasChanged; // Unsubscribe from the event
+    }
+
+    private void Increment(CartProductResponse product)
+    {
+        if(product.Quantity < 10)
+            UpdateQuantity(product, product.Quantity + 1);
+    }
+
+    private void Decrement(CartProductResponse product)
+    {
+        if(product.Quantity > 1)
+            UpdateQuantity(product, product.Quantity - 1);
+
+    }
+    private async Task LoadCart()
+    {
+        if ((await CartService.GetCartItems()).Count == 0)
+        {
+            message = "Your cart is empty.";
+            cartProducts = new List<CartProductResponse>();
+
+        }
+        else
+        {
+            cartProducts = await CartService.GetCartProducts();
+        }
+    }
+}
