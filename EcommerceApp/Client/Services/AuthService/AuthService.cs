@@ -11,17 +11,36 @@ namespace EcommerceApp.Client.Services.AuthService
         {
             _httpClient = httpClient;
         }
-        public async Task<ServiceResponse<Guid>> RegisterUser(UserRegister registerRequest)
+
+        public async Task<ServiceResponse<string>> LoginUser(UserLogin loginRequest)
         {
-            var result = await _httpClient.PostAsJsonAsync("api/auth/register", registerRequest);
-            var response = await result.Content.ReadFromJsonAsync<ServiceResponse<Guid>>();
+            var result = await _httpClient.PostAsJsonAsync("api/auth/login", loginRequest);
+            var response = await result.Content.ReadFromJsonAsync<ServiceResponse<string>>();
             if (response != null && response?.Data != null)
             {
                 return response;
             }
             else
             {
-                return new ServiceResponse<Guid>
+                return new ServiceResponse<string>
+                {
+                    Success = false,
+                    Message = response.Message
+                };
+            }
+        }
+
+        public async Task<ServiceResponse<string>> RegisterUser(UserRegister registerRequest)
+        {
+            var result = await _httpClient.PostAsJsonAsync("api/auth/register", registerRequest);
+            var response = await result.Content.ReadFromJsonAsync<ServiceResponse<string>>();
+            if (response != null && response?.Data != null)
+            {
+                return response;
+            }
+            else
+            {
+                return new ServiceResponse<string>
                 {
                     Success = false,
                     Message = "Something went wrong during registration."

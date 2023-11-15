@@ -1,5 +1,6 @@
 ﻿using EcommerceApp.Server.Models;
 using EcommerceApp.Shared.Models;
+using System.Threading.Tasks;
 
 namespace EcommerceApp.Client.Services.AuthService
 {
@@ -10,6 +11,7 @@ namespace EcommerceApp.Client.Services.AuthService
          Task<LoginResponse> LoginUser(LoginRequest loginRequest);
          Task LogoutUser();
          Task<UserInfoResponse> GetUserInfo();*/
-        Task<ServiceResponse<Guid>> RegisterUser(UserRegister registerRequest);
+        Task<ServiceResponse<string>> RegisterUser(UserRegister registerRequest);
+        Task<ServiceResponse<string>> LoginUser(UserLogin loginRequest);
     }
 }

@@ -1,0 +1,25 @@
+﻿<div class="dropdown">
+    <MudIconButton Class="my-custom-hover-button dropdown-toggle user-button" Icon="@Icons.Material.Filled.Person" Color="Color.Inherit" OnClick="@ToggleUserMenu" Style="transition: color 0.1s; " @onfocusout="HideUserMenu" >
+        <i class="oi oi-person"></i>
+    </MudIconButton>
+    <div class="dropdown-menu dropdown-men-right @UserMenuCssClass">
+        <a href="login" class="dropdown-item">Login</a>
+        <a href="register" class="dropdown-item">Register</a>
+    </div>
+</div>
+
+@code {
+    private bool showUserMenu = false;
+    private string UserMenuCssClass => showUserMenu ? "show-menu" : "";
+
+    private void ToggleUserMenu()
+    {
+        showUserMenu = !showUserMenu;
+    }
+
+    private async Task HideUserMenu()
+    {
+        await Task.Delay(200);
+        showUserMenu = false;
+    }
+}

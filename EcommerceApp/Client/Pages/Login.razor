@@ -1,5 +1,7 @@
 ﻿@attribute [Route(RouteConstants.Login)]
-
+@inject IAuthService AuthService
+@inject ILocalStorageService LocalStorageService
+@inject NavigationManager NavigationManager
 
 <PageTitle>Login</PageTitle>
 <MudText Typo="Typo.h3">Login</MudText>
@@ -17,7 +19,7 @@
         @* Added validation message for password confirmation and removed validation summary. *@
         <ValidationMessage For="@(()=> user.Password)" />
     </div>
-    <button type="submit" class="btn btn-primary">Register</button>
+    <button type="submit" class="btn btn-primary">Login</button>
     <ReusableResultSnackbar @ref="resultSnackbar"
                             Message="@Message"
                             Severity="@s" />
@@ -31,6 +33,18 @@
 
     private async Task HandleLogin()
     {
-        
+        var result = await AuthService.LoginUser(user);
+        if (result.Success)
+        {
+            Message = result.Message;
+
+            await LocalStorageService.SetItemAsync("authToken", result.Data);
+            NavigationManager.NavigateTo("/");
+
+
+        } else
+        {
+            Message = result.Message;
+        }
     }
 }

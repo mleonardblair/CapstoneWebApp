@@ -2,6 +2,10 @@
 using EcommerceApp.Server.Models;
 using EcommerceApp.Shared.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Reflection.Metadata.Ecma335;
+using System.Security.Claims;
 using System.Security.Cryptography;
 
 namespace EcommerceApp.Server.Services.AuthService
@@ -9,9 +13,12 @@ namespace EcommerceApp.Server.Services.AuthService
     public class AuthService : IAuthService
     {
         public readonly AppDbContext _context;
-        public AuthService(AppDbContext context)
+        private readonly IConfiguration _configuration;
+
+        public AuthService(AppDbContext context, IConfiguration configuration)
         {
             _context = context;
+            _configuration = configuration;
         }
 
         public async Task<bool> UserExists(string email)
@@ -34,6 +41,18 @@ namespace EcommerceApp.Server.Services.AuthService
                     .ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
 
             }
+        }
+
+        private bool VerifyPasswordHashAndSalt(string password,  byte[] passwordHash, byte[] passwordSalt)
+        {
+              using (var hmac = new HMACSHA512(passwordSalt))
+            {
+                var computedHash = hmac
+                    .ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
+
+               return computedHash.SequenceEqual(passwordHash);
+            }
+           
         }
         public async Task<ServiceResponse<Guid>> Register(ApplicationUser appUser, string password)
         {
@@ -59,6 +78,67 @@ namespace EcommerceApp.Server.Services.AuthService
                     Message = "User registered successfully."
                 };
             }
+        }
+
+        public async Task<ServiceResponse<string>> Login(string email, string password)
+        {
+            var response = new ServiceResponse<string>();
+            var user = await _context.ApplicationUsers.FirstOrDefaultAsync(x => x.Email.ToLower().Equals(email.ToLower()));
+            if(user == null)
+            {
+                response.Success = false;
+                response.Message = "User not found.";
+            }
+            else if(!VerifyPasswordHashAndSalt(password, user.PasswordHash, user.PasswordSalt))
+            {
+                response.Success = false;
+                response.Message = "Wrong password.";
+            }
+            else
+            {
+                response.Data = CreateToken(user);
+                response.Message = "User logged in successfully.";
+            }
+            
+            return response;
+        }
+
+        /// <summary>
+        /// When called this method creates a token for the user. The token contains two claims: NameIdentifier and Name.
+        /// The token is created using the secret key stored in appsettings.json. The token is valid for 1 day.
+        /// </summary>
+        /// <param name="user"></param>
+        /// <returns></returns>
+        private string CreateToken(ApplicationUser user)
+        {
+            // Create new instance of claims with two claims: NameIdentifier and Name. Claims are used to store information about the user in the token.
+            List<Claim> claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new Claim(ClaimTypes.Name, user.Email),
+            };  
+
+            // Create new instance of symmetric security key using the secret key stored in appsettings.json
+            var key = new SymmetricSecurityKey(System.Text.Encoding.UTF8
+                               .GetBytes(_configuration.GetSection("AppSettings:Token").Value));
+
+            // Create new instance of signing credentials using the key above
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
+
+            // Create new instance of security token descriptor; The descriptor contains the claims, expiry date and signing credentials
+           var token = new JwtSecurityToken(
+               claims: claims,
+               expires: DateTime.Now.AddDays(1),
+               signingCredentials: creds);
+
+
+            // Create new instance of JwtSecurityTokenHandler
+            var tokenHandler = new JwtSecurityTokenHandler();
+
+            // Create new instance of token using the tokenHandler
+            var tokenString = tokenHandler.WriteToken(token);
+            return tokenString;
+
         }
     }
 }

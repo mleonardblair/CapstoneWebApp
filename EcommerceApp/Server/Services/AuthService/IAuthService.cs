@@ -7,5 +7,6 @@ namespace EcommerceApp.Server.Services.AuthService
     {
         Task<ServiceResponse<Guid>> Register(ApplicationUser appUser, string password);
         Task<bool> UserExists(string email);
+        Task<ServiceResponse<string>> Login(string email, string password);
     }
 }
