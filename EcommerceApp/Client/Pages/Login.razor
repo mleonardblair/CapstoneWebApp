@@ -1,0 +1,36 @@
+﻿@attribute [Route(RouteConstants.Login)]
+
+
+<PageTitle>Login</PageTitle>
+<MudText Typo="Typo.h3">Login</MudText>
+
+<EditForm Model="user" OnValidSubmit="HandleLogin">
+    <DataAnnotationsValidator />
+    <div class="mb-3">
+        <label for="email">Email</label>
+        <InputText id="email" @bind-Value="user.Email" class="form-control" />
+        <ValidationMessage For="@(()=> user.Email)" />
+    </div>
+    <div class="mb-3">
+        <label for="password">Password</label>
+        <InputText id="password" @bind-Value="user.Password" class="form-control" type="password" />
+        @* Added validation message for password confirmation and removed validation summary. *@
+        <ValidationMessage For="@(()=> user.Password)" />
+    </div>
+    <button type="submit" class="btn btn-primary">Register</button>
+    <ReusableResultSnackbar @ref="resultSnackbar"
+                            Message="@Message"
+                            Severity="@s" />
+</EditForm>
+@code {
+    private UserLogin user = new UserLogin();
+    private ReusableResultSnackbar? resultSnackbar;
+    private string Message = string.Empty;
+    private Severity s;
+    private void ShowSnackbar() => resultSnackbar?.Show();
+
+    private async Task HandleLogin()
+    {
+        
+    }
+}

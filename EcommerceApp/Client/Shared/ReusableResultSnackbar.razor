@@ -1,0 +1,19 @@
+﻿@using MudBlazor
+@inject ISnackbar Snackbar
+
+@code {
+    [Parameter] 
+    public string Message { get; set; }
+    [Parameter] 
+    public Severity Severity { get; set; } = Severity.Normal;
+    [Parameter] 
+    public int DurationInSeconds { get; set; } = 2;
+
+    public void Show()
+    {
+        Snackbar.Add(Message, Severity, config =>
+        {
+            config.ShowCloseIcon = true;
+        });
+    }
+}

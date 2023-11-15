@@ -2,13 +2,16 @@
 {
     public static class RouteConstants
     {
+        // Registration and Login Pages
+        public const string Login = "/login";
+        public const string Register = "/register";
+
         // General Pages
         public const string AboutUs = "/about-us";
         public const string Gallery = "/gallery";
         public const string ContactUs = "/contact-us";
 
         // Shop Page
-        public const string Shop = "/shop";
         public const string ShopSortedByCategory = "/shop/category/{CategoryId:guid}";
         public const string ShopProductDetails = "/shop/product/{ProductId:guid}";
         public const string ShopCreateProduct = "/shop/products/create";
@@ -18,6 +21,9 @@
         // Shop Page Search Products
         public const string ShopSearchProducts = "/shop/search/{SearchQuery}";
         public const string ShopSearchProductsPagination = "/shop/search/{SearchQuery}/{Page:int}";
+
+        // Shopping Cart Pages
+        public const string ShoppingCart = "/cart";
 
         // Admin Routes
         public const string Admin = "/admin";
