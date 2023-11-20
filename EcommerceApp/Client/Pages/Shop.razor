@@ -1,4 +1,4 @@
-﻿@attribute [Route(RouteConstants.Shop)]  
+﻿@attribute [Route(RouteConstants.ShopPagination)]
 @attribute [Route(RouteConstants.ShopSortedByCategory)]
 @attribute [Route(RouteConstants.ShopSearchProducts)]
 @attribute [Route(RouteConstants.ShopSearchProductsPagination)]
@@ -44,8 +44,6 @@
         }
         else
         {
-            Console.WriteLine($"Page: {page}");
-            Console.WriteLine($"Page: {Page}");
             Console.WriteLine($"Page: {ProductService.CurrentPage}");
             await ProductService.GetAllProductsAsync(page, pageSize);
         };

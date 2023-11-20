@@ -8,6 +8,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Remove="Pages\UserAccount\Profile.razor" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Remove="Pages\Shop.razor.css" />
   </ItemGroup>
 
@@ -20,8 +24,10 @@
     <PackageReference Include="Azure.Core" Version="1.35.0" />
     <PackageReference Include="Azure.Storage.Blobs" Version="12.18.0" />
     <PackageReference Include="Blazored.LocalStorage" Version="4.4.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="6.0.25" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="6.0.15" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="6.0.15" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.AspNetCore.WebUtilities" Version="2.2.0" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="6.0.0" />
     <PackageReference Include="MudBlazor" Version="6.11.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
@@ -29,6 +35,18 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Shared\EcommerceApp.Shared.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <UpToDateCheckInput Remove="Pages\UserAccount\Profile.razor" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <_ContentIncludedByDefault Remove="Pages\UserAccount\Profile.razor" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="Pages\Profile.razor" />
   </ItemGroup>
 
 </Project>

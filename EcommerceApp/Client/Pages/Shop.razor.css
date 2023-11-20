@@ -4,25 +4,31 @@
     display: flex;
     justify-content: center; /* This will center the h3 tag horizontally */
 }
-
 .page {
     display: flex;
     flex-wrap: wrap; /* This allows items to wrap to the next line on smaller screens */
 }
 /* Sidebar styling */
 .sidebar {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
     background-color: #f4f4f4; /* Replace with your desired color */
     width: 250px; /* Fixed width for the sidebar */
-    height: calc(100vh - 64px); /* Full height */
-    position: relative; /* Stick to the top when you scroll */
-    top: 0; /* Top edge of the viewport */
-    overflow-y: auto; /* Enable scrolling if the content is taller than the screen */
+    /*position: relative;*/ /* Stick to the top when you scroll */
+    position: relative;
+    padding-bottom:10px;
+    height:100%;
+    top: 0;
 }
 /* Main content styling */
 .main-content {
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto; /* Enable scrolling if the content is taller than the screen */
     flex-grow: 1; /* Take up the remaining space */
     flex-basis: 0; /* Start growing from zero width */
-    padding: 1rem; /* Spacing around the content */
+    padding: 20px; /* Spacing around the content */
     min-width: 0; /* Make sure it can shrink below its content's intrinsic width */
 }
 
@@ -31,6 +37,8 @@
         width: 100%; /* Sidebar takes full width */
         height: auto; /* Height is automatic, based on content */
         position: relative; /* No longer sticky */
+        overflow-y: visible; /* No longer scrollable */ 
+                             /* always on top*/
     }
 
     .main-content {

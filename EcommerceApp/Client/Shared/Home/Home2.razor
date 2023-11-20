@@ -1,0 +1,18 @@
+﻿
+<div class="d-flex" style="height:100%">
+    @*Callback child communicate with parent*@
+    <MudButton Class="carousel-content" OnClick="TriggerUpdate">Test UpdateProgress</MudButton>
+
+    <MudIcon Class="mx-auto my-auto carousel-content" Icon="@Icons.Custom.Brands.MudBlazor" Size="@Size.Large" />
+    <MudText Typo="Typo.h3" Class="mx-auto my-auto carousel-content">Second Item</MudText>
+</div>
+
+@code {
+    [Parameter]
+    public Action<int>? OnItemChanged { get; set; }
+
+    private void TriggerUpdate()
+    {
+        OnItemChanged?.Invoke(1);
+    }
+}

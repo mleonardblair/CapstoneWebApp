@@ -7,6 +7,11 @@ using EcommerceApp.Server.Services.TagService;
 using EcommerceApp.Server.Services.ProductTagService;
 using Azure.Storage.Blobs;
 using Microsoft.OpenApi.Models;
+using EcommerceApp.Server.Services.CartService;
+using EcommerceApp.Server.Services.AuthService;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -29,11 +34,25 @@ builder.Services.AddAutoMapper(typeof(MappingProfile).Assembly);
 
 builder.Services.AddEndpointsApiExplorer();
 
-builder.Services.AddScoped<IProductService, ProductService>()
-.AddScoped<ICategoryService, CategoryService>()
-.AddScoped<ITagService, TagService>()
-.AddScoped<IProductTagService, ProductTagService>();
-
+builder.Services.AddScoped<IProductService, ProductService>();
+builder.Services.AddScoped<ICategoryService, CategoryService>();
+builder.Services.AddScoped<ITagService, TagService>();
+builder.Services.AddScoped<IProductTagService, ProductTagService>();
+builder.Services.AddScoped<ICartService, CartService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+     {
+         options.TokenValidationParameters = new TokenValidationParameters
+         {
+             ValidateIssuerSigningKey = true,
+             IssuerSigningKey = 
+             new SymmetricSecurityKey(Encoding.UTF8
+             .GetBytes(builder.Configuration.GetSection("AppSettings:Token").Value)),
+             ValidateIssuer = false,
+             ValidateAudience = false,
+         };
+     });
 
 var app = builder.Build();
 // Configure the HTTP request pipeline.
@@ -63,6 +82,8 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapRazorPages();
 app.MapControllers();

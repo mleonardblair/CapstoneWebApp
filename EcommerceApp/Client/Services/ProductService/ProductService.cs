@@ -24,7 +24,7 @@ namespace EcommerceApp.Client.Services.ProductService
 
         public string LastSearchQuery { get; set; } = string.Empty;
         public int CurrentPage { get; set; } = 1;
-        public int PageSize { get; set; } = 4;
+        public int PageSize { get; set; } = 10;
         public int PageCount { get; set; } = 0;
 
         // This event will be used to notify subscribers that the products have changed
@@ -86,15 +86,23 @@ namespace EcommerceApp.Client.Services.ProductService
                  await _http.GetFromJsonAsync<ServiceResponse<ProductPaginationResponse>>($"api/products/page={page}&pageSize={pageSize}") 
                : await _http.GetFromJsonAsync<ServiceResponse<ProductPaginationResponse>>($"api/products/category/{categoryId}/page={page}&pageSize={pageSize}");
 
-            
+
 
             if (result != null && result.Data != null)
             {
                 Products = result.Data.Products;
+                CurrentPage = result.Data.CurrentPage;
+                PageCount = result.Data.Pages;
             }
-            CurrentPage = result.Data.CurrentPage;
-            PageCount = result.Data.Pages;
-
+            else
+            {
+                // Handle the case where result or result.Data is null
+                // You can set a default value or handle the error accordingly.
+                Products = new List<ProductDto>(); // Example: Initialize Products with an empty list
+                CurrentPage = 0; // Example: Set CurrentPage to 0
+                PageCount = 0; // Example: Set PageCount to 0
+                Message = "No products found."; // Example: Set a default error message
+            }
             // Could set some 404 Message "Nothing Here Yet" or something like that
             if (Products.Count == 0)
                 Message = "No products found.";
@@ -278,7 +286,14 @@ namespace EcommerceApp.Client.Services.ProductService
         {
             var result = await _http
                 .GetFromJsonAsync<ServiceResponse<List<string>>>($"api/products/suggestions/{searchQuery}");
-            return result.Data;
+            if(result != null && result.Data != null)
+            {
+                return result.Data;
+            }
+            else
+            {
+                return new List<string>();
+            }
         }
 
     }

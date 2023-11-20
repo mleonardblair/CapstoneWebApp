@@ -7,24 +7,24 @@ namespace EcommerceApp.Server.Data
     public class AppDbContext : DbContext
     {
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
-    
-        public DbSet<Address>? Addresses { get; set; } = null!;
-        public DbSet<ShoppingCart>? Carts { get; set; } = null!;
+        #nullable disable
+        public DbSet<Address> Addresses { get; set; }
+        public DbSet<ShoppingCart> Carts { get; set; }
         // Add other DbSet properties for your other models
-        public DbSet<Category>? Categories { get; set; } = null!;
-        public DbSet<CartItem>? CartItems { get; set; } = null!;
-        public DbSet<Favourite>? Favourites { get; set; } = null!;
-        public DbSet<Product>? Products { get; set; }
-        public DbSet<Order>? Orders { get; set; } = null!;
-        public DbSet<OrderItem>? OrderItems { get; set; } = null!;
-        public DbSet<Payment>? Payments { get; set; } = null!;
-        public DbSet<ProductTag>? ProductTags { get; set; } = null!;
-        public DbSet<Report>? Reports { get; set; } = null!;
-        public DbSet<Review>? Reviews { get; set; } = null!;
-        public DbSet<Tag>? Tags { get; set; } = null!;
-        public DbSet<ApplicationUser>? ApplicationUsers { get; set; } = null!;
-        public DbSet<UserAddress>? UserAddresses { get; set; } = null!;
-
+        public DbSet<Category> Categories { get; set; }
+        public DbSet<CartItem> CartItems { get; set; }
+        public DbSet<Favourite> Favourites { get; set; }
+        public DbSet<Product> Products { get; set; }
+        public DbSet<Order> Orders { get; set; }
+        public DbSet<OrderItem> OrderItems { get; set; }
+        public DbSet<Payment> Payments { get; set; }
+        public DbSet<ProductTag> ProductTags { get; set; }
+        public DbSet<Report> Reports { get; set; }
+        public DbSet<Review> Reviews { get; set; }
+        public DbSet<Tag> Tags { get; set; }
+        public DbSet<ApplicationUser> ApplicationUsers { get; set; }
+        public DbSet<UserAddress> UserAddresses { get; set; }
+        #nullable restore
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);

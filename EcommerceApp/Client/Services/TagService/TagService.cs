@@ -10,7 +10,8 @@ namespace EcommerceApp.Client.Services.TagService
     {
         private readonly HttpClient _http;
         // This event will be used to notify subscribers that the products have changed
-        public event Action TagsChanged;
+        public event Action? TagsChanged;
+
         public string Message { get; set; } = "Loading tags...";
         public List<TagDto> Tags { get; set; } = new List<TagDto>();
         public TagService(HttpClient http)
