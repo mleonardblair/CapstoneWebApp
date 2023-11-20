@@ -36,14 +36,7 @@
 </style>*@
 @code {
     private string _paperStyle = "height: 200px;"; // Default height
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-        {
-            Console.WriteLine("OnAfterRenderAsync called");
 
-        }
-    }
     private void HandleBreakpointChange(Breakpoint breakpoint)
     {
         switch (breakpoint)

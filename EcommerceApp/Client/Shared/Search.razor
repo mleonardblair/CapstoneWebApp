@@ -34,7 +34,7 @@
     }
 
 
-    private async Task SearchProducts()
+    private void SearchProducts()
     {
         NavigationManager.NavigateTo($"/shop/search/{searchQuery}/1");
     }
@@ -42,7 +42,7 @@
     public async Task HandleSearch(KeyboardEventArgs args)
     {
         if(args.Key == "Enter"){
-            await SearchProducts();
+            SearchProducts();
         }
         else if(searchQuery.Length > 1)
         {

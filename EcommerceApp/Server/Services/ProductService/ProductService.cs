@@ -351,8 +351,13 @@ namespace EcommerceApp.Server.Services.ProductService
                 {
                     response.Success = false;
                     response.Message = "No products found.";
-                    response.Data.CurrentPage = 1;
-                    response.Data.Pages = 0;
+
+                    response.Data = new ProductPaginationResponse
+                    {
+                        Products = _mapper.Map<List<ProductDto>>(products),
+                        CurrentPage = 1,
+                        Pages = 0
+                    };
                 }
                 else
                 {
