@@ -140,26 +140,5 @@ namespace EcommerceApp.Server.Services.AuthService
             return tokenString;
 
         }
-
-        public async Task<ServiceResponse<bool>> ChangePassword(Guid userId, string newPassword)
-        {
-            var response = new ServiceResponse<bool>();
-            var user = await _context.ApplicationUsers.FindAsync(userId);
-            if (user == null)
-            {
-                response.Success = false;
-                response.Message = "User not found.";
-            }
-            
-            CreatePasswordHashAndSalt(newPassword, out byte[] passwordHash, out byte[] passwordSalt);
-            user.PasswordHash = passwordHash;
-            user.PasswordSalt = passwordSalt;
-
-            await _context.SaveChangesAsync();
-            response.Data = true;
-            response.Message = "Password changed successfully.";
-
-            return response;
-        }
     }
 }

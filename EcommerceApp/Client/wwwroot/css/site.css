@@ -1,26 +1,4 @@
-﻿.nav-button {
-    transition: all 0.2s ease; /* Smooth transition for all properties */
-}
-
-    .nav-button:hover {
-        background-color: rgba(255, 255, 255,0.7); /* Change to your preferred hover background color */
-        color: rgb(8, 28, 255); /* Change to your preferred hover text color */
-        position: relative; /* Needed for pseudo-elements positioning */
-    }
-
-    /* Example of animated underline */
-    .nav-button::after {
-        content: '';
-        display: block;
-        width: 0;
-        height: 2px;
-        /*background: rgb(0, 0, 0);*/ /* Change to your preferred underline color */
-        transition: width 0.2s;
-        position: absolute;
-        bottom: 5px; /* Adjust the position as needed */
-    }
-
-@keyframes slideInFromBottom {
+﻿@keyframes slideInFromBottom {
   from {
     transform: translateY(100%);
     opacity: 0;
@@ -52,17 +30,33 @@
   animation: slideOutToTop 0.5s forwards;
 }
 
-mud-toolbar .mud-toolbar-appbar {
+.mud-button-label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    line-height: 1.75;
+    letter-spacing: 0.02857em;
+    text-transform: lowercase;
+    color:white;
+}
+mud-toolbar mud-toolbar-appbar {
     display: flex;
+
     flex-direction: column;
     justify-content: space-between;
     align-items: center;
 }
-
+.mud-icon-button {
+    display: flex; /* This will align the icon properly within the appbar */
+    flex-direction:row;
+    justify-content: space-between;
+}
 .transition-drawer .mud-drawer-content {
     transition: transform 0.3s ease-in-out;
 }
-
+/* drawer icon*/
+.mud-icon-root.mud-svg-icon{
+    color:white;
+}
 .mud-button-group-root {
     display: flex;
     justify-content:space-between;
@@ -143,51 +137,9 @@ mud-toolbar .mud-toolbar-appbar {
     background-color: darkorange; /* Use the specific shade of orange you prefer */
     height:4px;
 }
-
-/* Used For Account Management Cards*/
-.mud-card-content.center-content {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: space-around;
-    text-align: center; /* For centering text */
-    width: 100%; /* Ensure full width if needed */
-}
-    .mud-card-content.center-content:hover {
-        background-color: aliceblue;
-        cursor: pointer;
-    }
-
-.my-custom-hover-button {
-    font-size: 0.875rem;
-    font-weight: 500;
-    line-height: 1.75;
-    letter-spacing: 0.02857em;
-    text-transform: lowercase;
-    color: white;
-    display: flex; /* This will align the icon properly within the appbar */
-    flex-direction: row;
-    justify-content: space-between;
-
-}
-
-.mud-badge-root .mud-badge-wrapper {
-    width: 75%;
-    height: 75%;
-}
 .my-custom-hover-button:hover {
     background-color: rgba(255, 255, 255, 0.1); /* Red with 50% opacity */ /* Change this color to your preferred hover color */
     /* Add other hover styles if needed */
-}
-.icon-button-color {
-    color: black; /* Or any other color */
-}
-.mud-input-slot.mud-input-root.mud-input-root-text{
-   text-align:center;
-   margin-top:0px;
-}
-.mud-input-control.mud-input-input-control.mud-input-number-control.mud-input-nospin{
-    margin-top:0px;
 }
 
 
@@ -220,7 +172,6 @@ mud-toolbar .mud-toolbar-appbar {
         right: 0;
         left: 0;
     }
-
 }
 /* AppbarHeight for tablets (small devices) */
 @media (min-width: 600px) {
@@ -228,7 +179,6 @@ mud-toolbar .mud-toolbar-appbar {
         padding-right: 0px !important;
         padding-left: 0px !important;
     }
-
     .mud-toolbar {
         padding: 0 8px;
         flex-direction: row;
@@ -236,23 +186,20 @@ mud-toolbar .mud-toolbar-appbar {
         justify-content: space-between;
         align-items: center;
     }
-
-        .mud-toolbar .mud-toolbar-appbar {
-            color: black;
-        }
-
+    .mud-toolbar .mud-toolbar-appbar {
+        color: black;
+    }
     .mud-appbar.mud-appbar-fixed-top {
         position: sticky;
         top: 0;
         right: 0;
         left: 0;
     }
-
     .mud-carousel {
-        /* Rotate the container */
+/* Rotate the container */
         height: calc(100vw);
     }
-}
+
 /* AppbarHeight for desktop (medium devices) */
 @media (min-width: 960px) {
     .mud-appbar {
@@ -274,15 +221,9 @@ mud-toolbar .mud-toolbar-appbar {
         padding-left: 0px !important;
     }
     .mud-container-maxwidth-lg.home-container-padding {
-        max-width:100%;
-        padding:0px;
+        max-width:100vw;
     }
-    .mud-container-maxwidth-lg {
-        max-width: 100%;
-        padding: 0px;
-    }
-    .home-container-padding{
-        max-width:100%;
+    .mud-container.mud-container-maxwidth-lg {
+        padding:0;
     }
 }
-

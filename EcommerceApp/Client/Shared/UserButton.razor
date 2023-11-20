@@ -1,22 +1,10 @@
-﻿@inject ILocalStorageService LocalStorageService
-@inject AuthenticationStateProvider AuthenticationStateProvider
-@inject NavigationManager NavigationManager
-
-<div class="dropdown">
+﻿<div class="dropdown">
     <MudIconButton Class="my-custom-hover-button dropdown-toggle user-button" Icon="@Icons.Material.Filled.Person" Color="Color.Inherit" OnClick="@ToggleUserMenu" Style="transition: color 0.1s; " @onfocusout="HideUserMenu" >
         <i class="oi oi-person"></i>
     </MudIconButton>
-    <div class="dropdown-menu dropdown-menu-right my-custom-dropdown @UserMenuCssClass">
-        <AuthorizeView>
-            <Authorized>
-                <a href="account-management" class="dropdown-item">My Account</a>
-                <button class="dropdown-item" @onclick="Logout">Logout</button>
-            </Authorized>
-            <NotAuthorized>
-                <a href="Login?returnUrl=@NavigationManager.ToBaseRelativePath(NavigationManager.Uri)" class="dropdown-item">Login</a>
-                <a href="register" class="dropdown-item">Register</a>
-            </NotAuthorized>
-        </AuthorizeView>
+    <div class="dropdown-menu dropdown-men-right @UserMenuCssClass">
+        <a href="login" class="dropdown-item">Login</a>
+        <a href="register" class="dropdown-item">Register</a>
     </div>
 </div>
 
@@ -33,12 +21,5 @@
     {
         await Task.Delay(200);
         showUserMenu = false;
-    }
-
-    private async Task Logout()
-    {
-        await LocalStorageService.RemoveItemAsync("authToken");
-        await AuthenticationStateProvider.GetAuthenticationStateAsync();
-        NavigationManager.NavigateTo("/");
     }
 }

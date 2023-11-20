@@ -10,19 +10,6 @@
     margin-left:0;
 }
 
-/* Hover effect for dropdown items */
-.dropdown-item:hover {
-    background-color: #f8f9fa; /* Example hover color, change as needed */
-}
-
-/* Ensure text is aligned to the left */
-.dropdown-item {
-    text-align: left;
-}
-
-/* Positioning the dropdown */
-.my-custom-dropdown {
-    position: absolute;
-    right: 0;
-    top: 100%; /* Adjust as necessary to align with the top right corner of the button */
+.dropdown-item:hover{
+    background-color: white;
 }

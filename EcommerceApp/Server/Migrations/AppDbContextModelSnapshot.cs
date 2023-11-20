@@ -93,11 +93,9 @@ namespace EcommerceApp.Server.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<byte[]>("PasswordHash")
-                        .HasColumnType("varbinary(max)");
-
-                    b.Property<byte[]>("PasswordSalt")
-                        .HasColumnType("varbinary(max)");
+                    b.Property<string>("Password")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("RefreshToken")
                         .HasColumnType("nvarchar(max)");
@@ -480,56 +478,56 @@ namespace EcommerceApp.Server.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("a420ef4b-48e6-41be-bcbb-9e421f889d23"),
-                            DateCreated = new DateTime(2023, 11, 15, 2, 38, 14, 966, DateTimeKind.Utc).AddTicks(660),
+                            Id = new Guid("9c5ce536-58cf-4273-9efd-065e359c5559"),
+                            DateCreated = new DateTime(2023, 10, 30, 18, 41, 36, 878, DateTimeKind.Utc).AddTicks(7368),
                             DateModified = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Description = "Outdoor and indoor ornaments that add flair to living spaces and gardens.",
                             Name = "Ornament"
                         },
                         new
                         {
-                            Id = new Guid("b42c8862-3cb1-4c66-a6cb-80a901d706c4"),
-                            DateCreated = new DateTime(2023, 11, 15, 2, 38, 14, 966, DateTimeKind.Utc).AddTicks(676),
+                            Id = new Guid("a00717b1-2a69-4efa-ac73-fc98418276ae"),
+                            DateCreated = new DateTime(2023, 10, 30, 18, 41, 36, 878, DateTimeKind.Utc).AddTicks(7375),
                             DateModified = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Description = "Items related to garden decorations and maintenance, including plants, tools, and accessories.",
                             Name = "Garden"
                         },
                         new
                         {
-                            Id = new Guid("b85a2208-2238-4a0f-bc5e-06beb68ccc91"),
-                            DateCreated = new DateTime(2023, 11, 15, 2, 38, 14, 966, DateTimeKind.Utc).AddTicks(679),
+                            Id = new Guid("c29a8ee2-427b-48e7-9971-6135feef8bfa"),
+                            DateCreated = new DateTime(2023, 10, 30, 18, 41, 36, 878, DateTimeKind.Utc).AddTicks(7377),
                             DateModified = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Description = "Circular arrangements of flowers, leaves, or other materials, often used for decorative purposes or special occasions.",
                             Name = "Wreaths"
                         },
                         new
                         {
-                            Id = new Guid("3bdb9898-fae4-4b4e-90a3-cd9941045a39"),
-                            DateCreated = new DateTime(2023, 11, 15, 2, 38, 14, 966, DateTimeKind.Utc).AddTicks(701),
+                            Id = new Guid("4136f847-2b3e-4b3f-9746-1664acd5bc26"),
+                            DateCreated = new DateTime(2023, 10, 30, 18, 41, 36, 878, DateTimeKind.Utc).AddTicks(7383),
                             DateModified = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Description = "A form of textile produced using knotting techniques, often used for wall hangings, plant hangers, and more.",
                             Name = "Macrame"
                         },
                         new
                         {
-                            Id = new Guid("b5504260-4a82-49f7-ac6d-fa33db5fe6ec"),
-                            DateCreated = new DateTime(2023, 11, 15, 2, 38, 14, 966, DateTimeKind.Utc).AddTicks(704),
+                            Id = new Guid("0d15632c-d7d1-4ad7-a0ef-53cea16d8cb6"),
+                            DateCreated = new DateTime(2023, 10, 30, 18, 41, 36, 878, DateTimeKind.Utc).AddTicks(7385),
                             DateModified = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Description = "The art of beautiful handwriting, often used in invitations, letters, and decorative texts.",
                             Name = "Calligraphy"
                         },
                         new
                         {
-                            Id = new Guid("6373cd30-b646-4a50-92ea-23c2673696ff"),
-                            DateCreated = new DateTime(2023, 11, 15, 2, 38, 14, 966, DateTimeKind.Utc).AddTicks(708),
+                            Id = new Guid("ee54170e-682e-422c-960c-9f31e17b4687"),
+                            DateCreated = new DateTime(2023, 10, 30, 18, 41, 36, 878, DateTimeKind.Utc).AddTicks(7387),
                             DateModified = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Description = "The craft of decorating fabric using a needle to apply thread or yarn, often used in apparel, home decor, and artworks.",
                             Name = "Embroidery"
                         },
                         new
                         {
-                            Id = new Guid("4789b2a7-e421-4135-9c9f-4c909837b1ec"),
-                            DateCreated = new DateTime(2023, 11, 15, 2, 38, 14, 966, DateTimeKind.Utc).AddTicks(710),
+                            Id = new Guid("22045126-8050-465c-8c67-0dbed75104a4"),
+                            DateCreated = new DateTime(2023, 10, 30, 18, 41, 36, 878, DateTimeKind.Utc).AddTicks(7388),
                             DateModified = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Description = "Items that serve a decorative purpose, enhancing the aesthetics of a space without serving a practical function.",
                             Name = "Decorative"

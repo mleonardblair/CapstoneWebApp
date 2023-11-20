@@ -8,7 +8,6 @@
 }
 else
 {
-    <MudText Typo="Typo.h4">Products</MudText>
     <ul class="list-unstyled">
         @foreach (var product in ProductService.Products)
         {
@@ -32,15 +31,17 @@ else
             </li>
         }
     </ul>
-    <div class="d-flex flex-column align-center" style="bottom:0;">
-        <MudPagination Size="Size.Medium"
-                   Variant="Variant.Text"
-                   Color="Color.Primary"
-                   Class="my-3"
-                   Style=""
-                   Count="ProductService.PageCount"
-                   SelectedChanged="HandlePageChanged" />
-    </div>
+    <div class="d-flex flex-column align-center">
+        <MudPagination
+            Size="Size.Medium"
+            Variant="Variant.Text"
+            Color="Color.Primary"
+            Class="my-3"
+            Align="Align.Center"
+            Style="position: fixed; bottom: 0;" 
+            Count="ProductService.PageCount"
+            SelectedChanged="HandlePageChanged"/>
+     </div>
     
 }
 
@@ -57,21 +58,12 @@ else
         ProductService.ProductsChanged -= StateHasChanged;
     }
 
-    // Only change page if its not the current page to avoid infinite loop.
     private void HandlePageChanged(int newPage)
     {
         ProductService.CurrentPage = newPage;
         // add one to the current page and navigation that direction.
         //ProductService.CurrentPage = ProductService.CurrentPage += 1;
-
-        if(NavigationManager.BaseUri.Equals($"/shop/products/{newPage}"))
-        {
-            // Do nothing.
-        }else
-        {
-            NavigationManager.NavigateTo($"shop/products/{newPage}");
-        }
-
+        NavigationManager.NavigateTo("shop/products/{newPage}");
     }
 
 }

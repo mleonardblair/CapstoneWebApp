@@ -17,20 +17,20 @@
             <MudHidden Breakpoint="Breakpoint.SmAndDown">
                 <!-- Wrapper for centered items -->
                     <!-- Desktop links -->
-      
+                <MudButtonGroup Color="Color.Primary" Variant="Variant.Text">
                     <MudButton Color="Color.Inherit" OnClick="@ShopClicked" Class="nav-button">Shop</MudButton>
                     <MudButton Color="Color.Inherit" OnClick="@GalleryClicked" Class="nav-button">Gallery</MudButton>
                     <MudButton Color="Color.Inherit" OnClick="@FAQClicked" Class="nav-button">FAQ</MudButton>
                     <MudButton Color="Color.Inherit" OnClick="@AboutUsClicked" Class="nav-button">About Us</MudButton>
                     <MudButton Color="Color.Inherit" OnClick="@ContactUsClicked" Class="nav-button">Contact Us</MudButton>
-  
+                </MudButtonGroup>
             </MudHidden>
             </div>
 
         <div class="icons">
             <Search/>
-            <UserButton/>
-            <CartCounter/>
+            <MudIconButton Class="my-custom-hover-button" Icon="@Icons.Material.Filled.Person" Color="Color.Inherit" OnClick="@ProfileClicked" Style="transition: color 0.3s;" />
+            <CartCounter></CartCounter>
 
         </div>
 
@@ -50,17 +50,17 @@
         </div>
     }
   
-    <MudMainContent >
+    <MudMainContent Style="padding-top: 0">
         <MudContainer Class="@containerClass">
+
             @Body
         </MudContainer>
-        <Footer />
     </MudMainContent>
 </MudLayout>
 @code {
     private bool MenuOpen = false;
     private string containerClass = "";
-    private string _mainContentClass = string.Empty;
+    private string _mainContentClass;
     private string MainContentClass
     {
         get => _mainContentClass;
@@ -78,24 +78,20 @@
     {
         MenuOpen = !MenuOpen;
         MainContentClass = MenuOpen ? "main-content-push-down" : "";
-        StateHasChanged();
     }
     protected override void OnInitialized()
     {
         // Ensuring the main content has enough padding to not be hidden under the AppBar.
         MainContentClass = "pt-5"; // assuming 5 is enough padding to clear the AppBar
         var uri = new Uri(NavigationManager.Uri);
-        if (uri.LocalPath == "/")
+        if (uri.LocalPath == "/gallery")
         {
             Console.WriteLine("Special Padding Set");
             containerClass = "home-container-padding";
-        }else
-        {
-            
         }
     }
     private void HomeClicked() => NavigationManager.NavigateTo("/");
-    private void ShopClicked() => NavigationManager.NavigateTo("/shop/products/1");
+    private void ShopClicked() => NavigationManager.NavigateTo("/shop");
     private void GalleryClicked() => NavigationManager.NavigateTo("/gallery");
     private void FAQClicked() => NavigationManager.NavigateTo("/faq");
     private void AboutUsClicked() => NavigationManager.NavigateTo("/aboutus");

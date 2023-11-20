@@ -1,6 +1,0 @@
-﻿.flex-container {
-    display: flex;
-    flex-direction: column;
-    justify-content: center; /* Center vertically */
-    align-items: center; /* Center horizontally if needed */
-}

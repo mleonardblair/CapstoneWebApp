@@ -119,7 +119,7 @@ else
         foreach (var tagId in product.ProductTags.Select(x => x.TagId))
         {
             var response = await TagService.GetTagByIdAsync(tagId);
-            if (response.Success && response?.Data != null)
+            if (response.Success)
             {
                 tagDtos.Add(response.Data);
             }

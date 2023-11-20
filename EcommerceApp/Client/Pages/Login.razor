@@ -1,9 +1,7 @@
-﻿@using Microsoft.AspNetCore.WebUtilities;
-@attribute [Route(RouteConstants.Login)]
+﻿@attribute [Route(RouteConstants.Login)]
 @inject IAuthService AuthService
 @inject ILocalStorageService LocalStorageService
 @inject NavigationManager NavigationManager
-@inject AuthenticationStateProvider AuthenticationStateProvider
 
 <PageTitle>Login</PageTitle>
 <MudText Typo="Typo.h3">Login</MudText>
@@ -32,16 +30,7 @@
     private string Message = string.Empty;
     private Severity s;
     private void ShowSnackbar() => resultSnackbar?.Show();
-    private string returnUrl = string.Empty;
 
-    protected override void OnInitialized(){
-        // Get absolute uri from browser.
-        var uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
-        // Get the return url to redirect the user to after login.
-        if(QueryHelpers.ParseQuery(uri.Query).TryGetValue("returnUrl", out var param)){
-            returnUrl = param.First();
-        }
-    }
     private async Task HandleLogin()
     {
         var result = await AuthService.LoginUser(user);
@@ -50,7 +39,6 @@
             Message = result.Message;
 
             await LocalStorageService.SetItemAsync("authToken", result.Data);
-            await AuthenticationStateProvider.GetAuthenticationStateAsync();
             NavigationManager.NavigateTo("/");
 
 

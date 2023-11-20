@@ -8,7 +8,5 @@ namespace EcommerceApp.Client.Services.CartService
 
         Task AddToCart(CartItemDto cartItemDto);
         Task<List<CartItemDto>> GetCartItems();
-        Task<List<CartProductResponse>> GetCartProducts();
-        Task RemoveProductFromCart(Guid productId);
     }
 }

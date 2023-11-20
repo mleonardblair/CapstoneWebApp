@@ -67,7 +67,7 @@ namespace EcommerceApp.Server.Controllers
     public class BlobUploadResult
     {
         public bool IsUploaded { get; set; }
-        public string FileUrl { get; set; } = string.Empty;
+        public string FileUrl { get; set; }
     }
 
 

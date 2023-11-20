@@ -15,11 +15,10 @@ namespace EcommerceApp.Server.Models
         public string LastName { get; set; } = string.Empty;
 
         [Required]
-        public DateTime DateCreated { get; set; } = DateTime.Now;
+        public DateTime DateCreated { get; set; } = DateTime.UtcNow;
         public DateTime DateModified { get; set; }
         public string Email { get; set; } = string.Empty;
-        public byte[]? PasswordHash { get; set; }
-        public byte[]? PasswordSalt { get; set; }
+        public string Password { get; set; } = string.Empty;
         public string? RefreshToken { get; set; }
 
 
