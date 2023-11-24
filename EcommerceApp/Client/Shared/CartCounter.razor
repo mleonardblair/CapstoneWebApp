@@ -2,6 +2,7 @@
 @inject ICartService CartService
 @inject ISyncLocalStorageService LocalStorage
 @implements IDisposable
+
 <MudBadge Content="@GetCartItemsCount()" Color="Color.Warning" Overlap="true"Origin="Origin.BottomRight" Dot="false">
     <MudIconButton Icon="@Icons.Material.Filled.ShoppingCart" Color="Color.Inherit" OnClick="@CartClicked" Style="transition: color 0.3s;" Class="cart my-custom-hover-button" />
 </MudBadge>
@@ -11,8 +12,8 @@
     
     private int GetCartItemsCount()
     {
-        var cart = LocalStorage.GetItem<List<CartDto>>("cart");
-        return cart != null ? cart.Count : 0;
+        var count = LocalStorage.GetItem<int>("cartItemsCount");
+        return count;
     }
 
 

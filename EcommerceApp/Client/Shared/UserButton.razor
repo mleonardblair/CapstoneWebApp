@@ -1,6 +1,7 @@
 ﻿@inject ILocalStorageService LocalStorageService
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject NavigationManager NavigationManager
+@inject ICartService CartService
 
 <div class="dropdown">
     <MudIconButton Class="my-custom-hover-button dropdown-toggle user-button" Icon="@Icons.Material.Filled.Person" Color="Color.Inherit" OnClick="@ToggleUserMenu" Style="transition: color 0.1s; " @onfocusout="HideUserMenu" >
@@ -38,6 +39,7 @@
     private async Task Logout()
     {
         await LocalStorageService.RemoveItemAsync("authToken");
+        await CartService.GetCartItemsCount();
         await AuthenticationStateProvider.GetAuthenticationStateAsync();
         NavigationManager.NavigateTo("/");
     }

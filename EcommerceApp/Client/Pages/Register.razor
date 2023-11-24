@@ -14,7 +14,7 @@
         <InputText id="email" @bind-Value="user.Email" class="form-control"/>
         <ValidationMessage For="@(()=> user.Email)"/>
     </div>
-        <div class="mb-3">
+     <div class="mb-3">
         <label for="password">Password</label>
         <InputText id="password" @bind-Value="user.Password" class="form-control" type="password"/>
         @* Added validation message for password confirmation and removed validation summary. *@
@@ -27,10 +27,10 @@
         <ValidationMessage For="@(()=> user.ConfirmPassword)" />
     </div>
     <button type="submit" class="btn btn-primary">Register</button>
-    <ReusableResultSnackbar @ref="resultSnackbar"
-                            Message="@message"
-                            Severity="@s" />
 </EditForm>
+<ReusableResultSnackbar @ref="resultSnackbar"
+                        Message="@message"
+                        Severity="@s" />
 
 
 @code {
@@ -50,13 +50,11 @@
     {
         var result = await AuthService.RegisterUser(user);
         message = result.Message;
-        if (!result.Success)
-        {
-            s = Severity.Warning;
-        }else
-        {
-            s = Severity.Success;
-        }
+        s = result.Success ? Severity.Success : Severity.Warning;
+        // Request the UI to re-render after state changes
+        StateHasChanged();
+
+        // Then show the snackbar
         ShowSnackbar();
     }
 }

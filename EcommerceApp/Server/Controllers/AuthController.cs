@@ -32,6 +32,7 @@ namespace EcommerceApp.Server.Controllers
                                         {
                                             Id = Guid.NewGuid(),
                                             Email = request.Email,
+                                            ShoppingCartId = Guid.NewGuid()
                                         },
                                         request.Password);
 
@@ -54,14 +55,29 @@ namespace EcommerceApp.Server.Controllers
         }
 
         [HttpPost("change-password"), Authorize]
-        public async Task<ActionResult<ServiceResponse<bool>>> ChangePassword([FromBody] string newPassword)
+        public async Task<ActionResult<ServiceResponse<bool>>> ChangePassword(UserChangePassword changeRequest)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var response = await _authService.ChangePassword(Guid.Parse(userId), newPassword);
+            
+            var response = await _authService.ChangePassword(userId, changeRequest.Password);
             if (!response.Success)
             {
                 return BadRequest(response);
             }
+            return Ok(response);
+        }
+
+        [HttpPut("update")]
+        public async Task<ActionResult<ServiceResponse<bool>>> UpdateUser( AppUserDto userDto)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var response = await _authService.UpdateUser(userId, userDto.Email, userDto.FirstName, userDto.LastName);
+
+            if (!response.Success)
+            {
+                return BadRequest(response.Message);
+            }
+
             return Ok(response);
         }
     }

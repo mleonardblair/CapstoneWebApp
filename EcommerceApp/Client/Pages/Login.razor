@@ -4,7 +4,7 @@
 @inject ILocalStorageService LocalStorageService
 @inject NavigationManager NavigationManager
 @inject AuthenticationStateProvider AuthenticationStateProvider
-
+@inject ICartService CartService
 <PageTitle>Login</PageTitle>
 <MudText Typo="Typo.h3">Login</MudText>
 
@@ -51,12 +51,16 @@
 
             await LocalStorageService.SetItemAsync("authToken", result.Data);
             await AuthenticationStateProvider.GetAuthenticationStateAsync();
+            await CartService.StoreCartItems(true);
+            await CartService.GetCartItemsCount();
+            ShowSnackbar();
+            // Wait 1 second so it shows the snackbar before redirecting.
+            await Task.Delay(1000);
             NavigationManager.NavigateTo("/");
-
-
         } else
         {
             Message = result.Message;
         }
     }
+  
 }

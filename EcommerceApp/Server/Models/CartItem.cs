@@ -21,7 +21,7 @@ namespace EcommerceApp.Server.Models
         public Product? Product { get; set; }
 
         [Required]
-        public Guid Quantity { get; set; }
+        public int Quantity { get; set; }
 
         [Required]
         public DateTime DateCreated { get; set; } = DateTime.UtcNow;

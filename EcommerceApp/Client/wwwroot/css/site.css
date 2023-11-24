@@ -1,4 +1,5 @@
-﻿.nav-button {
+﻿
+    .nav-button {
     transition: all 0.2s ease; /* Smooth transition for all properties */
 }
 
@@ -59,10 +60,22 @@ mud-toolbar .mud-toolbar-appbar {
     align-items: center;
 }
 
-.transition-drawer .mud-drawer-content {
-    transition: transform 0.3s ease-in-out;
+footer.footer {
+    height: 300px;
+    background-color: black;
+    width: 100%;
+    position: relative;
+    bottom: 0;
+    left: 0;
 }
 
+.transition-drawer.mud-drawer-content {
+    transition: transform 0.3s ease-in-out;
+}
+.mud-main-content{
+    padding-top:0px;
+   
+}
 .mud-button-group-root {
     display: flex;
     justify-content:space-between;
@@ -72,39 +85,39 @@ mud-toolbar .mud-toolbar-appbar {
     padding-left: 0px !important;
 }
 /* CONTROLS THE GALLERY CAROUSEL OVERRIDES MUDBLAZOR DEFAULT BEHAVIOR*/
-.mud-carousel {
+/*.mud-carousel {*/
     /* Rotate the container */
-    transform: rotate(-90deg) translateX(-100%);
+    /*transform: rotate(-90deg) translateX(-100%);*/
     /* Set the transform origin to the top left corner */
-    transform-origin: top left;
+    /*transform-origin: top left;*/
     /* Set the position to absolute to position the carousel */
-    position: absolute;
+    /*position: absolute;*/
     /* Set top position to the height of the navbar */
-    top: 68px;
+    /*top: 68px;*/
     /* Set left position to 0 */
-    left: 0;
+    /*left: 0;*/
     /* Set width to the viewport height minus navbar height, adjust if necessary */
-    width: calc(100vh - 68px);
+    /*width: calc(100vh - 68px);*/
     /* Set height to the full width of the viewport */
-    height: calc(100vw - 4px);
-}
+    /*height: calc(100vw - 4px);
+}*/
 
 /* Adjust the individual content items */
-.carousel-content {
+/*.carousel-content {*/
     /* Rotate the content to make it upright */
-    transform: rotate(90deg);
+    /*transform: rotate(90deg);*/
     /* Set the transform origin to the center */
-    transform-origin: center;
+    /*transform-origin: center;*/
     /* Content will be centered using 'd-flex' and 'mx-auto my-auto' */
-}
+/*}*/
 
 /* Ensure the carousel item fills the rotated container */
-.mud-carousel-item {
+/*.mud-carousel-item {*/
     /* The width should be 100% of the carousel's height after rotation */
-    width: 100%;
+    /*width: 100%;*/
     /* The height should be the same as the carousel width before rotation */
     /*height: calc(100vh - 64px);*/
-}
+/*}*/
 @keyframes slideInFromBottom {
     from {
         transform: translateY(100%);
@@ -200,10 +213,10 @@ mud-toolbar .mud-toolbar-appbar {
         height: 12px;
     }
     /* CONTROLS THE GALLERY CAROUSEL OVERRIDES MUDBLAZOR DEFAULT BEHAVIOR*/
-    .mud-carousel {
+    /*.mud-carousel {*/
         /* Rotate the container */
-        height: calc(100vw);
-    }
+        /*height: calc(100vw);
+    }*/
     .mud-appbar .mud-toolbar-appbar
     .mud-toolbar {
         flex-direction: column;
@@ -220,7 +233,9 @@ mud-toolbar .mud-toolbar-appbar {
         right: 0;
         left: 0;
     }
-
+    /*div.mud-main-content {
+        padding: 0px;
+    }*/
 }
 /* AppbarHeight for tablets (small devices) */
 @media (min-width: 600px) {
@@ -248,10 +263,10 @@ mud-toolbar .mud-toolbar-appbar {
         left: 0;
     }
 
-    .mud-carousel {
+    /*.mud-carousel {*/
         /* Rotate the container */
-        height: calc(100vw);
-    }
+        /*height: calc(100vw);
+    }*/
 }
 /* AppbarHeight for desktop (medium devices) */
 @media (min-width: 960px) {
@@ -277,10 +292,7 @@ mud-toolbar .mud-toolbar-appbar {
         max-width:100%;
         padding:0px;
     }
-    .mud-container-maxwidth-lg {
-        max-width: 100%;
-        padding: 0px;
-    }
+
     .home-container-padding{
         max-width:100%;
     }

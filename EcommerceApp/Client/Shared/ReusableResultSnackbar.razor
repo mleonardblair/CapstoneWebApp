@@ -9,11 +9,23 @@
     [Parameter] 
     public int DurationInSeconds { get; set; } = 2;
 
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        // If there is a message already set, show it
+        if (!string.IsNullOrWhiteSpace(Message))
+        {
+            Show();
+        }
+    }
     public void Show()
     {
         Snackbar.Add(Message, Severity, config =>
         {
             config.ShowCloseIcon = true;
+            config.VisibleStateDuration = DurationInSeconds * 1000;
         });
     }
 }

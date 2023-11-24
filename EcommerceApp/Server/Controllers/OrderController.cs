@@ -13,29 +13,31 @@ namespace EcommerceApp.Server.Controllers
     {
         private readonly IOrderService _orderService;
 
+
         public OrderController(IOrderService orderService)
         {
             _orderService = orderService;
         }
 
+     
         [HttpPost]
-        public async Task<ActionResult<ServiceResponse<OrderDto>>> CreateOrderAsync([FromBody] OrderDto orderDto)
+        public async Task<ActionResult<ServiceResponse<bool>>> PlaceOrderAsync()
         {
-            var response = await _orderService.CreateOrderAsync(orderDto);
+            var response = await _orderService.PlaceOrderAsync();
             return Ok(response);
         }
 
         [HttpGet]
-        public async Task<ActionResult<ServiceResponse<OrderDto>>> GetAllOrdersAsync()
+        public async Task<ActionResult<ServiceResponse<List<OrderOverviewResponse>>>> GetAllOrdersAsync()
         {
             var response = await _orderService.GetAllOrdersAsync();
             return Ok(response);
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<ServiceResponse<OrderDto>>> GetOrderByIdAsync(Guid id)
+        public async Task<ActionResult<ServiceResponse<OrderDto>>> GetOrderDetailsByIdAsync(Guid id)
         {
-            var response = await _orderService.GetOrderByIdAsync(id);
+            var response = await _orderService.GetOrderDetailsByIdAsync(id);
             return Ok(response);
         }
 

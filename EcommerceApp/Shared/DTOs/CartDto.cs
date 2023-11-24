@@ -5,6 +5,6 @@ namespace EcommerceApp.Shared.DTOs
     {
         public Guid Id { get; set; }
         public Guid ApplicationUserId { get; set; }
-        public List<CartItemDto> CartItems { get; set; } = new List<CartItemDto>();
+        public List<CartProductResponse> CartProducts { get; set; } = new List<CartProductResponse>();
     }
 }

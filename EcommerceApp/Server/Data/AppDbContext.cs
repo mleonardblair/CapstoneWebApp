@@ -28,6 +28,16 @@ namespace EcommerceApp.Server.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<ApplicationUser>(entity =>
+            {
+                entity.HasOne(u => u.ShoppingCart)
+                      .WithOne(s => s.ApplicationUser)
+                      .HasForeignKey<ShoppingCart>(s => s.ApplicationUserId);
+            });
+
+
+            // Seed data for Categories
             Guid category1Id = Guid.NewGuid();
             Guid category2Id = Guid.NewGuid();
 
@@ -265,25 +275,16 @@ namespace EcommerceApp.Server.Data
                 .WithMany(p => p.OrderItems)
                 .HasForeignKey(oi => oi.ProductId);
 
-            // ShoppingCart Configuration
-            modelBuilder.Entity<ShoppingCart>()
-                .HasKey(sc => sc.Id);
-
-            modelBuilder.Entity<ShoppingCart>()
-                .HasOne(sc => sc.ApplicationUser)
-                .WithMany(u => u.ShoppingCarts)
-                .HasForeignKey(sc => sc.ApplicationUserId);
-
-
 
             // CartItem Configuration
             modelBuilder.Entity<CartItem>()
                 .HasKey(ci => ci.Id);
 
             modelBuilder.Entity<CartItem>()
-                .HasOne(ci => ci.ShoppingCart)
-                .WithMany(sc => sc.CartItems)
-                .HasForeignKey(ci => ci.ShoppingCartId);
+                    .HasOne(ci => ci.ShoppingCart) // Indicates CartItem has one ShoppingCart
+                    .WithMany(sc => sc.CartItems)  // Indicates ShoppingCart has many CartItems
+                    .HasForeignKey(ci => ci.ShoppingCartId) // Specifies the foreign key
+                    .OnDelete(DeleteBehavior.Cascade);  // Configures cascade delete behavior
 
             modelBuilder.Entity<CartItem>()
                 .HasOne(ci => ci.Product)

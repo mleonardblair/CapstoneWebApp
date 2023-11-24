@@ -5,7 +5,6 @@ namespace EcommerceApp.Shared.DTOs
 {
     public class AppUserDto
     {
-        public Guid? Id { get; set; }
 
         [Required, MaxLength(50)]
         public string FirstName { get; set; } = string.Empty;
@@ -15,8 +14,6 @@ namespace EcommerceApp.Shared.DTOs
 
         [Required, MaxLength(100), EmailAddress]
         public string? Email { get; set; }
-
-        public string? Password { get; set; }
 
         [Required]
         public DateTime DateCreated { get; set; } = DateTime.UtcNow;

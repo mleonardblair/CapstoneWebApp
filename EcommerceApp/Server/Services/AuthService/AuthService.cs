@@ -1,5 +1,6 @@
 ﻿using EcommerceApp.Server.Data;
 using EcommerceApp.Server.Models;
+using EcommerceApp.Shared.DTOs;
 using EcommerceApp.Shared.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -14,13 +15,15 @@ namespace EcommerceApp.Server.Services.AuthService
     {
         public readonly AppDbContext _context;
         private readonly IConfiguration _configuration;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public AuthService(AppDbContext context, IConfiguration configuration)
+        public AuthService(AppDbContext context, IConfiguration configuration, IHttpContextAccessor httpContextAccessor)
         {
             _context = context;
             _configuration = configuration;
+            _httpContextAccessor = httpContextAccessor;
         }
-
+        public Guid GetUserId() => Guid.Parse(_httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier));
         public async Task<bool> UserExists(string email)
         {
             if(await _context.ApplicationUsers.AnyAsync(x => x.Email
@@ -141,16 +144,26 @@ namespace EcommerceApp.Server.Services.AuthService
 
         }
 
-        public async Task<ServiceResponse<bool>> ChangePassword(Guid userId, string newPassword)
+        public async Task<ServiceResponse<bool>> ChangePassword(string userId, string newPassword)
         {
             var response = new ServiceResponse<bool>();
-            var user = await _context.ApplicationUsers.FindAsync(userId);
+       
+            // Convert the string userId to Guid
+            if (!Guid.TryParse(userId, out Guid userGuid))
+            {
+                response.Success = false;
+                response.Message = "Invalid user ID.";
+                return response;
+            }
+
+            var user = await _context.ApplicationUsers.FindAsync(userGuid);
             if (user == null)
             {
                 response.Success = false;
                 response.Message = "User not found.";
+                return response;
             }
-            
+
             CreatePasswordHashAndSalt(newPassword, out byte[] passwordHash, out byte[] passwordSalt);
             user.PasswordHash = passwordHash;
             user.PasswordSalt = passwordSalt;
@@ -161,5 +174,40 @@ namespace EcommerceApp.Server.Services.AuthService
 
             return response;
         }
+
+        public async Task<ServiceResponse<bool>> UpdateUser(string userId, string email, string firstName, string lastName)
+        {
+            var response = new ServiceResponse<bool>();
+
+            // Convert the string userId to Guid
+            if (!Guid.TryParse(userId, out Guid userGuid))
+            {
+                response.Success = false;
+                response.Message = "Invalid user ID.";
+                return response;
+            }
+            var user = await _context.ApplicationUsers.FindAsync(userGuid);
+
+            if (user == null)
+            {
+                response.Success = false;
+                response.Message = "User not found.";
+                return response;
+            }
+
+            // Update non-sensitive fields only
+            user.FirstName = firstName;
+            user.LastName = lastName;
+            user.Email = email ?? email;  // Avoid overwriting with null
+            user.DateModified = DateTime.UtcNow;
+
+            _context.ApplicationUsers.Update(user);
+            await _context.SaveChangesAsync();
+
+            response.Data = true;
+            response.Message = "User updated successfully.";
+            return response;
+        }
+
     }
 }

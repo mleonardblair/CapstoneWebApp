@@ -1,3 +1,4 @@
+global using EcommerceApp.Server.Services.OrderService;
 using Microsoft.Extensions.DependencyInjection;
 using EcommerceApp.Server.Services.CategoryService;
 using EcommerceApp.Server.Services.ProductService;
@@ -37,9 +38,12 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<ITagService, TagService>();
+builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IProductTagService, ProductTagService>();
 builder.Services.AddScoped<ICartService, CartService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+// Add HttpContextAccessor
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
      {

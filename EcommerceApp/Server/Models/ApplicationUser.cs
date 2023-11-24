@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using System.ComponentModel.DataAnnotations;
 using EcommerceApp.Shared.Models;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace EcommerceApp.Server.Models
 {
@@ -21,13 +22,14 @@ namespace EcommerceApp.Server.Models
         public byte[]? PasswordHash { get; set; }
         public byte[]? PasswordSalt { get; set; }
         public string? RefreshToken { get; set; }
+        public Guid? ShoppingCartId { get; set; }
 
+        public ShoppingCart ShoppingCart { get; set; }
 
         // Navigation properties for relationships
         public ICollection<UserAddress> UserAddresses { get; set; } = new List<UserAddress>();
         public ICollection<Favourite> Favourites { get; set; } = new List<Favourite>();
         public ICollection<Order> Orders { get; set; } = new List<Order>();
-        public ICollection<ShoppingCart> ShoppingCarts { get; set; } = new List<ShoppingCart>();
         public ICollection<Review> Reviews { get; set; } = new List<Review>();
         public ICollection<Report> Reports { get; set; } = new List<Report>();
     }
