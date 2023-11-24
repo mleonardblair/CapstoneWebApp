@@ -193,7 +193,7 @@ namespace EcommerceApp.Client.Services.CartService
 
         public async Task UpdateQuantity(CartItemDto cartItemDto)
         {
-            if (await IsUserAuthenticated())
+            if (await _authService.IsUserAuthenticated())
             {
                 // Update the quantity of the cart item on the server if logged in.
                 var response = await _httpClient.PutAsJsonAsync("api/cart/update-quantity", cartItemDto);
