@@ -17,5 +17,6 @@ namespace EcommerceApp.Client.Services.AuthService
         Task<ServiceResponse<bool>> ChangePassword(UserChangePassword userChangePassword);
         Task<ServiceResponse<bool>> UpdateUser(AppUserDto userDto);
         Task<bool> IsUserAuthenticated();
+        Task<string> GetUserRole();
     }
 }

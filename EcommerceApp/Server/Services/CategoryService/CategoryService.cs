@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using EcommerceApp.Client.Services.CategoryService;
 using EcommerceApp.Server.Data;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
 
 namespace EcommerceApp.Server.Services.CategoryService
 {
@@ -47,11 +48,81 @@ namespace EcommerceApp.Server.Services.CategoryService
 
             return response;
         }
+        public async Task<ServiceResponse<List<Category>>> UpdateCategory(Category category)
+        {
+            var dbCategory = await _context.Categories.FirstOrDefaultAsync(c => c.Id == category.Id);
+            if (dbCategory == null)
+            {
+                return new ServiceResponse<List<Category>>
+                {
+                    Success = false, Message = "Category not found." };
+            }
+            dbCategory.Name = category.Name;
+            dbCategory.Description = category.Description;
+            dbCategory.Visible = category.Visible;
+            dbCategory.Editing = category.Editing;
+            dbCategory.IsNew = category.IsNew;
+            await _context.SaveChangesAsync();
+            return await GetAdminCategories();
+        }
+        public async Task<ServiceResponse<List<Category>>> AddCategory(Category category)
+        {
+            category.Editing = category.IsNew = false;
+            _context.Categories.Add(category);
+            await _context.SaveChangesAsync();
+            return await GetAdminCategories();
+        }
 
+        public async Task<ServiceResponse<List<Category>>> DeleteCategory(Guid categoryId)
+        {
+            Category category = await GetCategoryById(categoryId);
+            if (category == null)
+            {
+                return new ServiceResponse<List<Category>>
+                {
+                    Success = false, Message = "Category not found." };
+            }
+
+            category.Deleted = true;
+            await _context.SaveChangesAsync();
+
+            return await GetAdminCategories();
+        }
+
+     
+        public async Task<ServiceResponse<List<Category>>> GetAdminCategories()
+        {
+            var response = new ServiceResponse<List<Category>>();
+            var categories = await _context.Categories.Where(c => !c.Deleted).ToListAsync();
+
+            if (categories == null || !categories.Any())
+            {
+                response.Success = false;
+                response.Message = "Categories are not found.";
+            }
+            else
+            {
+                response.Data = categories;
+                response.Message = "All went well.";
+            }
+            return response;
+        }
+        public async Task<Category> GetCategoryById(Guid Id)
+        {
+
+            return await _context.Categories.FirstOrDefaultAsync(e => e.Id == Id);
+            
+        }
+
+
+        /// <summary>
+        /// When called returns the categories as a list of CategoryDTOs, that are not deleted and are visible.
+        /// </summary>
+        /// <returns></returns>
         public async Task<ServiceResponse<List<CategoryDto>>> GetAllCategoriesAsync()
         {
             var response = new ServiceResponse<List<CategoryDto>>();
-            var categories = await _context.Categories.ToListAsync();
+            var categories = await _context.Categories.Where(c=>!c.Deleted && c.Visible).ToListAsync();
 
             if (categories == null || !categories.Any())
             {
@@ -186,5 +257,6 @@ namespace EcommerceApp.Server.Services.CategoryService
             return response;
         }
 
+       
     }
 }

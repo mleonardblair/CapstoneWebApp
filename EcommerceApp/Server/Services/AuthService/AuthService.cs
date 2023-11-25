@@ -119,6 +119,7 @@ namespace EcommerceApp.Server.Services.AuthService
             {
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
                 new Claim(ClaimTypes.Name, user.Email),
+                new Claim(ClaimTypes.Role, user.Role)
             };  
 
             // Create new instance of symmetric security key using the secret key stored in appsettings.json

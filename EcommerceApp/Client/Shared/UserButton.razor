@@ -10,7 +10,15 @@
     <div class="dropdown-menu dropdown-menu-right my-custom-dropdown @UserMenuCssClass">
         <AuthorizeView>
             <Authorized>
-                <a href="account-management" class="dropdown-item">My Account</a>
+                @if (context.User.IsInRole("Customer"))
+                {
+                    <a href="account-dashboard" class="dropdown-item">Account Dashboard</a>
+                }
+                else if (context.User.IsInRole("Admin"))
+                {
+                    <a href="admin-dashboard" class="dropdown-item">Admin Dashboard</a>
+                }
+                <AdminMenu/>
                 <button class="dropdown-item" @onclick="Logout">Logout</button>
             </Authorized>
             <NotAuthorized>
