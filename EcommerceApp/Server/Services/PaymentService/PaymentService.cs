@@ -60,6 +60,10 @@ namespace EcommerceApp.Server.Services.PaymentService
             var options = new SessionCreateOptions
             {
                 CustomerEmail = _authService.GetUserEmail(),
+                ShippingAddressCollection = new SessionShippingAddressCollectionOptions
+                {
+                    AllowedCountries = new List<string>{"CA"}
+                },
                 PaymentMethodTypes = new List<string>
                 {
                     "card"
@@ -75,7 +79,7 @@ namespace EcommerceApp.Server.Services.PaymentService
             return session;
         }
 
-        public async Task<ServiceResponse<bool>> FulfillOrder(HttpRequest request)
+        public async Task<ServiceResponse<bool>> FulfillOrderAsync(HttpRequest request)
         {
             var json = await new StreamReader(request.Body).ReadToEndAsync();
             try {

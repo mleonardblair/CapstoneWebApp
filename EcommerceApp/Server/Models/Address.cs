@@ -10,23 +10,18 @@ namespace EcommerceApp.Server.Models
         public Guid Id { get; set; } = Guid.NewGuid();
 
         [Required, MaxLength(255)]
-        public string? AddressLine { get; set; }
+        public string AddressLine { get; set; } = string.Empty;
 
         [Required, MaxLength(100)]
-        public string? City { get; set; }
+        public string City { get; set; } = string.Empty;
 
-        [Required, MaxLength(50)]
-        public string? Province { get; set; }
+        [Required, MaxLength(50)] public string Province { get; set; } = string.Empty;    
 
-        [Required, MaxLength(50)]
-        public string? Country { get; set; }
+        [Required, MaxLength(50)] public string Country { get; set; } = string.Empty;
 
         [MaxLength(50)]
-        public string? PostalCode { get; set; }
-        [Required]
-        public DateTime DateCreated {  get; set; }= DateTime.UtcNow;
+        public string PostalCode { get; set; } = string.Empty;
         public DateTime DateModified {  get; set; }
-        public AddressType AddressType {  get; set; }
 
         public ICollection<UserAddress> UserAddresses { get; set; } = new List<UserAddress>();
     }

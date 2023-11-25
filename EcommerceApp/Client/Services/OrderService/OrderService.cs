@@ -24,7 +24,7 @@ namespace EcommerceApp.Client.Services.OrderService
             return (await _authStateProvider.GetAuthenticationStateAsync()).User.Identity.IsAuthenticated;
         }
         /// <summary>
-        /// 
+        /// When called, returns a url that is a redirect to the stripe order checkout. This method is called when the user clicks the checkout button on the cart page.
         /// </summary>
         /// <returns></returns>
         public async Task<string> PlaceOrderAsync()

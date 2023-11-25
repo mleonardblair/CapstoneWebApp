@@ -8,7 +8,7 @@ namespace EcommerceApp.Server.Services.OrderService
 {
     public interface IOrderService
     {
-        Task<ServiceResponse<bool>> PlaceOrderAsync();
+        Task<ServiceResponse<bool>> PlaceOrderAsync(Guid userId);
         Task<ServiceResponse<OrderDto>> CreateOrderAsync(OrderDto orderDto);
         Task<ServiceResponse<OrderDto>> GetOrderByIdAsync(Guid orderId);
         Task<ServiceResponse<OrderDto>> UpdateOrderByIdAsync(Guid orderId, OrderDto orderDto);

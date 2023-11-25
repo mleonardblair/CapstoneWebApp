@@ -1,0 +1,87 @@
+﻿@inject IAddressService AddressService
+
+
+@if(address == null)
+{
+    <span>You haven't specified a delivery address, yet.
+        <button class="btn" @onclick="InitAddress">Add an address?</button>
+    </span>
+}
+else if (!editAddress)
+{
+    <p>
+        <span>@address.FirstName @address.LastName</span>
+        <span>@address.AddressLine</span>
+        <span>@address.City, @address.Province, @address.PostalCode</span>
+        <span>@address.Country</span>
+        <button class="btn" @onclick="EditAddress">Edit</button>
+    </p>
+}
+else
+{
+    <EditForm Model="address" OnSubmit="SubmitAddress">
+        <div class="mb-3">
+            <label for="firstname">FirstName</label>
+            <InputText id="firstname" @bind-Value="address.FirstName" class="form-control" />
+        </div>
+        <div class="mb-3">
+            <label for="lastname">LastName</label>
+            <InputText id="lastname" @bind-Value="address.LastName" class="form-control" />
+        </div>
+        <div class="mb-3">
+            <label for="addressline">Address Line</label>
+            <InputText id="addressline" @bind-Value="address.AddressLine" class="form-control" />
+        </div>
+        <div class="mb-3">
+            <label for="city">City</label>
+            <InputText id="city" @bind-Value="address.City" class="form-control" />
+        </div>
+        <div class="mb-3">
+            <label for="province">Province</label>
+            <InputText id="province" @bind-Value="address.Province" class="form-control" />
+        </div>
+        <div class="mb-3">
+            <label for="postalcode">Postal Code</label>
+            <InputText id="postalcode" @bind-Value="address.PostalCode" class="form-control" />
+        </div>
+        <div class="mb-3">
+            <label for="country">Country</label>
+            <InputText id="country" @bind-Value="address.Country" class="form-control" />
+        </div>
+        <button type="submit" class="btn btn-primary">Save</button>
+    </EditForm>
+}
+<h3>AddressForm</h3>
+
+@code {
+    List<AddressDto> addresses = new List<AddressDto>();
+    AddressDto address = null;
+    bool editAddress = false;
+
+    protected async override Task OnInitializedAsync()
+    {
+        addresses = await AddressService.GetAddressesAsync();
+    }
+
+    private async Task SubmitAddress()
+    {
+        editAddress = false;
+        address = await AddressService.AddOrUpdateAddressAsync(address);
+    }
+
+    // Resets address to null and editAddress to false
+    private void InitAddress()
+    {
+        address = new AddressDto();
+        editAddress = true;
+    }
+
+    /// <summary>
+    /// When called sets editAddress mode to true
+    /// </summary>
+    private void EditAddress()
+    {
+        editAddress = true;
+    }
+
+}

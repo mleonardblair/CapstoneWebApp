@@ -7,6 +7,6 @@ namespace EcommerceApp.Server.Services.PaymentService
     {
         
         Task<Session> CreateCheckoutSessionAsync();
-        Task<ServiceResponse<bool>> FulfillOrder(HttpRequest request);
+        Task<ServiceResponse<bool>> FulfillOrderAsync(HttpRequest request);
     }
 }

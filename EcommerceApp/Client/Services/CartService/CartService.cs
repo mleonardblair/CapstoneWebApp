@@ -86,6 +86,15 @@ namespace EcommerceApp.Client.Services.CartService
 
         public async Task RemoveProductFromCart(Guid productId)
         {
+            if(await _authService.IsUserAuthenticated())
+            {
+                // Remove the cart item from the server if logged in.
+                var response = await _httpClient.DeleteAsync($"api/cart/remove/{productId}");
+                Console.WriteLine("Remove cart item from server.");
+            } else
+            {
+                Console.WriteLine("User is NOT authenticated");
+            }
             var cart = await _localStorage.GetItemAsync<List<CartItemDto>>("cart");
             if (cart == null)
             {
