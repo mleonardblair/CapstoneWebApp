@@ -23,6 +23,7 @@ namespace EcommerceApp.Server.Models
         public byte[]? PasswordSalt { get; set; }
         public string? RefreshToken { get; set; }
         public Guid? ShoppingCartId { get; set; }
+        public string Role { get; set; } = "Customer"; // default role
 
         public ShoppingCart ShoppingCart { get; set; }
 

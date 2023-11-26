@@ -4,6 +4,7 @@ using EcommerceApp.Server.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EcommerceApp.Server.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20231125124830_AddCategoryFlags")]
+    partial class AddCategoryFlags
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -33,6 +35,9 @@ namespace EcommerceApp.Server.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
 
+                    b.Property<int>("AddressType")
+                        .HasColumnType("int");
+
                     b.Property<string>("City")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -43,11 +48,13 @@ namespace EcommerceApp.Server.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
+                    b.Property<DateTime>("DateCreated")
+                        .HasColumnType("datetime2");
+
                     b.Property<DateTime>("DateModified")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("PostalCode")
-                        .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
@@ -489,57 +496,56 @@ namespace EcommerceApp.Server.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("84eaaffe-46df-45a2-9016-4016f93cbd88"),
-                            DateCreated = new DateTime(2023, 11, 25, 2, 9, 1, 288, DateTimeKind.Utc).AddTicks(35),
+                            Id = new Guid("90dd64c3-c7dd-4fe2-9c89-237600beedf0"),
+                            DateCreated = new DateTime(2023, 11, 25, 12, 48, 30, 471, DateTimeKind.Utc).AddTicks(7863),
                             DateModified = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Description = "Outdoor and indoor ornaments that add flair to living spaces and gardens.",
                             Name = "Ornament"
                         },
                         new
                         {
-                            Id = new Guid("b5722d41-34f3-4002-88c6-75aac65bd0c7"),
-                            DateCreated = new DateTime(2023, 11, 25, 2, 9, 1, 288, DateTimeKind.Utc).AddTicks(43),
+                            Id = new Guid("bb8400ca-b9d7-4fc1-b996-cfaef82e811a"),
+                            DateCreated = new DateTime(2023, 11, 25, 12, 48, 30, 471, DateTimeKind.Utc).AddTicks(7869),
                             DateModified = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Description = "Items related to garden decorations and maintenance, including plants, tools, and accessories.",
                             Name = "Garden"
                         },
                         new
                         {
-                            Id = new Guid("f0c2ade4-1352-4333-9796-6aa5a0a8f786"),
-                            DateCreated = new DateTime(2023, 11, 25, 2, 9, 1, 288, DateTimeKind.Utc).AddTicks(46),
+                            Id = new Guid("1497de30-f97e-4b4e-8dc2-df9d1db416ce"),
+                            DateCreated = new DateTime(2023, 11, 25, 12, 48, 30, 471, DateTimeKind.Utc).AddTicks(7870),
                             DateModified = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Description = "Circular arrangements of flowers, leaves, or other materials, often used for decorative purposes or special occasions.",
                             Name = "Wreaths"
                         },
                         new
                         {
-                            Id = new Guid("b24a1cd1-6ea9-47d7-96da-f35892399c13"),
-                            DateCreated = new DateTime(2023, 11, 25, 2, 9, 1, 288, DateTimeKind.Utc).AddTicks(58),
+                            Id = new Guid("9106a695-00a0-49e0-8e2d-cd2ae9271c3a"),
+                            DateCreated = new DateTime(2023, 11, 25, 12, 48, 30, 471, DateTimeKind.Utc).AddTicks(7883),
                             DateModified = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Description = "A form of textile produced using knotting techniques, often used for wall hangings, plant hangers, and more.",
                             Name = "Macrame"
                         },
                         new
                         {
-                            Id = new Guid("73be4b7e-44e7-456b-a84d-aaff96bef90d"),
-                            DateCreated = new DateTime(2023, 11, 25, 2, 9, 1, 288, DateTimeKind.Utc).AddTicks(60),
-
+                            Id = new Guid("c4aa03dc-83b0-448b-b9db-a459f3717109"),
+                            DateCreated = new DateTime(2023, 11, 25, 12, 48, 30, 471, DateTimeKind.Utc).AddTicks(7884),
                             DateModified = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Description = "The art of beautiful handwriting, often used in invitations, letters, and decorative texts.",
                             Name = "Calligraphy"
                         },
                         new
                         {
-                            Id = new Guid("1d8b35e5-4868-49ff-addb-f0fa4def48e2"),
-                            DateCreated = new DateTime(2023, 11, 25, 2, 9, 1, 288, DateTimeKind.Utc).AddTicks(63),
+                            Id = new Guid("78d562da-0149-4348-b68d-7486b99215d4"),
+                            DateCreated = new DateTime(2023, 11, 25, 12, 48, 30, 471, DateTimeKind.Utc).AddTicks(7886),
                             DateModified = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Description = "The craft of decorating fabric using a needle to apply thread or yarn, often used in apparel, home decor, and artworks.",
                             Name = "Embroidery"
                         },
                         new
                         {
-                            Id = new Guid("7bba214d-ee01-44a0-9d04-bb5fbe8fca58"),
-                            DateCreated = new DateTime(2023, 11, 25, 2, 9, 1, 288, DateTimeKind.Utc).AddTicks(65),
+                            Id = new Guid("4477cd92-8691-4d5c-af16-d5455295c1a2"),
+                            DateCreated = new DateTime(2023, 11, 25, 12, 48, 30, 471, DateTimeKind.Utc).AddTicks(7887),
                             DateModified = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Description = "Items that serve a decorative purpose, enhancing the aesthetics of a space without serving a practical function.",
                             Name = "Decorative"
@@ -564,10 +570,6 @@ namespace EcommerceApp.Server.Migrations
 
                     b.Property<DateTime>("DateCreated")
                         .HasColumnType("datetime2");
-
-                    b.Property<string>("Details")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 

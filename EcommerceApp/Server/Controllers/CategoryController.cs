@@ -43,11 +43,37 @@ namespace EcommerceApp.Server.Controllers
             var result = await _categoryService.GetAllCategoriesAsync();
             return Ok(result);
         }
-
         [HttpGet("{categoryId}")]
         public async Task<ActionResult<ServiceResponse<List<Category>>>> GetCategoryByIdAsync(Guid categoryId)
         {
             var result = await _categoryService.GetCategoryByIdAsync(categoryId);
+            return Ok(result);
+        }
+        [HttpGet("admin/{categoryId}"), Authorize(Roles ="Admin")]
+        public async Task<ActionResult<ServiceResponse<List<Category>>>> GetAdminCategories()
+        {
+            var result = await _categoryService.GetAdminCategories();
+            return Ok(result);
+        }
+
+        [HttpDelete("admin"), Authorize(Roles = "Admin")]
+        public async Task<ActionResult<ServiceResponse<List<Category>>>> DeleteCategory(Guid id)
+        {
+            var result = await _categoryService.DeleteCategory(id);
+            return Ok(result);
+        }
+
+        [HttpPost("admin"), Authorize(Roles = "Admin")]
+        public async Task<ActionResult<ServiceResponse<List<Category>>>> AddCategory(Category category)
+        {
+            var result = await _categoryService.AddCategory(category);
+            return Ok(result);
+        }
+
+        [HttpPut("admin"), Authorize(Roles = "Admin")]
+        public async Task<ActionResult<ServiceResponse<List<Category>>>> UpdateCategory(Category category)
+        {
+            var result = await _categoryService.UpdateCategory(category);
             return Ok(result);
         }
     }

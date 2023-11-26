@@ -2,6 +2,7 @@
 using EcommerceApp.Shared.DTOs;
 using EcommerceApp.Shared.Models;
 using System.Net.Http.Json;
+using System.Security.Claims;
 
 namespace EcommerceApp.Client.Services.AuthService
 {
@@ -33,7 +34,13 @@ namespace EcommerceApp.Client.Services.AuthService
                 };
             }
         }
-
+        // get the user role from the claims principal that is currently logged in
+        public async Task<string> GetUserRole()
+        {
+            var authState = await _authStateProvider.GetAuthenticationStateAsync();
+            var userRole = authState.User.FindFirst(c => c.Type == ClaimTypes.Role);
+            return userRole?.Value;
+        }
         public async Task<bool> IsUserAuthenticated()
         {
             return (await _authStateProvider.GetAuthenticationStateAsync()).User.Identity.IsAuthenticated;

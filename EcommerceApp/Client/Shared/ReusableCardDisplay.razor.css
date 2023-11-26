@@ -1,0 +1,15 @@
+﻿.icon-container {
+    height: 100px; /* Fixed height */
+    width: 100px; /* Fixed width */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #ccc; /* For the wrapper if needed */
+    margin: 10px; /* Adjust spacing around the icon containers */
+}
+
+    .icon-container img {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain; /* This ensures the aspect ratio is maintained */
+    }

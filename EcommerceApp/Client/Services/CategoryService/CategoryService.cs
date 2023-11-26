@@ -9,10 +9,11 @@ namespace EcommerceApp.Client.Services.CategoryService
         private readonly HttpClient _http;
         public string Message { get; set; } = "Loading categories...";
         public List<CategoryDto> Categories { get ; set; } = new List<CategoryDto>();
+        public List<CategoryDto> AdminCategories { get; set; } = new List<CategoryDto>();
         public CategoryDto Category { get; set; } = new CategoryDto();
 
         // This event will be used to notify subscribers that the categories have changed
-        public event Action CategoriesChanged;
+        public event Action OnChange;
         public CategoryService(HttpClient http)
         {
             _http = http;
@@ -25,22 +26,14 @@ namespace EcommerceApp.Client.Services.CategoryService
 
                 var result = await _http.GetFromJsonAsync<ServiceResponse<List<CategoryDto>>>("api/categories");
                 if (result != null && result.Data != null)
-                {
                     Categories = result.Data;
-                    Console.WriteLine($"Server Message: {result.Message}");
-                    Console.WriteLine("Successfully retrieved categories.");
                     // Notify subscribers that the products have changed
-                }
-                else
-                {
-                    Console.WriteLine("Received null or empty response from the server.");
-                }
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"An error occurred: {ex.Message}");
             }
-            CategoriesChanged?.Invoke();
+            OnChange.Invoke();
         }
 
 
@@ -62,6 +55,54 @@ namespace EcommerceApp.Client.Services.CategoryService
             return result;
         }
 
+
+        public async Task GetAdminCategories()
+        {
+           var response = await _http.GetFromJsonAsync<ServiceResponse<List<CategoryDto>>>("api/categories/admin");
+            if (response != null && response?.Data != null)
+                Categories = response.Data;
+           
+        }
+
+        public Task GetCategoryById(Guid categoryId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task AddCategory(CategoryDto categoryDto)
+        {
+            var response = await _http.PostAsJsonAsync("api/categories/admin", categoryDto);
+            AdminCategories = (await response.Content.ReadFromJsonAsync<ServiceResponse<List<CategoryDto>>>()).Data;
+            await GetAllCategoriesAsync();
+            OnChange.Invoke();
+        }
+
+        public async Task UpdateCategory(CategoryDto categoryDto)
+        {
+            var response = await _http.PutAsJsonAsync("api/categories/admin", categoryDto);
+            AdminCategories = (await response.Content.ReadFromJsonAsync<ServiceResponse<List<CategoryDto>>>()).Data;
+            await GetAllCategoriesAsync();
+            OnChange.Invoke();
+        }
+
+        public async Task DeleteCategory(Guid categoryId)
+        {
+             var response = await _http.DeleteAsync($"api/categories/admin/{categoryId}");
+            AdminCategories = (await response.Content.ReadFromJsonAsync<ServiceResponse<List<CategoryDto>>>()).Data;
+            await GetAllCategoriesAsync();
+            OnChange.Invoke();
+        }
+
+        public CategoryDto CreateNewCategory() { 
+           var newCategory = new CategoryDto
+           {
+                IsNew = true,
+                Editing = true
+            };
+            AdminCategories.Add(newCategory);
+            OnChange.Invoke();
+            return newCategory;
+        }
     }
 }
 
