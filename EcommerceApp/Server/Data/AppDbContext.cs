@@ -112,30 +112,30 @@ namespace EcommerceApp.Server.Data
                 .HasMaxLength(100);
 
             // Address Configuration
-            modelBuilder.Entity<Server.Models.Address>()
+            modelBuilder.Entity<Address>()
                 .HasKey(a => a.Id);
 
-            modelBuilder.Entity<Server.Models.Address>()
+            modelBuilder.Entity<Address>()
                 .Property(a => a.AddressLine)
                 .IsRequired()
                 .HasMaxLength(255);
 
-            modelBuilder.Entity<Server.Models.Address>()
+            modelBuilder.Entity<Address>()
                 .Property(a => a.City)
                 .IsRequired()
                 .HasMaxLength(100);
 
-            modelBuilder.Entity<Server.Models.Address>()
+            modelBuilder.Entity<Address>()
                 .Property(a => a.Province)
                 .IsRequired()
                 .HasMaxLength(50);
 
-            modelBuilder.Entity<Server.Models.Address>()
+            modelBuilder.Entity<Address>()
                 .Property(a => a.Country)
                 .IsRequired()
                 .HasMaxLength(50);
 
-            modelBuilder.Entity<Server.Models.Address>()
+            modelBuilder.Entity<Address>()
                 .Property(a => a.PostalCode)
                 .HasMaxLength(50);
 

@@ -12,5 +12,7 @@ namespace EcommerceApp.Server.Services.AuthService
         Task<ServiceResponse<bool>> ChangePassword(string userId, string password);
         Task<ServiceResponse<bool>> UpdateUser(string userId, string email, string firstName, string lastName);
         Guid GetUserId();
+        string GetUserEmail();
+        Task<ApplicationUser> GetApplicationUserByEmail(string email);
     }
 }

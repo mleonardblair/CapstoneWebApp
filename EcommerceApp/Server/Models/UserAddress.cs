@@ -10,6 +10,7 @@ namespace EcommerceApp.Server.Models
     {
         [Key]
         public Guid Id { get; set; } = Guid.NewGuid();
+        public string Details { get; set; } = string.Empty;
 
         [Required]
         public Guid ApplicationUserId { get; set; }  // Changed type to string

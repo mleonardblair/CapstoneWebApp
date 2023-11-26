@@ -20,7 +20,7 @@ namespace EcommerceApp.Server.Controllers
         }
 
         [HttpPut("update-quantity")]
-        public async Task<ActionResult<ServiceResponse<CartItemDto>>> UpdateQuantity(CartItemDto cartItemDto)
+        public async Task<ActionResult<ServiceResponse<bool>>> UpdateQuantity(CartItemDto cartItemDto)
         {
             return Ok(await _cartService.UpdateQuantity(cartItemDto));
         }
@@ -29,8 +29,14 @@ namespace EcommerceApp.Server.Controllers
         public async Task<ActionResult<ServiceResponse<List<CartItemDto>>>> GetCartItemsForUser()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            Guid.TryParse(userId, out Guid userIdGuid);
-            return Ok(await _cartService.GetCartItemsByUserId(userIdGuid));
+            if(Guid.TryParse(userId, out Guid userIdGuid)){
+                var result = await _cartService.GetCartItemsByUserId(userIdGuid);
+                if(result != null)
+                {
+                    return Ok(result);
+                }
+            }
+            return BadRequest();
         }
         [HttpPost("add")]
         public async Task<ActionResult<ServiceResponse<CartItemDto>>> AddCartItem(CartItemDto cartItemDto)
@@ -57,10 +63,10 @@ namespace EcommerceApp.Server.Controllers
             return Ok(result);
         }
 
-        [HttpDelete("remove/{cartItemId}")]
-        public async Task<ActionResult<ServiceResponse<bool>>> RemoveCartItemById(Guid cartItemId)
+        [HttpDelete("remove/{productId}")]
+        public async Task<ActionResult<ServiceResponse<bool>>> RemoveCartItemById(Guid productId)
         {
-            return Ok(await _cartService.RemoveCartItemById(cartItemId));
+            return Ok(await _cartService.RemoveCartItemById(productId));
         }
 
         [HttpGet("{Id}")]

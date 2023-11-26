@@ -24,6 +24,7 @@ namespace EcommerceApp.Server.Services.AuthService
             _httpContextAccessor = httpContextAccessor;
         }
         public Guid GetUserId() => Guid.Parse(_httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier));
+        public string GetUserEmail() => _httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.Name);
         public async Task<bool> UserExists(string email)
         {
             if(await _context.ApplicationUsers.AnyAsync(x => x.Email
@@ -37,25 +38,20 @@ namespace EcommerceApp.Server.Services.AuthService
 
         private void CreatePasswordHashAndSalt(string password, out byte[] passwordHash, out byte[] passwordSalt)
         {
-            using (var hmac = new HMACSHA512())
-            {
-                passwordSalt = hmac.Key;
-                passwordHash = hmac
-                    .ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
-
-            }
+            using var hmac = new HMACSHA512();
+            passwordSalt = hmac.Key;
+            passwordHash = hmac
+                .ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
         }
 
         private bool VerifyPasswordHashAndSalt(string password,  byte[] passwordHash, byte[] passwordSalt)
         {
-              using (var hmac = new HMACSHA512(passwordSalt))
-            {
-                var computedHash = hmac
-                    .ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
+            using var hmac = new HMACSHA512(passwordSalt);
+            var computedHash = hmac
+                .ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
 
-               return computedHash.SequenceEqual(passwordHash);
-            }
-           
+            return computedHash.SequenceEqual(passwordHash);
+
         }
         public async Task<ServiceResponse<Guid>> Register(ApplicationUser appUser, string password)
         {
@@ -115,7 +111,7 @@ namespace EcommerceApp.Server.Services.AuthService
         private string CreateToken(ApplicationUser user)
         {
             // Create new instance of claims with two claims: NameIdentifier and Name. Claims are used to store information about the user in the token.
-            List<Claim> claims = new List<Claim>
+            List<Claim> claims = new()
             {
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
                 new Claim(ClaimTypes.Name, user.Email),
@@ -210,5 +206,10 @@ namespace EcommerceApp.Server.Services.AuthService
             return response;
         }
 
+
+        public async Task<ApplicationUser> GetApplicationUserByEmail(string email)
+        {
+            return await _context.ApplicationUsers.FirstOrDefaultAsync(i => i.Email.Equals(email));
+        }
     }
 }

@@ -23,19 +23,22 @@ namespace EcommerceApp.Client.Services.OrderService
         {
             return (await _authStateProvider.GetAuthenticationStateAsync()).User.Identity.IsAuthenticated;
         }
-        public async Task PlaceOrderAsync()
+        /// <summary>
+        /// When called, returns a url that is a redirect to the stripe order checkout. This method is called when the user clicks the checkout button on the cart page.
+        /// </summary>
+        /// <returns></returns>
+        public async Task<string> PlaceOrderAsync()
         {
             if(await IsUserAuthenticated())
             {
-                var response = await _httpClient.PostAsync("api/orders", null);
-                if (response.IsSuccessStatusCode)
-                {
-                    _navigationManager.NavigateTo("/orders");
-                }
+                var result = await _httpClient.PostAsync("api/payment/checkout", null);
+                var url = await result.Content.ReadAsStringAsync();
+                return url;
+             
             }
             else
             {
-                _navigationManager.NavigateTo("/login");
+                return "login";
             }
 
         }

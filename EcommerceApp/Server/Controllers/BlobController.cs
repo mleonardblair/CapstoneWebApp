@@ -25,9 +25,21 @@ namespace EcommerceApp.Server.Controllers
                 var blobContainerClient = _blobServiceClient.GetBlobContainerClient("products");
                 var blobClient = blobContainerClient.GetBlobClient(file.FileName);
 
+                // Determine the content type from the file
+                var contentType = file.ContentType;
+
                 using (var stream = file.OpenReadStream())
                 {
-                    await blobClient.UploadAsync(stream);
+                    // Set the content type for the blob
+                    var blobHttpHeader = new Azure.Storage.Blobs.Models.BlobHttpHeaders
+                    {
+                        ContentType = contentType
+                    };
+
+                    await blobClient.UploadAsync(stream, new Azure.Storage.Blobs.Models.BlobUploadOptions
+                    {
+                        HttpHeaders = blobHttpHeader
+                    });
                 }
 
                 result.FileUrl = blobClient.Uri.AbsoluteUri;
@@ -41,6 +53,7 @@ namespace EcommerceApp.Server.Controllers
             }
             return result;
         }
+
 
         [HttpPost("upload")]
         public async Task<ActionResult<ServiceResponse<BlobUploadResult>>> Upload(IFormFile file)

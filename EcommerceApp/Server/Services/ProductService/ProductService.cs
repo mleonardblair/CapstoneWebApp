@@ -550,7 +550,7 @@ namespace EcommerceApp.Server.Services.ProductService
         {
             var products = await FindProductsBySearchQuery(searchQuery);
 
-            List<string> result = new List<string>();
+            List<string> result = new();
             foreach(var product in products)
             {
                 if (product.Name.Contains(searchQuery, StringComparison.OrdinalIgnoreCase))

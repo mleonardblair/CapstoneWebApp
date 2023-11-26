@@ -96,9 +96,13 @@ namespace EcommerceApp.Server.Services.OrderService
             return response;
         }
 
-        public async Task<ServiceResponse<bool>> PlaceOrderAsync()
+        /// <summary>
+        /// Place order function takes the user id guid to pass to the weebhook
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        public async Task<ServiceResponse<bool>> PlaceOrderAsync(Guid userId)
         {
-            var userId = _authService.GetUserId();
             var cartItems = (await _cartService.GetCartItemsByUserId(userId)).Data;
             if (!cartItems.Any())
             {

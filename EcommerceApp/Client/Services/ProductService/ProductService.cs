@@ -31,7 +31,7 @@ namespace EcommerceApp.Client.Services.ProductService
         public event Action ProductsChanged;
         public async Task<ServiceResponse<ProductDto>> CreateProductAsync(ProductDto product)
         {
-            ServiceResponse<ProductDto> result = new ServiceResponse<ProductDto>();
+            ServiceResponse<ProductDto> result = new();
 
             var productResponse = await _http.PostAsJsonAsync("api/products/create", product);
             if (productResponse.IsSuccessStatusCode)

@@ -1,15 +1,16 @@
 global using EcommerceApp.Server.Services.OrderService;
-using Microsoft.Extensions.DependencyInjection;
-using EcommerceApp.Server.Services.CategoryService;
-using EcommerceApp.Server.Services.ProductService;
-using EcommerceApp.Server.Data;
+global using EcommerceApp.Server.Services.PaymentService;
+global using EcommerceApp.Server.Services.CartService;
+global using EcommerceApp.Server.Services.AuthService;
+global using EcommerceApp.Server.Services.AddressService;
+global using EcommerceApp.Server.Services.TagService;
+global using EcommerceApp.Server.Services.ProductTagService;
+global using EcommerceApp.Server.Services.CategoryService;
+global using EcommerceApp.Server.Services.ProductService;
+global using EcommerceApp.Server.Data;
 using Microsoft.EntityFrameworkCore;
-using EcommerceApp.Server.Services.TagService;
-using EcommerceApp.Server.Services.ProductTagService;
 using Azure.Storage.Blobs;
 using Microsoft.OpenApi.Models;
-using EcommerceApp.Server.Services.CartService;
-using EcommerceApp.Server.Services.AuthService;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
@@ -36,10 +37,12 @@ builder.Services.AddAutoMapper(typeof(MappingProfile).Assembly);
 builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddScoped<IProductService, ProductService>();
+builder.Services.AddScoped<IAddressService, AddressService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<ITagService, TagService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IProductTagService, ProductTagService>();
+builder.Services.AddScoped<IPaymentService, PaymentService>();
 builder.Services.AddScoped<ICartService, CartService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 // Add HttpContextAccessor

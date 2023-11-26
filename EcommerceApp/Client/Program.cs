@@ -1,4 +1,5 @@
 global using Microsoft.AspNetCore.Components.Authorization;
+global using EcommerceApp.Client.Services.AddressService;
 using Azure.Storage.Blobs;
 using Blazored.LocalStorage;
 using EcommerceApp.Client;
@@ -13,6 +14,7 @@ using MudBlazor.Services;
 using System;
 using MudBlazor;
 using EcommerceApp.Client.Services.OrderService;
+using EcommerceApp.Client.Services.AddressService;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.Services.AddMudServices(config =>
@@ -40,6 +42,7 @@ builder.Services.AddScoped<ICartService, CartService>();
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<ITagService, TagService>();
+builder.Services.AddScoped<IAddressService, AddressService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddOptions();

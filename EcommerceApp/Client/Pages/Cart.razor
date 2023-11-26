@@ -1,34 +1,31 @@
 ﻿@attribute [Route(RouteConstants.ShoppingCart)]
 @inject ICartService CartService
 @inject IOrderService OrderService
+@inject IAddressService AddressService
+@inject NavigationManager NavigationManager
 @implements IDisposable
 @inject IAuthService AuthService
 @inject AuthenticationStateProvider AuthStateProvider
 <PageTitle>Shopping Cart</PageTitle>
+<MudMainContent>
+<MudContainer>
+
 <h3> Shopping Cart </h3>
 
-@if (cartProducts == null || cartProducts.Count == 0)
-{
-    <MudText Typo="Typo.body1">
-        @message
-    </MudText>
-    <MudImage Src="/emptycart.png"
-          Alt=" a highly stylized empty shopping cart adorned with vines, suitable for an ecommerce website and set against a white background"
-          Style="max-width:300px; max-height:300px; object-fit:contain;" />
-}
-else if (orderPlaced)
-{
-    <MudText Typo="Typo.body1">
-        Thanks For Your Order!
-    </MudText>
-    <div class="display: flex; align-items:center; justify-content:center">
-        <MudImage 
-            Src="/successcheckout.png" 
-            Alt="A highly stylized 2.5D image representing a successful order for an ecommerce website. The image includes a large, vibrant green checkmark in the center" 
-            Style="max-width:300px; max-height:300px; object-fit:contain;" />
-    </div>
-}else
-{
+    @if (cartProducts == null || cartProducts.Count == 0)
+    {
+        <MudText Typo="Typo.body1">
+            @message
+        </MudText>
+        if (!message.Equals("Loading Cart..."))
+        {
+            <MudImage Src="/emptycart.png"
+              Alt=" a highly stylized empty shopping cart adorned with vines, suitable for an ecommerce website and set against a white background"
+              Style="max-width:300px; max-height:300px; object-fit:contain;" />
+        }
+    }
+    else
+    {
     
         <div style="display:flex; flex-direction:row">
             <MudPaper Style="display:flex; flex-direction:column; align-items:center; justify-content:flex-start; padding: 2rem; min-height: 50vh; width:80%; max-width:1000px; margin: 2rem auto; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
@@ -62,18 +59,18 @@ else if (orderPlaced)
                                             <MudIconButton Color="Color.Dark" Icon="@Icons.Material.Filled.RemoveCircleOutline" OnClick="@( () => Decrement(product))" Size="Size.Small" />
 
                                             <MudNumericField Variant="Variant.Text"
-                                                     Style="width:100px; margin:auto; text-align:center; border: 1px solid black;"
-                                                     Class="px-md-2"
-                                                     @bind-Value="@product.Quantity"
-                                                                      ReadOnly Min="1"
-                                                     Max="99"
-                                                                      DisableUnderLine
-                                                                      HideSpinButtons />
+                                                        Style="width:100px; margin:auto; text-align:center; border: 1px solid black;"
+                                                        Class="px-md-2"
+                                                        @bind-Value="@product.Quantity"
+                                                                        ReadOnly Min="1"
+                                                        Max="99"
+                                                                        DisableUnderLine
+                                                                        HideSpinButtons />
 
                                             <MudIconButton Color="Color.Dark" Icon="@Icons.Material.Filled.AddCircleOutline" OnClick="@( () => Increment(product))" Size="Size.Small" />
                                         </div>
                                         <div class="d-flex justify-content-end">
-                                             <MudButton Color="Color.Error" Variant="Variant.Outlined" OnClick="@( () => RemoveProductFromCart(product.ProductId))">Remove</MudButton>
+                                                <MudButton Color="Color.Error" Variant="Variant.Outlined" OnClick="@( () => RemoveProductFromCart(product.ProductId))">Remove</MudButton>
                                         </div>
                                     </MudCardActions>
                                 </MudCard>
@@ -82,18 +79,40 @@ else if (orderPlaced)
                     </MudList>
                 </div>
             </MudPaper>
-
+        @if (isAuthenticated)
+        {
+            <div>
+                <MudPaper Style="display:flex; flex-direction:column; align-items:center; justify-content:flex-start; padding: 2rem; min-height: 50vh; width:20%; max-width:300px; margin: 2rem auto; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <MudText Typo="Typo.h6">Delivery Address</MudText>
+                    <AddressForm />
+                </MudPaper>
+            </div>
+        }
         <div class="display: flex; align-items:center; justify-content:center">
-            <MudButton Color="Color.Success" Variant="Variant.Outlined" OnClick="@( () =>Placeorder())">Place Order</MudButton>
+            <MudButton Color="Color.Success" Variant="Variant.Outlined" OnClick="@( () =>Placeorder())">Checkout</MudButton>
         </div>
     </div>
-
-}
+    }
+    </MudContainer>
+</MudMainContent>
 @code {
     bool orderPlaced = false;
     List<CartProductResponse> cartProducts = new List<CartProductResponse>();
     string message = "Loading Cart...";
+    bool isAuthenticated = false; // flag to check if the user is authenticated controls the visibility of the address
 
+    /// <summary>
+    /// When called sets isAuthenticated to true and loads the cart, any products in the cart will be loaded and rendered.
+    /// </summary>
+    /// <returns></returns>
+    protected override async Task OnInitializedAsync()
+    {
+        isAuthenticated = await AuthService.IsUserAuthenticated();
+        orderPlaced = false;
+        await CartService.CreateNewShoppingCart();
+        CartService.OnChange += StateHasChanged; // Subscribe to the event
+        await LoadCart();
+    }
 
 
     // Method to update the quantity of a product in the cart.
@@ -114,42 +133,11 @@ else if (orderPlaced)
         // Add this line to refresh the UI
         StateHasChanged();
     }
+
+
     private async Task RemoveProductFromCart(Guid productId)
     {
         await CartService.RemoveProductFromCart(productId);
-        await LoadCart();
-    }
-
-
-    protected override async Task OnInitializedAsync()
-    {
-        orderPlaced = false;
-        await CartService.CreateNewShoppingCart();
-
-
-
-
-        //TODO REMOVE THIS IS ALL DEBUGGING CODE
-
-        // Get the logged in users user id.
-        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
-        var user = authState.User;
-        if (user.Identity.IsAuthenticated)
-        {
-            var userId = user.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-            Guid.TryParse(userId, out Guid userIdGuid);
-            if(userIdGuid != Guid.Empty)
-            {
-                await CartService.GetShoppingCartByUserId(userIdGuid);
-            }
-            Console.WriteLine($"User ID: {userId}");
-        }
-        else
-        {
-            Console.WriteLine("User is not authenticated.");
-        }
-
-        CartService.OnChange += StateHasChanged; // Subscribe to the event
         await LoadCart();
     }
 
@@ -181,8 +169,7 @@ else if (orderPlaced)
     }
     private async Task Placeorder()
     {
-        await OrderService.PlaceOrderAsync();   
-        await CartService.GetCartItemsCount();
-        orderPlaced = true;
+        string url = await OrderService.PlaceOrderAsync();
+        NavigationManager.NavigateTo(url);
     }
 }

@@ -3,13 +3,17 @@
 @inject IAuthService AuthService    
 @attribute [Authorize]
 <AuthorizeView>
-        <p>You are logged in. @context.User.Identity.Name</p>
+        <MudText Class="d-flex align-self-center" Typo="Typo.h4">You are logged in. @context.User.Identity.Name</MudText>
 </AuthorizeView>
 <MudContainer>
 
-
+    <h5>Delivery Address</h5>
+    <AddressForm/>
+    <p></p>
 
     <MudText Typo="Typo.h5">Change User Info</MudText>
+
+
     <EditForm Model="user" OnValidSubmit="ChangeUserInfo">
         <DataAnnotationsValidator></DataAnnotationsValidator>
         <div class="mb-3">

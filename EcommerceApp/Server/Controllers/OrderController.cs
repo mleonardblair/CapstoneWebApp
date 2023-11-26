@@ -20,12 +20,15 @@ namespace EcommerceApp.Server.Controllers
         }
 
      
-        [HttpPost]
+      /*  
+       *  ONLY STRIPE CLI WEBHOOK CAN CALL THIS METHOD
+       *  
+       *  [HttpPost]
         public async Task<ActionResult<ServiceResponse<bool>>> PlaceOrderAsync()
         {
             var response = await _orderService.PlaceOrderAsync();
             return Ok(response);
-        }
+        }*/
 
         [HttpGet]
         public async Task<ActionResult<ServiceResponse<List<OrderOverviewResponse>>>> GetAllOrdersAsync()

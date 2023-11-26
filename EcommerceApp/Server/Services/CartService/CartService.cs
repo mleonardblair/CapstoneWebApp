@@ -119,8 +119,10 @@ namespace EcommerceApp.Server.Services.CartService
             return response;
         }
 
-        public async Task<ServiceResponse<List<CartProductResponse>>> GetCartItemsByUserId(Guid userId)
+        public async Task<ServiceResponse<List<CartProductResponse>>> GetCartItemsByUserId(Guid? userId = null)
         {
+            if(userId == null)
+                userId = _authService.GetUserId();
             var response = new ServiceResponse<List<CartProductResponse>>();
 
             try
@@ -150,8 +152,11 @@ namespace EcommerceApp.Server.Services.CartService
                             Title = product?.Name ?? string.Empty,
                             Price = product?.Price ?? 0m,
                             Description = product?.Description ?? string.Empty,
-                            ImageUrl = product?.ImageURI ?? string.Empty,
-                            Tags = product?.ProductTags.Select(pt => pt.Tag.Name).ToList() ?? new List<string>(),
+                            ImageUrl = product.ImageURI,
+                            Tags = product?.ProductTags
+                               .Where(pt => pt.Tag != null)
+                               .Select(pt => pt.Tag.Name)
+                               .ToList() ?? new List<string>(),
                             ProductId = cartItem.ProductId,
                             Quantity = cartItem.Quantity,
                             DateCreated = cartItem.DateCreated
@@ -188,7 +193,8 @@ namespace EcommerceApp.Server.Services.CartService
                 Data = new List<CartProductResponse>()
             };
 
-            shoppingCart.CartItems.Select(async item =>
+            // Create a list of tasks
+            var tasks = shoppingCart.CartItems.Select(async item =>
             {
                 var product = await _context.Products
                     .Where(p => p.Id == item.ProductId)
@@ -206,76 +212,28 @@ namespace EcommerceApp.Server.Services.CartService
                     })
                     .FirstOrDefaultAsync();
 
-                if (product != null)
+                return product != null ? new CartProductResponse
                 {
-                    var cartProductResponse = new CartProductResponse
-                    {
-                        Id = item.Id, // Use the CartItemDto ID
-                        ProductId = product.Id,
-                        Title = product.Name,
-                        Price = product.Price,
-                        ImageUrl = product.ImageURI,
-                        Quantity = item.Quantity,
-                        Tags = product.Tags
-                    };
-
-                    response.Data.Add(cartProductResponse);
-                }
-
+                    Id = item.Id,
+                    ProductId = product.Id,
+                    Title = product.Name,
+                    Price = product.Price,
+                    ImageUrl = product.ImageURI,
+                    Quantity = item.Quantity,
+                    Tags = product.Tags
+                } : null;
             });
-        response.Message = $"Found ({response.Data.Count}) item(s) in the cart.";
+
+            // Await all the tasks to complete
+            var products = await Task.WhenAll(tasks);
+
+            // Add non-null products to the response
+            response.Data.AddRange(products.Where(p => p != null));
+            response.Message = $"Found ({response.Data.Count}) item(s) in the cart.";
 
             return response;
         }
 
-        /*  public async Task<ServiceResponse<List<CartProductResponse>>> GetCartProducts(List<CartItemDto> cartItems)
-          {
-              var result = new ServiceResponse<List<CartProductResponse>>()
-              {
-                  Data = new List<CartProductResponse>()
-              };
-              foreach(var item in cartItems)
-              {
-                  // Fetch the product from the database only once
-                  var product = await _context.Products
-                      .Where(p => p.Id == item.ProductId)
-                      .Select(p => new
-                      {
-                          p.Name,
-                          p.Price,
-                          p.ImageURI,
-                          p.Description,
-                          Tags = _context.ProductTags
-                              .Where(pt => pt.ProductId == p.Id)
-                              .Select(pt => pt.Tag != null ? pt.Tag.Name : null) // Handle null without null-conditional operator
-                              .ToList()
-                      })
-                      .FirstOrDefaultAsync();
-
-
-
-
-                  // Check if the product exists in the database
-                  if (product != null)
-                  {
-                      // Create a new CartProductResponse object using the fetched data
-                      var cartItemDto = new CartProductResponse
-                      {
-                          Id = Guid.NewGuid(),
-                          ProductId = item.ProductId,
-                          Title = product.Name,
-                          Price = product.Price,
-                          ImageUrl = product.ImageURI,
-                          Quantity = item.Quantity,
-                          Tags = product.Tags
-                      };
-
-                      // Add the cartItemDto to the result
-                      result.Data.Add(cartItemDto);
-                  }
-              }
-              return result;
-          }*/
 
         public async Task<ServiceResponse<List<CartProductResponse>>> StoreCartItems(List<CartItemDto> cartItemsDtos)
         {
@@ -415,7 +373,10 @@ namespace EcommerceApp.Server.Services.CartService
                             Price = ci.Product.Price,
                             Description = ci.Product.Description,
                             ImageUrl = ci.Product.ImageURI,
-                            Tags = ci.Product.ProductTags.Select(pt => pt.Tag.Name).ToList(),
+                            Tags = ci.Product.ProductTags
+                                        .Where(pt => pt != null && pt.Tag != null)
+                                        .Select(pt => pt.Tag.Name)
+                                        .ToList(),
                             ProductId = ci.ProductId,
                             Quantity = ci.Quantity,
                             DateCreated = ci.DateCreated
@@ -453,47 +414,45 @@ namespace EcommerceApp.Server.Services.CartService
         }
 
 
-        // Update the cart item where the cartitem corresponds the user id of the current user.
-        public async Task<ServiceResponse<CartItemDto>> UpdateQuantity(CartItemDto cartItemDto)
+        public async Task<ServiceResponse<bool>> UpdateQuantity(CartItemDto cartItemDto)
         {
-            var response = new ServiceResponse<CartItemDto>();
+            var response = new ServiceResponse<bool>();
             try
             {
-                var cartItem = _mapper.Map<CartItem>(cartItemDto);
+                // Find the existing cart item in the database
+                var cartItem = await _context.CartItems
+                                .FirstOrDefaultAsync(ci => ci.Id == cartItemDto.Id && ci.ShoppingCart.ApplicationUserId == _authService.GetUserId());
+
+                // Check if the cart item exists and belongs to the user
                 if (cartItem != null)
                 {
+                    // Update the quantity of the found cart item
+                    cartItem.Quantity = cartItemDto.Quantity;
+
                     _context.CartItems.Update(cartItem);
                     await _context.SaveChangesAsync();
-                    response = new ServiceResponse<CartItemDto>
-                    {
-                        Data = cartItemDto,
-                        Message = "Updated the cart item quantity for the user.",
-                        Success = true
-                    };
+
+                    response.Data = true;
+                    response.Message = "Updated the cart item quantity for the user.";
+                    response.Success = true;
                 }
                 else
                 {
-                    response = new ServiceResponse<CartItemDto>
-                    {
-                        Data = cartItemDto,
-                        Message = "Couldn't update the cart item quantity for the user.",
-                        Success = false
-                    };
+                    response.Data = false;
+                    response.Message = "Cart item not found or doesn't belong to the user.";
+                    response.Success = false;
                 }
-
             }
             catch (Exception ex)
             {
-                response = new ServiceResponse<CartItemDto>
-                {
-                    Data = null,
-                    Message = $"Couldn't update the cart item quantity for the user. {ex.Message}",
-                    Success = false
-                };
+                response.Data = false;
+                response.Message = $"Couldn't update the cart item quantity for the user. {ex.Message}";
+                response.Success = false;
             }
 
             return response;
         }
+
 
         public async Task<ServiceResponse<CartItemDto>> AddCartItem(CartItemDto cartItemDto)
         {
@@ -604,34 +563,42 @@ namespace EcommerceApp.Server.Services.CartService
             return response;
         }
 
-
-        public async Task<ServiceResponse<bool>> RemoveCartItemById(Guid cartItemId)
+        /// <summary>
+        /// Method when called will remove the product id from the shopping cart. Removing all cart items that have he product id, for the shopping cart for the current authenticated user.
+        /// </summary>
+        /// <param name="productId"></param>
+        /// <returns></returns>
+        public async Task<ServiceResponse<bool>> RemoveCartItemById(Guid productId)
         {
-            // take the cartItemId and find the cart item in the shopping cart, then remove it from the shopping cart.
             var response = new ServiceResponse<bool>();
             try
             {
-                var cartItem = await _context.CartItems.FirstOrDefaultAsync(ci => ci.Id == cartItemId);
-                if (cartItem != null)
+                // Get the shopping cart based on the user id 
+                var userId = _authService.GetUserId();
+                var shoppingCart = await _context.Carts
+                    .Include(c => c.CartItems)
+                    .FirstOrDefaultAsync(c => c.ApplicationUserId == userId);
+                if (shoppingCart != null)
                 {
-                    _context.CartItems.Remove(cartItem);
-                    await _context.SaveChangesAsync();
-                    response = new ServiceResponse<bool>
+                    // Remove the cart items that have the product id
+                    var cartItems = shoppingCart.CartItems
+                        .Where(ci => ci.ProductId == productId)
+                        .ToList();
+                    if (cartItems != null)
                     {
-                        Data = true,
-                        Message = "Removed the cart item from the shopping cart.",
-                        Success = true
-                    };
+                        _context.RemoveRange(cartItems);
+                    }
                 }
-                else
+             
+                await _context.SaveChangesAsync();
+                response = new ServiceResponse<bool>
                 {
-                    response = new ServiceResponse<bool>
-                    {
-                        Data = false,
-                        Message = "Couldn't remove the cart item from the shopping cart.",
-                        Success = false
-                    };
-                }
+                    Data = true,
+                    Message = "Removed the cart item from the shopping cart.",
+                    Success = true
+                };
+                
+        
             }
             catch (Exception ex)
             {
