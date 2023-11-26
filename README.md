@@ -1,1 +1,1 @@
-# CapstoneWebApp
+# Ecommerce Blazor Web Assembly WebApp
