@@ -48,12 +48,12 @@ namespace EcommerceApp.Server.Services.CategoryService
 
             return response;
         }
-        public async Task<ServiceResponse<List<Category>>> UpdateCategory(Category category)
+        public async Task<ServiceResponse<List<CategoryDto>>> UpdateCategory(CategoryDto category)
         {
             var dbCategory = await _context.Categories.FirstOrDefaultAsync(c => c.Id == category.Id);
             if (dbCategory == null)
             {
-                return new ServiceResponse<List<Category>>
+                return new ServiceResponse<List<CategoryDto>>
                 {
                     Success = false, Message = "Category not found." };
             }
@@ -65,22 +65,27 @@ namespace EcommerceApp.Server.Services.CategoryService
             await _context.SaveChangesAsync();
             return await GetAdminCategories();
         }
-        public async Task<ServiceResponse<List<Category>>> AddCategory(Category category)
+        public async Task<ServiceResponse<List<CategoryDto>>> AddCategory(CategoryDto category)
         {
-            category.Editing = category.IsNew = false;
-            _context.Categories.Add(category);
+            Category c = new Category();
+            c.Editing = category.IsNew = false;
+             c = _mapper.Map<Category>(category);
+            _context.Categories.Add(c);
             await _context.SaveChangesAsync();
             return await GetAdminCategories();
         }
 
-        public async Task<ServiceResponse<List<Category>>> DeleteCategory(Guid categoryId)
+        public async Task<ServiceResponse<List<CategoryDto>>> DeleteCategory(Guid categoryId)
         {
             Category category = await GetCategoryById(categoryId);
             if (category == null)
             {
-                return new ServiceResponse<List<Category>>
+                return new ServiceResponse<List<CategoryDto>>
                 {
-                    Success = false, Message = "Category not found." };
+                    Success = false,
+                    Message = "Category not found."
+                };
+               
             }
 
             category.Deleted = true;
@@ -90,9 +95,9 @@ namespace EcommerceApp.Server.Services.CategoryService
         }
 
      
-        public async Task<ServiceResponse<List<Category>>> GetAdminCategories()
+        public async Task<ServiceResponse<List<CategoryDto>>> GetAdminCategories()
         {
-            var response = new ServiceResponse<List<Category>>();
+            var response = new ServiceResponse<List<CategoryDto>>();
             var categories = await _context.Categories.Where(c => !c.Deleted).ToListAsync();
 
             if (categories == null || !categories.Any())
@@ -102,7 +107,8 @@ namespace EcommerceApp.Server.Services.CategoryService
             }
             else
             {
-                response.Data = categories;
+                var convertedCat = _mapper.Map<List<CategoryDto>>(categories);
+                response.Data = convertedCat;
                 response.Message = "All went well.";
             }
             return response;

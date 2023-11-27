@@ -1,4 +1,5 @@
 global using EcommerceApp.Server.Services.OrderService;
+global using EcommerceApp.Server.Services.FavouriteService;
 global using EcommerceApp.Server.Services.PaymentService;
 global using EcommerceApp.Server.Services.CartService;
 global using EcommerceApp.Server.Services.AuthService;
@@ -44,6 +45,7 @@ builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IProductTagService, ProductTagService>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
 builder.Services.AddScoped<ICartService, CartService>();
+builder.Services.AddScoped<IFavouriteService, FavouriteService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 // Add HttpContextAccessor
 builder.Services.AddHttpContextAccessor();

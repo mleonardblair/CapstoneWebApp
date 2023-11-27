@@ -8,7 +8,7 @@ namespace EcommerceApp.Client.Services.CategoryService
     {
         public string Message { get; set; }
         public List<CategoryDto> Categories { get; set; }
-        List<CategoryDto> AdminCategories { get; set; }
+        public List<CategoryDto> AdminCategories { get; set; }
         public CategoryDto Category { get; set; }
 
         // This event will be used to notify subscribers that the categories have changed

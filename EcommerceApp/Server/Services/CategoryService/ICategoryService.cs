@@ -17,9 +17,9 @@ namespace EcommerceApp.Server.Services.CategoryService
         /// Returns all categories for admin panel including those that are marked "deleted" and notvisible.
         /// </summary>
         /// <returns></returns>
-        Task<ServiceResponse<List<Category>>> GetAdminCategories();
-        Task<ServiceResponse<List<Category>>> AddCategory(Category category);
-        Task<ServiceResponse<List<Category>>> UpdateCategory(Category category);
-        Task<ServiceResponse<List<Category>>> DeleteCategory(Guid categoryId);
+        Task<ServiceResponse<List<CategoryDto>>> GetAdminCategories();
+        Task<ServiceResponse<List<CategoryDto>>> AddCategory(CategoryDto category);
+        Task<ServiceResponse<List<CategoryDto>>> UpdateCategory(CategoryDto category);
+        Task<ServiceResponse<List<CategoryDto>>> DeleteCategory(Guid categoryId);
     }
 }

@@ -1,75 +1,88 @@
 ﻿@page "/admin/categories"
 @inject ICategoryService CategoryService
-@inject ICategoryService CategoryService
 @attribute [Authorize(Roles = "Admin")]
 @implements IDisposable
-<h3>Categories</h3>
 
-<div class="header">
-    <div class="col">Name</div>
-    <div class="col">Name</div>
-    <div class="col">Visible</div>
-    <div class="col"></div>
-</div>
+<MudContainer>
+    <MudMainContent>
 
-@foreach (var category in CategoryService.AdminCategories)
-{
-    @if (category.Editing)
-    {
-        <EditForm Model="editingCategory" OnSubmit="UpdateCategory">
-            <div class="row">
-                <div class="col">
-                    <InputText @bind-Value="editingCategory.Name" class="form-control" />
-                </div>
-                <div class="col">
-                    <InputText @bind-Value="editingCategory.Description" class="form-control" />
-                </div>
-                <div class="col col-visible">
-                    <InputCheckbox @bind-Value="editingCategory.Visible" class="big-checkbox" />
-                </div>
-                <div class="col">
-                    <button type="submit" class="btn btn-primary">
-                        <i class="oi oi-cloud-upload"></i>
-                    </button>
-                    <button class="btn btn-primary" onClick="CancelEditing">
-                        <i class="oi oi-circle-x"></i>
-                    </button>
-                </div>
-            </div>
-        </EditForm>
+        <MudText Style="padding:30px" Typo="Typo.h3">Product Categories</MudText>
 
-    }else {
-        <div class="row">
-            <div class="col">
-                @category.Name
-            </div>
-            <div class="col">
-                @category.Description
-            </div>
-            <div class="col col-visible">
-                <span>@(category.Visible ? "✔️" : "")</span>"
-            </div>
-            <div class="col">
-                <button class="btn btn-primary" @onclick="(()=>EditCategory(category))">
-                    <i class="oi oi-pencil"></i>
-                </button>
-                <button class="btn btn-primary" @onclick="(()=>DeleteCategory(category.Id))">
-                    <i class="oi oi-trash"></i>
-                </button>
-            </div>
+        <div class="header">
+            <div class="col">Name</div>
+            <div class="col">Description</div>
+            <div class="col">Visible</div>
+            <div class="col"></div>
         </div>
-    }
+        @if(CategoryService.AdminCategories == null){
+            <MudProgressCircular Color="Color.Primary" Size="Size.Large" Indeterminate="true" />
+        }else {
+            @foreach (var category in CategoryService.AdminCategories)
+            {
+                @if (category.Editing)
+                {
+                    Console.WriteLine($"Editing category: {category.Name}");
+                    <EditForm Model="editingCategory" OnSubmit="UpdateCategory">
+                        <div class="row">
+                            <div class="col">
+                                <InputText @bind-Value="editingCategory.Name" class="form-control" />
+                            </div>
+                            <div class="col">
+                                <InputText @bind-Value="editingCategory.Description" class="form-control" />
+                            </div>
+                            <div class="col col-visible">
+                                <InputCheckbox @bind-Value="editingCategory.Visible" class="big-checkbox" />
+                            </div>
+
+                            <div class="col">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="oi oi-cloud-upload"></i>
+                                </button>
+                                <button class="btn btn-primary" @onclick="(()=>CancelEditing())">
+                                    <i class="oi oi-circle-x"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </EditForm>
+
+                }else {
+                    <div class="row">
+                        <div class="col">
+                            @category.Name
+                        </div>
+                        <div class="col">
+                            @category.Description
+                        </div>
+                        <div class="col col-visible">
+                            <span>@(category.Visible ? "✔️" : "")</span>"
+                        </div>
+                        <div class="col">
+                            <button class="btn btn-primary" @onclick="(()=>EditCategory(category))">
+                                <i class="oi oi-pencil"></i>
+                            </button>
+                            <button class="btn btn-primary" @onclick="(()=>DeleteCategory(category.Id))">
+                                <i class="oi oi-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                }
    
-}
-<button class="btn btn-primary" @onclick="CreateNewCategory">
-    <i class="oi oi-plus"></i> Add new category
-</button>"
+            }
+        }
+        <button class="btn btn-primary" @onclick="(()=>CreateNewCategory())">
+            <i class="oi oi-plus"></i> Add new category
+        </button>
+
+    </MudMainContent>
+</MudContainer>
 @code {
-    CategoryDto editingCategory = null;
+    CategoryDto? editingCategory = null;
 
     protected override async Task OnInitializedAsync()
     {
+        Console.WriteLine("Loading categories...");
         await CategoryService.GetAdminCategories();
+        Console.WriteLine("Categories loaded.");
 
         CategoryService.OnChange += StateHasChanged;
     }
@@ -81,38 +94,56 @@
 
     private void CreateNewCategory()
     {
+        Console.WriteLine("Creating a new category.");
         editingCategory = CategoryService.CreateNewCategory();
     }
 
+
     private void EditCategory(CategoryDto category)
     {
+        Console.WriteLine($"Editing category: {category.Name}");
         category.Editing = true;
         editingCategory = category;
     }
 
 
+
     private async Task UpdateCategory()
     {
-        if(editingCategory.IsNew)
+        if (editingCategory != null)
         {
-            await CategoryService.AddCategory(editingCategory);
+            Console.WriteLine($"Updating category: {editingCategory.Name}");
+            if (editingCategory.IsNew)
+            {
+                await CategoryService.AddCategory(editingCategory);
+                Console.WriteLine("Added new category.");
+            }
+            else
+            {
+                await CategoryService.UpdateCategory(editingCategory);
+                Console.WriteLine("Updated existing category.");
+            }
+            editingCategory = new CategoryDto();
         }
         else
         {
-            await CategoryService.UpdateCategory(editingCategory);
+            Console.WriteLine("UpdateCategory called but editingCategory is null.");
         }
-        editingCategory = new CategoryDto();
     }
+
 
 
     private async Task CancelEditing()
     {
+        Console.WriteLine("Cancelling edit.");
         editingCategory = new CategoryDto();
         await CategoryService.GetAdminCategories();
     }
 
     private async Task DeleteCategory(Guid id)
     {
+        Console.WriteLine($"Deleting category with ID: {id}");
         await CategoryService.DeleteCategory(id);
     }
+
 }

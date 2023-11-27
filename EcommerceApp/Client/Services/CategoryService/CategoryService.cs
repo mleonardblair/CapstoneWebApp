@@ -60,7 +60,7 @@ namespace EcommerceApp.Client.Services.CategoryService
         {
            var response = await _http.GetFromJsonAsync<ServiceResponse<List<CategoryDto>>>("api/categories/admin");
             if (response != null && response?.Data != null)
-                Categories = response.Data;
+                AdminCategories = response.Data;
            
         }
 
@@ -72,7 +72,8 @@ namespace EcommerceApp.Client.Services.CategoryService
         public async Task AddCategory(CategoryDto categoryDto)
         {
             var response = await _http.PostAsJsonAsync("api/categories/admin", categoryDto);
-            AdminCategories = (await response.Content.ReadFromJsonAsync<ServiceResponse<List<CategoryDto>>>()).Data;
+            AdminCategories = (await response.Content
+                .ReadFromJsonAsync<ServiceResponse<List<CategoryDto>>>()).Data;
             await GetAllCategoriesAsync();
             OnChange.Invoke();
         }
@@ -100,7 +101,7 @@ namespace EcommerceApp.Client.Services.CategoryService
                 Editing = true
             };
             AdminCategories.Add(newCategory);
-            OnChange.Invoke();
+            OnChange?.Invoke();
             return newCategory;
         }
     }

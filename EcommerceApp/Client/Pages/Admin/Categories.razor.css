@@ -18,8 +18,11 @@
 
 .col {
     flex: 1;
+    align-self: center;
+
 }
 
 .col-visible {
     text-align: center;
+    align-self: center;
 }
