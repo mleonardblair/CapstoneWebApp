@@ -25,6 +25,7 @@ namespace EcommerceApp.Shared.DTOs
     public enum OrderStatus
     {
         Pending,
+        Returned,
         Processing,
         Completed,
         Cancelled

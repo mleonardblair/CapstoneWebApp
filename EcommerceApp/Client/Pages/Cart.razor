@@ -10,19 +10,29 @@
 <MudMainContent>
 <MudContainer>
 
-<h3> Shopping Cart </h3>
+<h3 style="text-align:center;"> Shopping Cart </h3>
 
+    @if (isLoading)
+        {
+            <div class="d-flex align-items-center justify-content-center">
+                <MudProgressCircular Color="Color.Primary" Size="Size.Large" Indeterminate="true" />
+            </div>
+        }
     @if (cartProducts == null || cartProducts.Count == 0)
     {
-        <MudText Typo="Typo.body1">
-            @message
-        </MudText>
+        
         if (!message.Equals("Loading Cart..."))
-        {
+        {    <div class="d-flex align-items-center justify-content-center">
             <MudImage Src="/emptycart.png"
               Alt=" a highly stylized empty shopping cart adorned with vines, suitable for an ecommerce website and set against a white background"
               Style="max-width:300px; max-height:300px; object-fit:contain;" />
+                </div>
         }
+            <div class="d-flex align-items-center justify-content-center">
+                <MudText Typo="Typo.body1">
+                    @message
+                </MudText>
+            </div>
     }
     else
     {
@@ -96,6 +106,7 @@
     </MudContainer>
 </MudMainContent>
 @code {
+    private bool isLoading = true; // New flag to track loading state
     bool orderPlaced = false;
     List<CartProductResponse> cartProducts = new List<CartProductResponse>();
     string message = "Loading Cart...";
@@ -107,11 +118,13 @@
     /// <returns></returns>
     protected override async Task OnInitializedAsync()
     {
+        isLoading = true; // Start loading
         isAuthenticated = await AuthService.IsUserAuthenticated();
         orderPlaced = false;
         await CartService.CreateNewShoppingCart();
         CartService.OnChange += StateHasChanged; // Subscribe to the event
         await LoadCart();
+        isLoading = false; // Loading complete
     }
 
 

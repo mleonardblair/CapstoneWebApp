@@ -6,23 +6,25 @@
 <MudSnackbarProvider />
 <MudLayout Style="display: flex;flex-direction: column; min-height: 100vh;">
     <MudMainContent Style="padding-top:0px">
-        <MudAppBar Elevation="1" DisableGutters="true" Color="Color.Dark" Dense="false" Fixed="true">
+        <MudAppBar Elevation="1" DisableGutters="true" Dense="false" Fixed="true">
             <!-- Hamburger menu icon for mobile view -->
             <MudHidden Breakpoint="Breakpoint.MdAndUp">
                 <MudIconButton Icon="@Icons.Material.Filled.Menu" OnClick="@ToggleMenu" @onfocusout="ToggleMenu" Class="my-custom-hover-button">
                 </MudIconButton>
             </MudHidden>
-
+                <div class="logo">
+                    <img src="/emptycart.png" alt="logo" />"
+                </div>
             <div class="links">
                 <MudHidden Breakpoint="Breakpoint.SmAndDown">
                     <!-- Wrapper for centered items -->
                     <!-- Desktop links -->
 
-                    <MudButton Color="Color.Inherit" OnClick="@ShopClicked" Class="nav-button">Shop</MudButton>
-                    <MudButton Color="Color.Inherit" OnClick="@GalleryClicked" Class="nav-button">Gallery</MudButton>
-                    <MudButton Color="Color.Inherit" OnClick="@FAQClicked" Class="nav-button">FAQ</MudButton>
-                    <MudButton Color="Color.Inherit" OnClick="@AboutUsClicked" Class="nav-button">About Us</MudButton>
-                    <MudButton Color="Color.Inherit" OnClick="@ContactUsClicked" Class="nav-button">Contact Us</MudButton>
+                    <MudButton OnClick="@ShopClicked" Class="nav-button">Shop</MudButton>
+                    <MudButton  OnClick="@GalleryClicked" Class="nav-button">Gallery</MudButton>
+                    <MudButton  OnClick="@FAQClicked" Class="nav-button">FAQ</MudButton>
+                    <MudButton  OnClick="@AboutUsClicked" Class="nav-button">About Us</MudButton>
+                    <MudButton  OnClick="@ContactUsClicked" Class="nav-button">Contact Us</MudButton>
                 </MudHidden>
             </div>
             <div class="icons">
@@ -78,7 +80,7 @@
     {
         // Ensuring the main content has enough padding to not be hidden under the AppBar.
 
-        var uri = new Uri(NavigationManager.Uri);
+        /**var uri = new Uri(NavigationManager.Uri);
         if (uri.LocalPath == "/")
         {
             Console.WriteLine("Special Padding Set");
@@ -86,7 +88,7 @@
         }else
         {
             
-        }
+        }*/
     }
     private void HomeClicked() => NavigationManager.NavigateTo("/");
     private void ShopClicked() => NavigationManager.NavigateTo("/shop/products/1");
@@ -98,24 +100,39 @@
     private void CartClicked() => NavigationManager.NavigateTo("/cart");
 
     MudTheme MyCustomTheme = new MudTheme()
+    {
+        Typography = new Typography()
         {
-            Typography = new Typography()
+            Default = new Default()
             {
-                Default = new Default()
-                {
 
-                    FontFamily = new[] { "Roboto", "sans-serif" }
-                }
-            },
-            Palette = new PaletteLight()
-            {
-                Dark = Colors.Grey.Darken4,
-                Warning = "#ff0000"//Colors.Red.Default
-            },
-            LayoutProperties = new LayoutProperties()
-            {
-                AppbarHeight = "64px",
-                DrawerWidthLeft = "250px", // A more typical drawer width
+                FontFamily = new[] { "Outfit" }
             }
-        };
+        },
+        Palette = new PaletteLight()
+        {
+            Primary = "#B7C799", // Muted Green
+            Secondary = "#F1E7D0", // Warm Beige
+            AppbarBackground = "#7695B3", // Dusty Blue for AppBar Background
+            AppbarText = "#3A3E44", // Charcoal Grey for AppBar Text
+            Background = "#F7F7F7", // Off-White for General Background
+            Surface = "#F1E7D0", // Warm Beige for Card Surfaces and such
+            DrawerBackground = "#B7C799", // Muted Green for Drawer Background
+            DrawerText = "#3A3E44", // Charcoal Grey for Drawer Text
+            ActionDefault = "#EC7063", // Coral Pink for Call to Action
+            ActionDisabled = "#C8C8C8", // Light Grey for Disabled Actions
+            ActionDisabledBackground = "#F7F7F7", // Off-White for Disabled Background
+            TextPrimary = "#3A3E44", // Charcoal Grey for Primary Text
+            TextSecondary = "#7695B3", // Dusty Blue for Secondary Text
+            Error = "#EC7063", // Coral Pink for Errors
+            Info = "#C7B0DF", // Soft Lilac for Info Alerts
+            Success = "#7695B3", // Dusty Blue for Success Messages
+            Warning = "#EC7063", // Coral Pink for Warnings
+        },
+        LayoutProperties = new LayoutProperties()
+        {
+            AppbarHeight = "64px",
+            DrawerWidthLeft = "250px", // A more typical drawer width
+        }
+    };
 }

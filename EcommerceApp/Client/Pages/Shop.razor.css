@@ -5,6 +5,8 @@
     justify-content: center; /* This will center the h3 tag horizontally */
 }
 .page {
+    padding-left:40px;
+    
     display: flex;
     flex-wrap: wrap; /* This allows items to wrap to the next line on smaller screens */
 }
@@ -17,25 +19,22 @@
     width: 250px; /* Fixed width for the sidebar */
     /*position: relative;*/ /* Stick to the top when you scroll */
     position: relative;
-    padding-bottom:10px;
-    height:100%;
     top: 0;
 }
 /* Main content styling */
 .main-content {
     display: flex;
+    flex-wrap: wrap;
     flex-direction: column;
     overflow-y: auto; /* Enable scrolling if the content is taller than the screen */
     flex-grow: 1; /* Take up the remaining space */
-    flex-basis: 0; /* Start growing from zero width */
-    padding: 20px; /* Spacing around the content */
     min-width: 0; /* Make sure it can shrink below its content's intrinsic width */
 }
 
 @media (max-width: 599.98px) {
     .sidebar {
         width: 100%; /* Sidebar takes full width */
-        height: auto; /* Height is automatic, based on content */
+        height: calc(100vh - 64px); /* Height is automatic, based on content */
         position: relative; /* No longer sticky */
         overflow-y: visible; /* No longer scrollable */ 
                              /* always on top*/
@@ -46,8 +45,43 @@
     }
 }
 
+
+@media (max-width: 599.98px) {
+    .sidebar {
+        width: 100%; /* Full width */
+        position: static; /* Reset position */
+        height: auto; /* Height based on content */
+        overflow-y: auto; /* Scrollable if content overflows */
+    }
+
+    .main-content {
+        display: flex; /* Ensure it's displayed */
+        flex-direction: column; /* Stack children vertically */
+        width: 100%; /* Full width */
+        height: auto; /* Height based on content */
+        overflow-y: auto; /* Scrollable if content overflows */
+        padding-left: 0; /* Reset padding if needed */
+    }
+}
+
 @media (min-width: 600px) {
     .page {
-        flex-direction: row; /* Align sidebar and content in a row */
+        display: flex;
+        flex-direction: row; /* Side-by-side layout for larger screens */
+    }
+
+    .sidebar {
+        width: 250px; /* Fixed width */
+        position: fixed; /* Positioned relative to the viewport */
+        top: 0;
+        bottom: 0; /* Stretch from top to bottom */
+        overflow-y: auto; /* Scrollable if content overflows */
+    }
+
+    .main-content {
+        flex-grow: 1; /* Take up remaining space */
+        min-width: 0; /* Allow shrinkage below content width */
+        margin-left: 250px; /* Make space for the sidebar */
+        padding-left: 40px; /* Maintain padding from the left */
     }
 }

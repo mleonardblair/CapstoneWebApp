@@ -11,31 +11,46 @@ namespace EcommerceApp.Server.Services.FavouriteService
     {
         private readonly IMapper _mapper;
         private readonly AppDbContext _context;
+        private readonly IAuthService _authService;
 
         public FavouriteService(IMapper mapper, 
-            AppDbContext context) {
+            AppDbContext context,
+            IAuthService authService) {
             _mapper = mapper;
             _context = context;
+            _authService = authService;
         }
 
-        public async Task<ServiceResponse<FavouriteProductResponse>> AddFavouriteAsync(FavouriteDto favouriteDto)
+        public async Task<ServiceResponse<FavouriteProductResponse>> AddFavouriteAsync(FavouriteProductResponse favouriteDto)
         {
             var response = new ServiceResponse<FavouriteProductResponse>();
             try
             {
-                // Map the DTO to the Favourite entity
-                var favouriteEntity = _mapper.Map<Favourite>(favouriteDto);
+                // CHeck the current favourite doesnt already exist for the user ie, it doesn't have the same product id and application user id as any existing favourite
+                var existingFavourite = await _context.Favourites.FirstOrDefaultAsync(f => f.ProductId == favouriteDto.ProductId && f.ApplicationUserId == favouriteDto.ApplicationUserId);
 
+                // If the favourite already exists, return an error
+                if (existingFavourite != null)
+                {
+                    response.Data = null;
+                    response.Success = false;
+                    response.Message = "Favourite already exists.";
+                    response.StatusCode = 400;
+                    return response;
+                }
+                var favouriteEntity = _mapper.Map<Favourite>(favouriteDto);
                 // Add the favourite entity to the context
                 await _context.Favourites.AddAsync(favouriteEntity);
                 await _context.SaveChangesAsync();
 
-                // After saving, fetch the product related to the favourite to build the response
-                var product = await _context.Products.FindAsync(favouriteEntity.ProductId);
+                // After saving, fetch the product related to the favourite to build the response wrapper.
+                var product = await _context.Products.FindAsync(favouriteDto.ProductId);
                 if (product == null)
                 {
+                    response.Data = null;
                     response.Success = false;
                     response.Message = "Product not found.";
+                    response.StatusCode = 404;
                     return response;
                 }
 
@@ -43,6 +58,7 @@ namespace EcommerceApp.Server.Services.FavouriteService
                 var favouriteProductResponse = new FavouriteProductResponse
                 {
                     FavouriteId = favouriteEntity.Id,
+                    ApplicationUserId = _authService.GetUserId(), // get the current logged in user. will always work due to authentication check on client.
                     DateAddedToFavourite = favouriteEntity.DateCreated,
                     ProductId = product.Id,
                     ProductName = product.Name,
@@ -50,42 +66,60 @@ namespace EcommerceApp.Server.Services.FavouriteService
                     ProductPrice = product.Price,
                     ProductImageURI = product.ImageURI,
                     ProductStockQuantity = product.StockQuantity,
-                    ProductImages = product.Images
                 };
 
                 response.Data = favouriteProductResponse;
             }
             catch (Exception ex)
             {
+                response.Data = null;
                 response.Success = false;
                 response.Message = ex.Message;
+                response.StatusCode = 500;
+
             }
 
             return response;
         }
 
 
-        public async Task<ServiceResponse<bool>> DeleteFavouriteAsync(Guid id)
+        public async Task<ServiceResponse<bool>> DeleteFavouriteAsync(Guid productId)
         {
             var response = new ServiceResponse<bool>();
-            try
+            var userId =  _authService.GetUserId(); // get the current logged in user. will always work due to authentication check on client.
+            // check to see if the product id exists in the favourites table for the current user
+            var favourite = await _context.Favourites.FirstOrDefaultAsync(f => f.ProductId == productId && f.ApplicationUserId == userId);
+
+            if (favourite == null)
             {
-                var favourite = await _context.Favourites.FindAsync(id);
-                if (favourite == null)
+                return new ServiceResponse<bool>
+                {
+                    Data = false,
+                    Success = false,
+                    Message = "Favourite not found.",
+                    StatusCode = 404
+                };
+            }
+            else
+            {
+                try
+                {
+                    _context.Favourites.Remove(favourite);
+                    await _context.SaveChangesAsync();
+                    return new ServiceResponse<bool>
+                    {
+                        Data = true,
+                        Success = true,
+                        Message = "Favourite deleted successfully.",
+                        StatusCode = 200
+
+                    };
+                }
+                catch (Exception ex)
                 {
                     response.Success = false;
-                    response.Message = "Favourite not found.";
-                    return response;
+                    response.Message = ex.Message;
                 }
-
-                _context.Favourites.Remove(favourite);
-                await _context.SaveChangesAsync();
-                response.Data = true;
-            }
-            catch (Exception ex)
-            {
-                response.Success = false;
-                response.Message = ex.Message;
             }
 
             return response;
@@ -117,7 +151,6 @@ namespace EcommerceApp.Server.Services.FavouriteService
                         ProductPrice = f.Product.Price,
                         ProductImageURI = f.Product.ImageURI,
                         ProductStockQuantity = f.Product.StockQuantity,
-                        ProductImages = f.Product.Images
                     };
                 }));
 
@@ -157,7 +190,6 @@ namespace EcommerceApp.Server.Services.FavouriteService
                     ProductPrice = favourite.Product.Price,
                     ProductImageURI = favourite.Product.ImageURI,
                     ProductStockQuantity = favourite.Product.StockQuantity,
-                    ProductImages = favourite.Product.Images
                 };
 
                 response.Data = favouriteProductResponse;
@@ -171,6 +203,52 @@ namespace EcommerceApp.Server.Services.FavouriteService
             return response;
         }
 
+        public async Task<ServiceResponse<List<FavouriteProductResponse>>> GetFavouritesByUserId(Guid userId)
+        {
+          // get the favourites that the user has added to their favourites list
+          var favourites = await _context.Favourites
+                .Include(f => f.Product)
+                .Where(f => f.ApplicationUserId == userId)
+                .ToListAsync();
+            // if we fail to find any favourites, return an error
+            if (favourites == null)
+            {
+                return new ServiceResponse<List<FavouriteProductResponse>>
+                {
+                    Data = null,
+                    Success = false,
+                    Message = "Favourites not found or there are none.",
+                    StatusCode = 404
+                };
+            }
+            // Use Task.WhenAll to await all asynchronous operations inside the Select
+            var favouriteProductResponses = await Task.WhenAll(favourites.Select(async f =>
+            {
+                // Perform any necessary additional asynchronous operations here
+                // For example, fetching more details about the product or related entities
+                // If no additional async operations are needed, this can be simplified
+
+                return new FavouriteProductResponse
+                {
+                    FavouriteId = f.Id,
+                    DateAddedToFavourite = f.DateCreated,
+                    ProductId = f.Product.Id,
+                    ProductName = f.Product.Name,
+                    ProductDescription = f.Product.Description,
+                    ProductPrice = f.Product.Price,
+                    ProductImageURI = f.Product.ImageURI,
+                    ProductStockQuantity = f.Product.StockQuantity,
+                };
+            }));
+            // return the favourites
+            return new ServiceResponse<List<FavouriteProductResponse>>
+            {
+                Data = favouriteProductResponses.ToList(),
+                Success = true,
+                Message = "Favourites retrieved successfully.",
+                StatusCode = 200
+            };
+        }
 
         public async Task<ServiceResponse<FavouriteProductResponse>> UpdateFavouriteAsync(FavouriteDto favouriteDto)
         {
@@ -200,8 +278,7 @@ namespace EcommerceApp.Server.Services.FavouriteService
                     ProductDescription = favourite.Product.Description,
                     ProductPrice = favourite.Product.Price,
                     ProductImageURI = favourite.Product.ImageURI,
-                    ProductStockQuantity = favourite.Product.StockQuantity,
-                    ProductImages = favourite.Product.Images
+                    ProductStockQuantity = favourite.Product.StockQuantity
                 };
 
                 response.Data = favouriteProductResponse;

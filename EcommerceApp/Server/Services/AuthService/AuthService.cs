@@ -1,4 +1,5 @@
-﻿using EcommerceApp.Server.Data;
+﻿using AutoMapper;
+using EcommerceApp.Server.Data;
 using EcommerceApp.Server.Models;
 using EcommerceApp.Shared.DTOs;
 using EcommerceApp.Shared.Models;
@@ -8,6 +9,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Reflection.Metadata.Ecma335;
 using System.Security.Claims;
 using System.Security.Cryptography;
+using System.Text.RegularExpressions;
 
 namespace EcommerceApp.Server.Services.AuthService
 {
@@ -16,12 +18,17 @@ namespace EcommerceApp.Server.Services.AuthService
         public readonly AppDbContext _context;
         private readonly IConfiguration _configuration;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IMapper _mapper;
 
-        public AuthService(AppDbContext context, IConfiguration configuration, IHttpContextAccessor httpContextAccessor)
+        public AuthService(AppDbContext context, 
+            IConfiguration configuration, 
+            IHttpContextAccessor httpContextAccessor,
+            IMapper mapper)
         {
             _context = context;
             _configuration = configuration;
             _httpContextAccessor = httpContextAccessor;
+            _mapper = mapper;
         }
         public Guid GetUserId() => Guid.Parse(_httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier));
         public string GetUserEmail() => _httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.Name);
@@ -207,9 +214,237 @@ namespace EcommerceApp.Server.Services.AuthService
         }
 
 
-        public async Task<ApplicationUser> GetApplicationUserByEmail(string email)
+        public async Task<ApplicationUser?> GetApplicationUserByEmail(string email)
         {
             return await _context.ApplicationUsers.FirstOrDefaultAsync(i => i.Email.Equals(email));
+        }
+
+
+        public async Task<ServiceResponse<List<AppUserDto>>> GetAllUserAdmin()
+        {
+            var response = new ServiceResponse<List<AppUserDto>>();
+            var users = await _context.ApplicationUsers.ToListAsync();
+
+            if (users == null || !users.Any())
+            {
+                response.Success = false;
+                response.Message = "Users are not found.";
+            }
+            else
+            {
+                var convertedCat = _mapper.Map<List<AppUserDto>>(users);
+                response.Data = convertedCat;
+                response.Message = "All went well.";
+            }
+            return response;
+        
+        }
+
+        public async Task<ServiceResponse<AppUserDto>>GetUserByIdAdmin(Guid userId)
+        {
+            throw new NotImplementedException();
+        }
+        /// <summary>
+        /// Updates the details of an existing user in the application database.
+        /// </summary>
+        /// <remarks>
+        /// Performs various checks before updating a user:
+        /// - Validates that the first and last names contain only allowed characters (letters and specific French characters).
+        /// - Ensures the uniqueness of the user's email address.
+        /// - Checks for the existence of a user with the same first or last name.
+        /// - Confirms the existence of the user in the database by matching the user ID.
+        /// </remarks>
+        /// <param name="appUser">An <see cref="AppUserDto"/> object containing the user's updated information.</param>
+        /// <returns>
+        /// A <see cref="ServiceResponse{T}"/> object with a boolean data value.
+        /// The response indicates success or failure, a descriptive message, and an HTTP status code.
+        /// </returns>
+        /// <exception cref="Exception">Thrown when an error occurs during the database update process.</exception>
+
+        public async Task<ServiceResponse<bool>> UpdateUser(AppUserDto appUser)
+        {
+                // Validate the category name (only letters, no digits or special characters but does take french characters)
+                if (!Regex.IsMatch(appUser.FirstName, @"^[a-zA-ZéèêëîïôœùûüçÉÈÊËÎÏÔŒÙÛÜÇ ]+$") ||
+                    !Regex.IsMatch(appUser.LastName, @"^[a-zA-ZéèêëîïôœùûüçÉÈÊËÎÏÔŒÙÛÜÇ ]+$"))
+                {
+                return new ServiceResponse<bool>
+                {
+                        Success = false,
+                        Message = "Invalid user name. Only letters are allowed.",
+                        Data = false,
+                        StatusCode = 400 // Bad Request
+                    };
+                }
+                // Check for email uniqueness only on non-deleted users as if deleted they wont be visible so we dont want confusion with the user names being taken they cant see.
+                var isEmailUsed = await _context.ApplicationUsers
+                                .AnyAsync(c => c.Email == appUser.Email);
+                if (isEmailUsed)
+                {
+                    return new ServiceResponse<bool>
+                    {
+                        Success = false,
+                        Message = "User email already exists.",
+                        Data = false,
+                        StatusCode = 400 // Bad Request
+                    };
+                }
+                var isNameUsed = await _context.ApplicationUsers
+                                    .AnyAsync(c => c.FirstName == appUser.FirstName ||
+                                    c.LastName == appUser.LastName);
+
+                if (isNameUsed)
+                {
+                    return new ServiceResponse<bool>
+                    {
+                        Success = false,
+                        Message = "User name already exists.",
+                        Data = false,
+                        StatusCode = 400 // Bad Request
+                    };
+                }
+
+                // Check if the user already exists
+                var dbUser = await _context.ApplicationUsers.FirstOrDefaultAsync(c => c.Id == appUser.Id);
+                if (dbUser == null)
+                {
+                    return new ServiceResponse<bool>
+                    {
+                        Success = false,
+                        Message = "User not found.",
+                        Data = false,
+                        StatusCode = 404 // Not Found
+                    };
+                }
+
+                // Update user properties
+                dbUser.FirstName = appUser.FirstName;
+                dbUser.LastName = appUser.LastName;
+           /*     dbCategory.Visible = appUser.Visible;*/
+                dbUser.DateModified = DateTime.UtcNow;
+                dbUser.Role = appUser.Role;
+                dbUser.Email = appUser.Email;
+                
+
+                try
+                {
+                    await _context.SaveChangesAsync();
+                    return new ServiceResponse<bool>
+                    {
+                        Success = true,
+                        Message = "User updated successfully.",
+                        Data = true,
+                        StatusCode = 200 // OK
+                    };
+                }
+                catch (Exception)
+                {
+                    // Log the exception details here
+
+                    return new ServiceResponse<bool>
+                    {
+                        Success = false,
+                        Message = "A server error occurred while updating the user.",
+                        Data = false,
+                        StatusCode = 500 // Internal Server Error
+                    };
+                }
+            
+
+        }
+
+        public async Task<ServiceResponse<bool>> AddUser(AppUserDto appUser)
+        { // Validate the user name (only letters, no digits or special characters but does take french characters)
+            if (!Regex.IsMatch(appUser.LastName, @"^[a-zA-ZéèêëîïôœùûüçÉÈÊËÎÏÔŒÙÛÜÇ ]+$") ||
+                !Regex.IsMatch(appUser.FirstName, @"^[a-zA-ZéèêëîïôœùûüçÉÈÊËÎÏÔŒÙÛÜÇ ]+$"))
+
+            {
+                return new ServiceResponse<bool>
+                {
+                    Success = false,
+                    Message = "Invalid user name. Only letters are allowed.",
+                    Data = false,
+                    StatusCode = 400 // Bad Request
+                };
+            }
+
+            var isEmailUsed = await _context.ApplicationUsers
+                                .AnyAsync(c => c.Email == appUser.Email);
+
+            if (isEmailUsed)
+            {
+                return new ServiceResponse<bool>
+                {
+                    Success = false,
+                    Message = "User email already exists.",
+                    Data = false,
+                    StatusCode = 400 // Bad Request
+                };
+            }
+            // Check for name uniqueness
+            var isNameUsed = await _context.ApplicationUsers
+                                .AnyAsync(c => c.FirstName == appUser.FirstName &&
+                                                               c.LastName == appUser.LastName);
+            if (isNameUsed)
+            {
+                return new ServiceResponse<bool>
+                {
+                    Success = false,
+                    Message = "User name already exists.",
+                    Data = false,
+                    StatusCode = 400 // Bad Request
+                };
+            }
+            var response = new ServiceResponse<bool>
+            {
+                Data = new bool()
+            };
+            ApplicationUser a = new();
+            try
+            {
+                a = _mapper.Map<ApplicationUser>(appUser);
+                _context.ApplicationUsers.Add(a);
+                var result = await _context.SaveChangesAsync();
+
+                if (result <= 0)
+                {
+                    response.Data = false;
+                    response.Success = false;
+                    response.Message = "Failed to add users.";
+                    response.StatusCode = 400; // Bad Request
+                    return response;
+                }
+                else
+                {
+                    response.Data = true;
+                    response.Success = true;
+                    response.Message = "Users added successfully.";
+                    response.StatusCode = 200; // OK
+                    return response;
+                }
+            }
+            catch (Exception)
+            {
+                // Log the exception details here
+
+                return new ServiceResponse<bool>
+                {
+                    Success = false,
+                    Message = "An unexpected server error occurred while adding the user.",
+                    Data = false,
+                    StatusCode = 500 // Internal Server Error
+                };
+            }
+
+        }
+
+        public Task GetUsers()
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task GetUserById(Guid userId)
+        {
+            throw new NotImplementedException();
         }
     }
 }

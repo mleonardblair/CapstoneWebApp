@@ -1,97 +1,154 @@
 ﻿@inject ICategoryService CategoryService // Inject the CategoryService;
 @inject ITagService TagService;
+@inject IProductService ProductService;
+@inject NavigationManager NavigationManager;
+<MudDrawer>
 
-<MudPaper Class="mx-2" Elevation="0">
+</MudDrawer>
+<MudPaper Class="mx-2" Elevation="0" Style="height:100%">
     @if (CategoryService.Categories == null)
     {
-    <MudPaper Square="true" 
-        Elevation="3">
+        <MudPaper Square="true" 
+            Elevation="3">
             <MudSkeleton SkeletonType="SkeletonType.Rectangle" Height="20px" Class="my-md-3 my-lg-3 my-xl-4" />
-            <MudSkeleton Height="2px" Class="my-md-3 my-lg-3 my-xl-4" />
-            <MudSkeleton Height="42px;" Class="py-md-3 py-lg-3 py-xl-4" />
-            <MudSkeleton Height="42px;" Class="py-md-3 py-lg-3 py-xl-4" />
-            <MudSkeleton Height="42px;" Class="py-md-3 py-lg-3 py-xl-4" />
+            <MudSkeleton Height="2px" Class="my-md-3 my-lg-3 my-xl-4 text-center text-md-start" />
+            <MudSkeleton Height="42px;" Class="py-md-3 py-lg-3 py-xl-4 text-center text-md-start" />
+            <MudSkeleton Height="42px;" Class="py-md-3 py-lg-3 py-xl-4 text-center text-md-start" />
+            <MudSkeleton Height="42px;" Class="py-md-3 py-lg-3 py-xl-4 text-center text-md-start" />
         </MudPaper>
     }
     else
     {
         <MudPaper 
-            Class="py-md-6 py-lg-6 py-xl-6 mr-md-2 mr-sm-3  mr-lg-2 mr-xl-2 mb-2" 
-            Elevation="0"
-            Style="position: relative;">
+              Class="py-md-12 py-lg-12 py-xl-12 mr-md-2 mr-sm-3  mr-lg-2 mr-xl-2"
+              Elevation="0"
+              Style="position: relative;">
             <MudNavMenu Rounded="true" Margin="Margin.Normal">
-                <MudText Typo="Typo.h6" Color="Color.Primary" Class="p-4">Categories</MudText>
+                <MudText Typo="Typo.h6" Color="Color.Primary" Class="p-4 text-center text-md-start">Browse by category</MudText>
                 @*<MudText Typo="Typo.body2" Class="px-4 mud-text-secondary">Style based categories</MudText>*@
                 <MudDivider Class="my-2" />
                 @foreach (var category in CategoryService.Categories)
                 {
-                    <MudNavLink Href="@($"shop/category/{category.Id}")">@category.Name</MudNavLink>
+                    <MudText Class="py-3 text-center text-md-start" Typo="Typo.body1" @onclick="() => NavigateToCategory(category.Id)">@category.Name</MudText>
                 }
             </MudNavMenu>
         </MudPaper>
+        // Price Filter
+        <MudPaper 
+            Class="py-md-12 py-lg-12 py-xl-12 mr-md-2 mr-sm-3  mr-lg-2 mr-xl-2" 
+            Elevation="1">
+            <MudText Typo="Typo.h6" Class="p-4 text-center text-md-start"  Color="Color.Primary">Search by Price Range</MudText>
+            <MudForm>
+                <MudTextField Label="Min Price" @bind-Value="minPrice" Class="mr-2 py-3" T="decimal?" />
+                <MudTextField Label="Max Price" @bind-Value="maxPrice" Class="mr-2 py-3" T="decimal?" />
+                <MudButton OnClick="ApplyPriceFilter" Color="Color.Primary" FullWidth Variant="Variant.Filled">Apply</MudButton>
+            </MudForm>
+        </MudPaper>
+        
+        // Sort Ascending
+        <MudText Typo="Typo.h6" Color="Color.Primary" Class="p-4 text-center text-md-start">Sorting</MudText>
+        <MudButton OnClick="ToggleSortOrder" FullWidth Variant="Variant.Filled" Color="Color.Primary">Sort: @(isAscending ? "Ascending" : "Descending")</MudButton>
     }
    
+    @if (TagService.Tags == null || TagService.Tags.Count == 0)
+    {
+        <MudPaper Square="true"
+              Elevation="3">
+            <MudSkeleton SkeletonType="SkeletonType.Rectangle" Height="20px" Class="my-md-3 my-lg-3 my-xl-4" />
+            <MudSkeleton Height="2px" Class="my-md-3 my-lg-3 my-xl-4" />
+            <MudSkeleton Height="42px;" Class="py-md-3 py-lg-3 py-xl-4" />
+            <MudSkeleton Height="42px;" Class="py-md-3 py-lg-3 py-xl-4" />
+            <MudSkeleton Height="42px;" Class="py-md-3 py-lg-3 py-xl-4" />
+              <MudSkeleton Height="2px" Class="my-md-3 my-lg-3 my-xl-4" />
+            <MudSkeleton Height="42px;" Class="py-md-3 py-lg-3 py-xl-4" />
+            <MudSkeleton Height="42px;" Class="py-md-3 py-lg-3 py-xl-4" />
+            <MudSkeleton Height="42px;" Class="py-md-3 py-lg-3 py-xl-4" />
+              <MudSkeleton Height="2px" Class="my-md-3 my-lg-3 my-xl-4" />
+            <MudSkeleton Height="42px;" Class="py-md-3 py-lg-3 py-xl-4" />
+            <MudSkeleton Height="42px;" Class="py-md-3 py-lg-3 py-xl-4" />
+            <MudSkeleton Height="2px" Class="my-md-3 my-lg-3 my-xl-4" />
+            <MudSkeleton Height="42px;" Class="py-md-3 py-lg-3 py-xl-4" />
+            <MudSkeleton Height="42px;" Class="py-md-3 py-lg-3 py-xl-4" />
+            <MudSkeleton Height="42px;" Class="py-md-3 py-lg-3 py-xl-4" />
+            <MudSkeleton Height="42px;" Class="py-md-3 py-lg-3 py-xl-4" />
+        </MudPaper>
 
+    }
+    else
+    {
+         <MudDivider Class="my-2" />
+             <MudPaper 
+                    Class="py-md-12 py-lg-12 py-xl-12 mr-md-2 mr-sm-3  mr-lg-2 mr-xl-2" 
+                    Elevation="0"
+                    Style="position: relative;">
+                    <MudText Typo="Typo.h6" Color="Color.Primary" Class="p-4 text-center text-md-start">Tags</MudText>
+                    <MudDivider Class="my-2" />
+                <MudChipSet Class="justify-content-center">
 
-
-@if (TagService.Tags == null || TagService.Tags.Count == 0)
-{
-    <MudPaper Square="true"
-          Elevation="3">
-        <MudSkeleton SkeletonType="SkeletonType.Rectangle" Height="20px" Class="my-md-3 my-lg-3 my-xl-4" />
-        <MudSkeleton Height="2px" Class="my-md-3 my-lg-3 my-xl-4" />
-        <MudSkeleton Height="42px;" Class="py-md-3 py-lg-3 py-xl-4" />
-        <MudSkeleton Height="42px;" Class="py-md-3 py-lg-3 py-xl-4" />
-        <MudSkeleton Height="42px;" Class="py-md-3 py-lg-3 py-xl-4" />
-          <MudSkeleton Height="2px" Class="my-md-3 my-lg-3 my-xl-4" />
-        <MudSkeleton Height="42px;" Class="py-md-3 py-lg-3 py-xl-4" />
-        <MudSkeleton Height="42px;" Class="py-md-3 py-lg-3 py-xl-4" />
-        <MudSkeleton Height="42px;" Class="py-md-3 py-lg-3 py-xl-4" />
-          <MudSkeleton Height="2px" Class="my-md-3 my-lg-3 my-xl-4" />
-        <MudSkeleton Height="42px;" Class="py-md-3 py-lg-3 py-xl-4" />
-        <MudSkeleton Height="42px;" Class="py-md-3 py-lg-3 py-xl-4" />
-        <MudSkeleton Height="2px" Class="my-md-3 my-lg-3 my-xl-4" />
-        <MudSkeleton Height="42px;" Class="py-md-3 py-lg-3 py-xl-4" />
-        <MudSkeleton Height="42px;" Class="py-md-3 py-lg-3 py-xl-4" />
-        <MudSkeleton Height="42px;" Class="py-md-3 py-lg-3 py-xl-4" />
-        <MudSkeleton Height="42px;" Class="py-md-3 py-lg-3 py-xl-4" />
-    </MudPaper>
-
-}
-else
-{
-        <MudDivider Class="my-2" />
-     <MudPaper 
-            Class="py-md-12 py-lg-12 py-xl-12 mr-md-2 mr-sm-3  mr-lg-2 mr-xl-2" 
-            Elevation="0"
-            Style="position: relative;">
-            <MudText Typo="Typo.h6" Color="Color.Primary" Class="p-4">Tags</MudText>
-            <MudDivider Class="my-2" />
-        <MudChipSet Class="justify-content-center">
-
-            @foreach (var tag in TagService.Tags)
-            {
-                @if (!TagColors.ContainsKey(tag.Name))
-                {
-                    TagColors[tag.Name] = MudMethods.GetRandomColor2(TagColors);
-                }
-                <MudChip Variant="Variant.Text"
-                     Class="my-2 py-5"
-                    Text="@tag.Name"
-                    Href="@($"shop/tag/{tag.Id}")"
-                    Color="@TagColors[tag.Name]"
-                    @key="tag.Id">
-                </MudChip>
-            }
-        </MudChipSet>
-    </MudPaper>
-}
+                    @foreach (var tag in TagService.Tags)
+                    {
+                        @if (!TagColors.ContainsKey(tag.Name))
+                        {
+                            TagColors[tag.Name] = MudMethods.GetRandomColor2(TagColors);
+                        }
+                        <MudChip Variant="Variant.Text"
+                            @onclick="() => SelectTag(tag.Id)"
+                             Class="my-2 py-5"
+                            Text="@tag.Name"
+                            Color="@TagColors[tag.Name]"
+                            @key="tag.Id">
+                        </MudChip>
+                    }
+                </MudChipSet>
+            </MudPaper>
+    }
 </MudPaper>
 @code {
+    [Parameter]
+    public EventCallback<bool> OnSortOrderChanged { get; set; }
+    private bool isAscending = true; // Default sort order
+    [Parameter]
+    public EventCallback<Guid> TagSelectedCallback { get; set; }
+    [Parameter]
+    public EventCallback<(decimal? minPrice, decimal? maxPrice)> PriceRangeSelectedCallback { get; set; }
     private Dictionary<string, MudBlazor.Color> TagColors = new Dictionary<string, MudBlazor.Color>();
+    private decimal? minPrice;
+    private decimal? maxPrice;
+
     protected override async Task OnInitializedAsync()
     {
-      await CategoryService.GetAllCategoriesAsync();
-      await TagService.GetAllTagsAsync();
+        await CategoryService.GetAllCategoriesAsync();
+        await TagService.GetAllTagsAsync();
     }
+    private async Task NavigateToCategory(Guid categoryId)
+    {
+        await ProductService.SetSelectedCategory(categoryId); // build the nav dir for the header on productlist
+        NavigationManager.NavigateTo($"shop/category/{categoryId}");
+    }
+    private async Task ToggleSortOrder()
+    {
+        isAscending = !isAscending;
+        if (OnSortOrderChanged.HasDelegate)
+        {
+            await OnSortOrderChanged.InvokeAsync(isAscending);
+        }
+    }
+    // Method to call when a tag is selected
+    private async Task SelectTag(Guid tagId)
+    {
+        if (TagSelectedCallback.HasDelegate)
+        {
+            await ProductService.SetSelectedTag(tagId);// build the nav dir for the header on productlist
+            await TagSelectedCallback.InvokeAsync(tagId);
+        }
+    }
+    private async Task ApplyPriceFilter()
+    {
+        if (PriceRangeSelectedCallback.HasDelegate)
+        {
+            Console.WriteLine($"private vars in shopsidebar: maxprice: {maxPrice} minprice: {minPrice}");
+            await PriceRangeSelectedCallback.InvokeAsync((minPrice, maxPrice));
+        }
+    }
+    
 }

@@ -1,34 +1,124 @@
 ﻿@attribute [Route(RouteConstants.ShopPagination)]
 @attribute [Route(RouteConstants.ShopSortedByCategory)]
+@attribute [Route(RouteConstants.ShopSortedByTag)]
 @attribute [Route(RouteConstants.ShopSearchProducts)]
 @attribute [Route(RouteConstants.ShopSearchProductsPagination)]
 @inject IProductService ProductService
+@inject IFavouriteService FavouriteService
+@inject NavigationManager NavigationManager 
+@inject IAuthService AuthService
+@inject AuthenticationStateProvider AuthenticationStateProvider
 @using EcommerceApp.Client.Shared;
+@using System.Security.Claims;
 @*<MudText Typo="Typo.h3">Shop</MudText>*@
 
-<div class="page">
-    <div class="sidebar">
-        <ShopSidebar/>
-    </div>
-    <div class="main-content">
-        <ProductList/>
-    </div>
-</div>
+<MudMainContent Style="height: 100%;">
+    <MudContainer Style="height: 100%;">
+        <div class="page">
+            <ReusableResultSnackbar @ref="resultSnackbar"
+                                    Message="@message"
+                                    Severity="@s" />
+            <div class="sidebar">
+                <MudPaper Class="paper-padding" Style="background-color:#B7C799">
+                    <ShopSidebar TagSelectedCallback="OnTagSelected"
+                                    PriceRangeSelectedCallback="OnPriceRangeSelected"
+                                    OnSortOrderChanged="HandleSortOrderChanged" />
+                </MudPaper>
+            </div>
+            <div class="main-content">
+                <MudPaper Class="paper-padding h-100">
+                    <ProductList 
+                        OnFavoriteToggle="HandleFavoriteToggle" 
+                        OnClearClick = "HandleClearCatalogFilter"/>
+                </MudPaper>
+            </div>
+        </div>
+    </MudContainer>
+</MudMainContent>
 
 @code {
+    [Parameter]
+    public bool? IsAscending { get; set; } = true;
+    [Parameter]
+    public Guid? TagId { get; set; } = null;
     [Parameter]
     public string? SearchQuery { get; set; } = null;
     [Parameter]
     public Guid? CategoryId { get; set; } = null;
-
+    [Parameter]
+    public decimal? MinPrice { get; set; } = null;
+    [Parameter]
+    public decimal? MaxPrice { get; set; } = null;
     /// <summary>
     /// Parameter for URL Synchronization fetches from the URI the page number and sets it to the Page property
     /// Because the page is set, it automatically fires the lifecycle method OnParametersSetAsync which recalls the ProductService to fetch the products.
     /// </summary>
     [Parameter]
     public int Page { get; set; } = 1;
+    Severity s = Severity.Success;
+    string message = string.Empty;
+    private ReusableResultSnackbar? resultSnackbar;
+    private async Task HandleClearCatalogFilter()
+    {
+        IsAscending = null;
+        TagId = null;
+        SearchQuery = null;
+        CategoryId = null;
+        MinPrice = null;
+        MaxPrice = null;
+        await ProductService.GetAllProductsAsync();
+        message = "Cleared Filter/Sort/Search.";
+        resultSnackbar?.Show();
+    }
+    private async Task HandleFavoriteToggle(Guid productId)
+    {
+        // Logic to toggle favorite status
+        Console.WriteLine($" Product {productId}");
+        await ToggleFavorite(productId);
+    }
+    private async Task ToggleFavorite(Guid productId)
+    {
+        var userId = await GetUserIdAsync();
+        // Use userId as needed, for example:
+        if (userId.HasValue)
+        {
+            var product = ProductService.Products.FirstOrDefault(p => p.Id == productId);
+            if (product != null)
+            {
+                List<FavouriteProductResponse> favs = (await FavouriteService.GetFavouritesByUserId(userId)).Data;
+                // Logic to update favorite status
+                if (product.isFavourite)
+                {
+                    var favourite = favs.FirstOrDefault(f => f.ProductId == productId);
+                    await FavouriteService.DeleteFavouriteAsync(favourite.FavouriteId);
+                    Console.WriteLine($"Deleted favourite : " + favourite.ProductName);
+                }
+                else
+                {
+                    FavouriteProductResponse favourite = new FavouriteProductResponse()
+                        {
+                            FavouriteId = Guid.NewGuid(),
+                            ProductId = productId,
+                            ApplicationUserId = userId.Value
+                        };
+                    try{                       
+                        await FavouriteService.AddFavouriteAsync(favourite);
+                        var favourited = favs.FirstOrDefault(f => f.ProductId == productId);
+                        Console.WriteLine($"Added favourite : " + favourite.ProductName);
+                    }catch(Exception e)
+                    {
+                        Console.WriteLine(e.Message);
+                    }
 
-
+                }
+                product.isFavourite = !product.isFavourite;
+                StateHasChanged();
+            }
+        }else
+        {
+            NavigationManager.NavigateTo("/login");
+        }
+    }
     protected override async Task OnParametersSetAsync()
     {
         int page = ProductService.CurrentPage; // Fetch the CurrentPage from ProductService
@@ -42,11 +132,92 @@
         {
             await ProductService.GetAllProductsAsync(page, pageSize, CategoryId);
         }
+        else if (TagId.HasValue)
+        {
+            await ProductService.GetProductsByTag(page, pageSize, TagId);
+        }
         else
         {
-            Console.WriteLine($"Page: {ProductService.CurrentPage}");
             await ProductService.GetAllProductsAsync(page, pageSize);
         };
     }
+    private async Task OnPriceRangeSelected((decimal? minPrice, decimal? maxPrice) priceRange)
+    {
+        MinPrice = priceRange.minPrice;
+        MaxPrice = priceRange.maxPrice;
+        ProductService.MinPrice = priceRange.minPrice;
+        ProductService.MaxPrice = priceRange.maxPrice;
+        await ApplyFilters();
+    }
+    private async Task ApplyFilters()
+    {
+        int page = ProductService.CurrentPage; // Fetch the CurrentPage from ProductService
+        int pageSize = ProductService.PageSize; // Fetch the PageSize from ProductService
 
+        if (SearchQuery != null)
+        {
+            await ProductService.SearchProducts(SearchQuery, page, MinPrice, MaxPrice);
+        }
+        else if (CategoryId != Guid.Empty && CategoryId.HasValue)
+        {
+            await ProductService.GetAllProductsAsync(page, pageSize, MinPrice, MaxPrice, CategoryId);
+        }
+        else if (TagId.HasValue)
+        {
+            await ProductService.GetProductsByTag(page, pageSize, TagId, MinPrice, MaxPrice);
+        }
+        else
+        {
+            await ProductService.GetAllProductsAsync(page, pageSize, MinPrice, MaxPrice);
+        };
+    }
+    private void OnTagSelected(Guid tagId)
+    {
+        // Logic to update the product list based on the selected tag
+        // For example, you can set the SearchQuery or other parameters here
+        TagId = tagId;
+        NavigationManager.NavigateTo($"/shop/tag/{tagId}");
+    }
+
+    private async Task HandleSortOrderChanged(bool isAscending)
+    {
+        ProductService.IsAscending = isAscending;
+        int page = ProductService.CurrentPage; // Fetch the CurrentPage from ProductService
+        int pageSize = ProductService.PageSize; // Fetch the PageSize from ProductService
+
+        if (SearchQuery != null)
+        {
+            await ProductService.SearchProducts(SearchQuery, page, isAscending);
+        }
+        else if (CategoryId != Guid.Empty && CategoryId.HasValue)
+        {
+            await ProductService.GetAllProductsAsync(page, pageSize, isAscending, CategoryId);
+        }
+        else if (TagId.HasValue)
+        {
+            await ProductService.GetProductsByTag(page, pageSize, isAscending, TagId);
+        }
+        else
+        {
+            await ProductService.GetAllProductsAsync(page, pageSize, isAscending);
+        };
+    }
+
+    private async Task<Guid?> GetUserIdAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity?.IsAuthenticated == true)
+        {
+            var userIdClaim = user.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim != null && Guid.TryParse(userIdClaim.Value, out Guid userId))
+            {
+                Console.WriteLine($" User Id: {userId}");
+                return userId;
+            }
+        }
+
+        return null; // User is not authenticated or the claim is not a valid Guid
+    }
 }

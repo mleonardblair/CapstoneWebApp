@@ -6,6 +6,8 @@ namespace EcommerceApp.Client.Services.CategoryService
 {
     public interface ICategoryService
     {
+        public string SnackMessage { get; set; }
+        public Severity Severity { get; set; }
         public string Message { get; set; }
         public List<CategoryDto> Categories { get; set; }
         public List<CategoryDto> AdminCategories { get; set; }
@@ -18,11 +20,11 @@ namespace EcommerceApp.Client.Services.CategoryService
         Task<ServiceResponse<CategoryDto>> GetCategoryByIdAsync(Guid productId);
         Task GetAdminCategories();
         Task GetCategoryById(Guid categoryId);
-        Task AddCategory(CategoryDto categoryDto);
-        Task UpdateCategory(CategoryDto categoryDto);
-        Task DeleteCategory(Guid categoryId);
+        Task<ServiceResponse<bool>> AddCategory(CategoryDto categoryDto);
+        Task<ServiceResponse<List<CategoryDto>>> UpdateCategory(CategoryDto categoryDto);
+        Task<ServiceResponse<List<CategoryDto>>> DeleteCategory(Guid categoryId);
         CategoryDto CreateNewCategory();
-
+        void ResetSnackbarMessage();
 
 
 

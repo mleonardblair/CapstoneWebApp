@@ -1,12 +1,10 @@
 ﻿
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
-using EcommerceApp.Server.Data;
 using EcommerceApp.Server.Models;
 using EcommerceApp.Shared.DTOs;
 using EcommerceApp.Shared.Models;
-using EcommerceApp.Server.Services.CartService;
-using EcommerceApp.Server.Services.AuthService;
+using Microsoft.AspNetCore.Mvc;
 
 namespace EcommerceApp.Server.Services.OrderService
 {
@@ -234,5 +232,60 @@ namespace EcommerceApp.Server.Services.OrderService
 
             return response;
         }
+
+        public Task<ServiceResponse<List<OrderDetailsResponse>>> GetOrdersByCustomerIdAsync(Guid customerId)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        ///  When called, this method will return all the orders for all the users asynchronously from the server.
+        /// </summary>
+        /// <returns></returns>
+        public async Task<ServiceResponse<List<OrderDetailsResponse>>> GetAdminOrders()
+        {
+            var response = new ServiceResponse<List<OrderDetailsResponse>>();
+            var orders = await _context.Orders
+                .Include(o => o.OrderItems)
+                .ThenInclude(oi => oi.Product)
+                .OrderByDescending(o => o.DateCreated)
+                .ToListAsync();
+
+            if (orders == null || orders.Count == 0)
+            {
+                response.Success = false;
+                response.Message = "No orders found. None may exist at this time.";
+                response.Data = null;
+                response.StatusCode = 404;
+            }
+            else
+            {
+                // Map the orders to the order details response which is a flattened version of the order.
+                var orderDetailsResponse = orders.Select(o => new OrderDetailsResponse
+                {
+                    OrderDate = o.DateCreated,
+                    TotalPrice = o.Total,
+                    // Map the order items to the order details product response which is a flattened version of the order item.
+                    Products = o.OrderItems.Select(oi => new OrderDetailsProductResponse
+                    {
+                        ProductId = oi.ProductId,
+                        Name = oi.Product.Name,
+                        ImageURI = oi.Product.ImageURI,
+                        Quantity = oi.Quantity,
+                        TotalPrice = oi.Price * oi.Quantity
+                    }).ToList()
+                }).ToList();
+
+                response.Data = orderDetailsResponse;
+                response.Success = true;
+                response.Message = "Orders retrieved successfully.";
+                response.StatusCode = 200;
+            }
+
+            return response;
+        }
+
+
+
     }
 }

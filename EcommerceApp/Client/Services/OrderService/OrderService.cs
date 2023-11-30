@@ -1,7 +1,9 @@
-﻿using EcommerceApp.Shared.DTOs;
+﻿using EcommerceApp.Client.Pages.Admin;
+using EcommerceApp.Shared.DTOs;
 using EcommerceApp.Shared.Models;
 using Microsoft.AspNetCore.Components;
 using System.Net.Http.Json;
+using static System.Net.WebRequestMethods;
 
 namespace EcommerceApp.Client.Services.OrderService
 {
@@ -9,14 +11,19 @@ namespace EcommerceApp.Client.Services.OrderService
     {
         private readonly HttpClient _httpClient;
         private readonly AuthenticationStateProvider _authStateProvider;
-        private readonly NavigationManager _navigationManager;
+
+        public string Message { get; set; } = string.Empty;
+        public List<OrderDetailsResponse> AdminOrders { get; set; } = new List<OrderDetailsResponse>();
+        public List<OrderDetailsResponse> Orders { get; set; } = new List<OrderDetailsResponse>();
+        public string SnackMessage { get; set; } = "THIS SHOULD NOT BE NULL SET IT TO SOMETHING";
+        public Severity Severity { get; set; } = Severity.Error;
+
+        public event Action OnChange;
 
         public OrderService(HttpClient httpClient,
-            AuthenticationStateProvider authStateProvider,
-            NavigationManager navigationManager) {
+            AuthenticationStateProvider authStateProvider) {
             _httpClient = httpClient;
             _authStateProvider = authStateProvider;
-            _navigationManager = navigationManager;
         }
 
         private async Task<bool> IsUserAuthenticated()
@@ -56,6 +63,14 @@ namespace EcommerceApp.Client.Services.OrderService
         {
             var result = await _httpClient.GetFromJsonAsync<ServiceResponse<OrderDetailsResponse>>($"api/orders/{id}");
             return result.Data;
+        }
+
+        public async Task GetAdminOrders()
+        {
+            var response = await _httpClient.GetFromJsonAsync<ServiceResponse<List<OrderDetailsResponse>>>("api/orders/admin");
+            if (response != null && response?.Data != null)
+                AdminOrders = response.Data;
+            OnChange?.Invoke();
         }
     }
 }

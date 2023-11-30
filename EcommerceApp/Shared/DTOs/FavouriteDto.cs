@@ -8,7 +8,7 @@ namespace EcommerceApp.Shared.DTOs
 {
     public class FavouriteDto
     {
-        public Guid Id { get; set; }
+        public Guid Id { get; set; } = Guid.NewGuid();
         public Guid ApplicationUserId { get; set; }
         public Guid ProductId { get; set; }
         public DateTime DateCreated { get; set; }

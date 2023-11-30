@@ -18,8 +18,16 @@ namespace EcommerceApp.Server.Controllers
             _favouriteService = favouriteService;
         }
 
+
+        [HttpGet("user/{userId}")]
+        public async Task<ActionResult<ServiceResponse<List<ProductDto>>>> GetFavouritesByUserId(Guid userId)
+        {
+            var result = await _favouriteService.GetFavouritesByUserId(userId);
+            return Ok(result);
+         }
+
         [HttpPost]
-        public async Task<ActionResult<ServiceResponse<FavouriteProductResponse>>> AddFavourite(FavouriteDto favouriteDto)
+        public async Task<ActionResult<ServiceResponse<FavouriteProductResponse>>> AddFavourite(FavouriteProductResponse favouriteDto)
         {
             var result = await _favouriteService.AddFavouriteAsync(favouriteDto);
             return Ok(result);

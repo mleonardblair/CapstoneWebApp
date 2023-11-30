@@ -16,6 +16,7 @@ namespace EcommerceApp.Shared.DTOs
         public decimal Price { get; set; }
         public string ImageURI { get; set; } = string.Empty;
         public string[] Images { get; set; } = new string[0];
+        public bool isFavourite { get; set; } = false;
         [Required]
         public Guid CategoryId { get; set; }
         [Required]

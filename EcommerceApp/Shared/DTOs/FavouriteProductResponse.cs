@@ -10,15 +10,15 @@ namespace EcommerceApp.Shared.DTOs
     {
         // From Favourite Model
         public Guid FavouriteId { get; set; }
+        public Guid ApplicationUserId { get; set; }
         public DateTime DateAddedToFavourite { get; set; }
 
         // From Product Model
         public Guid ProductId { get; set; }
-        public string ProductName { get; set; }
-        public string ProductDescription { get; set; }
+        public string ProductName { get; set; } = string.Empty;
+        public string ProductDescription { get; set; } = string.Empty;
         public decimal ProductPrice { get; set; }
-        public string ProductImageURI { get; set; }
+        public string ProductImageURI { get; set; } = string.Empty;
         public int ProductStockQuantity { get; set; }
-        public string[] ProductImages { get; set; }
     }
 }

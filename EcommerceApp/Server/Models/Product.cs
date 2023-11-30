@@ -23,7 +23,16 @@ namespace EcommerceApp.Server.Models
         [NotMapped]
         public string[] Images
         {
-            get => string.IsNullOrEmpty(ImagesJson) ? new string[0] : JsonConvert.DeserializeObject<string[]>(ImagesJson);
+            get
+            {
+                if (string.IsNullOrEmpty(ImagesJson))
+                {
+                    return new string[0];
+                }
+
+                var images = JsonConvert.DeserializeObject<string[]>(ImagesJson);
+                return images ?? new string[0]; // Return an empty array if deserialization results in null
+            }
             set => ImagesJson = value is null ? string.Empty : JsonConvert.SerializeObject(value);
         }
 

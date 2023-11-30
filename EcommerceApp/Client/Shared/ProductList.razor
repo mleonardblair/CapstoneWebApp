@@ -1,22 +1,33 @@
-﻿@inject IProductService ProductService
+﻿@using System.Security.Claims
+@using System.Text;
+@inject IProductService ProductService
+@inject IFavouriteService FavouriteService
 @inject NavigationManager NavigationManager
 @implements IDisposable 
-
-@if (ProductService.Products == null || ProductService.Products.Count == 0)
+<MudContainer Style="flex-direction:unset;">
+    <ReusableResultSnackbar @ref="resultSnackbar"
+                            Message="@message"
+                            Severity="@s" />
+    <MudText Typo="Typo.h5">@ProductService.GetDynamicHeading()</MudText><MudButton OnClick="HandleClearFilterSortSearch">Clear</MudButton>
+@if (ProductService.Products == null )
 {
-    <span>@ProductService.Message</span>
+    <MudText Typo="Typo.h6" Align="Align.Left" Style="display:flex; flex-grow:1;">@ProductService.Message</MudText>
+    <div class="container-center">
+        <MudProgressCircular Color="Color.Primary" Size="Size.Large" Indeterminate="true" />
+    </div>
 }
-else
+else if(ProductService.Products.Count > 0)
 {
-    <MudText Typo="Typo.h4">Products</MudText>
+
     <ul class="list-unstyled">
         @foreach (var product in ProductService.Products)
         {
             var imageSrc = product.ImageURI ?? "/images/img_placeholder.jpg";
             Console.WriteLine(imageSrc);
-            <li class="media my-3 gx-3">
+            <li class="media my-3 gx-3" style="padding-top:20px;min-height:200px;">
+                <hr style= "border-top-color:black; border: 2px;"/>
                 <div class="media-img-wrapper me-3">
-                    <a href="#">
+                    <a href="/shop/product/@product.Id">
                         <img class="media-img" src="@imageSrc" alt="@product.Name" />
                     </a>
                 </div>
@@ -25,11 +36,28 @@ else
                         <h4 class="mb-0">@product.Name</h4>
                     </a>
                     <p>@product.Description</p>
-                    <h5 class="price">
+                    <div style="align-items:flex-end;  justify-content:flex-end; display:flex;">
+                            @if(product.isFavourite)
+                            {
+                                <MudIconButton Icon="@Icons.Material.Filled.Favorite"
+                                   Color="@Color.Error" 
+                                               Title="Favorited"
+                                   OnClick="@(() => HandleFavoriteClick(product.Id))" />
+                            }
+                            else
+                            {
+                                <MudIconButton Icon="@Icons.Material.Filled.FavoriteBorder"
+                                   Color="@Color.Default" 
+                                               Title="Add to Favorites"
+                                   OnClick="@(() => HandleFavoriteClick(product.Id))" />
+                            }
+                    </div>
+                    <h5 class="price" style="padding:0px margin:0px;">
                         $@product.Price
                     </h5>
                 </div>
             </li>
+            <hr/>
         }
     </ul>
     <div class="d-flex flex-column align-center" style="bottom:0;">
@@ -41,22 +69,50 @@ else
             Count="ProductService.PageCount"
             SelectedChanged="HandlePageChanged" />
     </div>
+
+}else
+{    // If 0 products returns from a search, for instance
     
+    <div style="height:100%; width:auto; margin:auto;">
+    <MudText Typo="Typo.h4" Align="Align.Center" Style="display:flex; flex-grow:1;">@ProductService.Message</MudText>
+    <MudPaper Style="height:auto;">
+
+    </MudPaper>
+    <MudImage Src="/images/empty-bench-empty-productlist.png" />
+    </div>
 }
-
+</MudContainer>
 @code {
+    [Parameter] 
+    public EventCallback<Guid> OnFavoriteToggle { get; set; }
+    [Parameter] 
+    public EventCallback OnClearClick { get; set; }
+    private async Task HandleClearFilterSortSearch()
+    {
+        if (OnClearClick.HasDelegate)
+        {
+            await OnClearClick.InvokeAsync();
+        }
+    }
+    private async Task HandleFavoriteClick(Guid productId)
+    {
+        if (OnFavoriteToggle.HasDelegate)
+        {
+            await OnFavoriteToggle.InvokeAsync(productId);
+        }
+    }
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
         // Subscribe to the ProductsChanged event to re-render the component when the event is raised by the ProductService class. This is necessary because the ProductService class is a singleton and the Products property is only set once when the application starts.
         ProductService.ProductsChanged += StateHasChanged;
     }
-
+   
     public void Dispose()
     {
         ProductService.ProductsChanged -= StateHasChanged;
     }
-
+  
     // Only change page if its not the current page to avoid infinite loop.
     private void HandlePageChanged(int newPage)
     {
@@ -71,7 +127,8 @@ else
         {
             NavigationManager.NavigateTo($"shop/products/{newPage}");
         }
-
     }
-
+    Severity s = Severity.Success;
+    string message = string.Empty;
+    private ReusableResultSnackbar? resultSnackbar;
 }

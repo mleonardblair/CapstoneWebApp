@@ -13,6 +13,7 @@
 
         // Shop Page
         public const string ShopSortedByCategory = "/shop/category/{CategoryId:guid}";
+        public const string ShopSortedByTag = "/shop/tag/{TagId:guid}";
         public const string ShopProductDetails = "/shop/product/{ProductId:guid}";
         public const string ShopCreateProduct = "/shop/products/create";
         public const string ShopEditProduct = "/shop/products/edit/{id}";

@@ -2,6 +2,18 @@
     display: flex;
     align-items: center;
 }
+/* CSS for the logo within the app bar */
+.logo {
+    height: 100%; /* Set the height to match the app bar */
+    display: flex;
+    align-items: center; /* Centers the logo vertically */
+    padding: 5px; /* Optional: adds some space around the logo */
+}
+
+    .logo img {
+        height: 100%; /* Make the image fill the logo container */
+        width: auto; /* Maintain the aspect ratio of the image */
+    }
 
 .links {
     flex: 1; /* This will allow the .links container to grow and fill available space */
@@ -27,33 +39,7 @@
     height: 100%; /* Set the height to fill the container */
     text-decoration: none; /* Optional: to remove the underline from links */
 }
-.nav-button {
-    transition: all 0.3s ease; /* Smooth transition for all properties */
-}
 
-    .nav-button:hover {
-        background-color: #ffffff; /* Change to your preferred hover background color */
-        color: #000000; /* Change to your preferred hover text color */
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Elevate with shadow */
-        transform: scale(1.05); /* Slightly increase the size */
-        position: relative; /* Needed for pseudo-elements positioning */
-    }
-
-    /* Example of animated underline */
-    .nav-button::after {
-        content: '';
-        display: block;
-        width: 0;
-        height: 2px;
-        background: #000000; /* Change to your preferred underline color */
-        transition: width 0.3s;
-        position: absolute;
-        bottom: -5px; /* Adjust the position as needed */
-    }
-
-    .nav-button:hover::after {
-        width: 100%; /* Underline grows to full width */
-    }
 
 /* Extra small devices */
 @media (max-width: 599.98px) {

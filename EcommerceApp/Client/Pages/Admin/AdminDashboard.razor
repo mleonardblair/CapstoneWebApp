@@ -11,7 +11,7 @@
         {
               @if (!string.IsNullOrEmpty(UserName))
             {
-                <MudAlert Severity="Severity.Success" Variant="Variant.Filled" Class="mb-4" Style="color:black">
+                <MudAlert Severity="Severity.Normal" Variant="Variant.Filled" Class="mb-4">
                     <MudAlertTitle>Hi @UserName!</MudAlertTitle>
                     <MudText Typo="Typo.body1">Welcome to your admin account management page.</MudText>
                 </MudAlert>
@@ -23,6 +23,11 @@
                 </div>
                 <MudContainer MaxWidth="MaxWidth.Small">
                     <MudGrid Justify="Justify.Center">
+                      
+                        <ReusableCardDisplay IconPath="/images/admin/account-svgrepo-com2.png"
+                                 Title="My Profile"
+                                 OnClick="GoToProfile"
+                                 Xs="12" Sm="12" Md="5" Lg="5" Xl="5" />
                         <ReusableCardDisplay IconPath="/images/admin/friend-svgrepo-1.png"
                                  Title="Users"
                                  OnClick="GoToUsers"
@@ -31,14 +36,14 @@
                                          Title="View All Orders" 
                                  OnClick="GoToAdminOrders"                
                                  Xs="12" Sm="12" Md="5" Lg="5" Xl="5" />
-                        <ReusableCardDisplay IconPath="/images/admin/pay-svgrepo-1.png" 
-                                 Title="Comments"        
-                                 OnClick="GoToComments"
-                                 Xs="12" Sm="12" Md="5" Lg="5" Xl="5"  />
-                        <ReusableCardDisplay IconPath="/images/admin/mail-svgrepo-1.png"
+                        <ReusableCardDisplay IconPath="/images/admin/pay-svgrepo-1.png"
                                          Title="Reports" 
                                  OnClick="GoToReports"
                                  Xs="12" Sm="12" Md="5" Lg="5" Xl="5"  />
+                        <ReusableCardDisplay IconPath="/images/admin/account-svgrepo-com2.png"
+                                         Title="View Categories"
+                                         OnClick="GoToCategories"
+                                         Xs="12" Sm="12" Md="5" Lg="5" Xl="5" />
                         <ReusableCardDisplay IconPath="/images/admin/kudakurage-svgrepo-1.png"
                                          Title="Product Catelogue"
                                          OnClick="GoToProductCatelogue"
@@ -58,6 +63,7 @@
     {
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         var user = authState.User;
+
         if (user.Identity.IsAuthenticated)
         {
             // You can access the user's name using the claim types
@@ -72,11 +78,14 @@
     }
     private string UserName { get; set; }
 
-    private void GoToAdminOrders() => NavigationManager.NavigateTo("/admin-management/admin-orders");
-    private void GoToUsers() => NavigationManager.NavigateTo("/admin-management/users");
-    private void GoToComments() => NavigationManager.NavigateTo("/admin-management/comments");
-    private void GoToReports() => NavigationManager.NavigateTo("/admin-management/reports");
-    private void GoToProductCatelogue() => NavigationManager.NavigateTo("/admin-management/product-catelogue");
+    private void GoToCategories() => NavigationManager.NavigateTo("/admin-dashboard/categories");
+    private void GoToAdminOrders() => NavigationManager.NavigateTo("/admin-dashboard/orders");
+    private void GoToUsers() => NavigationManager.NavigateTo("/admin-dashboard/users");
+    private void GoToProfile() => NavigationManager.NavigateTo("/admin-dashboard/profile");
+    // Out of scope.
+   // private void GoToComments() => NavigationManager.NavigateTo("/admin-dashboard/comments");
+    private void GoToReports() => NavigationManager.NavigateTo("/admin-dashboard/reports");
+    private void GoToProductCatelogue() => NavigationManager.NavigateTo("/admin-dashboard/product-catelogue");
 
     // You can add additional methods for navigation or other actions for each card
 }

@@ -166,6 +166,9 @@ namespace EcommerceApp.Server.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("Name")
+                        .IsUnique();
+
                     b.ToTable("Categories");
                 });
 
@@ -259,6 +262,180 @@ namespace EcommerceApp.Server.Migrations
                     b.HasIndex("ProductId");
 
                     b.ToTable("OrderItems");
+                });
+
+            modelBuilder.Entity("EcommerceApp.Server.Models.PageModels.AboutUs", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("DateModified")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Image")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ImageAlt")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Paragraph")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("AboutUs");
+                });
+
+            modelBuilder.Entity("EcommerceApp.Server.Models.PageModels.Banner", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("BannerImageURI")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("DateModified")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Banners");
+                });
+
+            modelBuilder.Entity("EcommerceApp.Server.Models.PageModels.ContactUs", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("BusinessAddress")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("DateModified")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Telephone")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("WebsiteUrl")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ContactUs");
+                });
+
+            modelBuilder.Entity("EcommerceApp.Server.Models.PageModels.FAQ", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("DateModified")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("FAQs");
+                });
+
+            modelBuilder.Entity("EcommerceApp.Server.Models.PageModels.FAQAnswer", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("AnswerText")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("FAQId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FAQId");
+
+                    b.ToTable("FAQAnswer");
+                });
+
+            modelBuilder.Entity("EcommerceApp.Server.Models.PageModels.FAQQuestion", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("FAQId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("QuestionText")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FAQId");
+
+                    b.ToTable("FAQQuestion");
+                });
+
+            modelBuilder.Entity("EcommerceApp.Server.Models.PageModels.Gallery", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("DateModified")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Subtitle")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Galleries");
+                });
+
+            modelBuilder.Entity("EcommerceApp.Server.Models.PageModels.GalleryImage", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("GalleryId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ImageURI")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("GalleryId");
+
+                    b.ToTable("GalleryImage");
                 });
 
             modelBuilder.Entity("EcommerceApp.Server.Models.Payment", b =>
@@ -489,57 +666,56 @@ namespace EcommerceApp.Server.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("84eaaffe-46df-45a2-9016-4016f93cbd88"),
-                            DateCreated = new DateTime(2023, 11, 25, 2, 9, 1, 288, DateTimeKind.Utc).AddTicks(35),
+                            Id = new Guid("8d6adaf6-3f09-4c96-9e56-1222c23b2df0"),
+                            DateCreated = new DateTime(2023, 11, 30, 5, 52, 46, 390, DateTimeKind.Utc).AddTicks(2112),
                             DateModified = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Description = "Outdoor and indoor ornaments that add flair to living spaces and gardens.",
                             Name = "Ornament"
                         },
                         new
                         {
-                            Id = new Guid("b5722d41-34f3-4002-88c6-75aac65bd0c7"),
-                            DateCreated = new DateTime(2023, 11, 25, 2, 9, 1, 288, DateTimeKind.Utc).AddTicks(43),
+                            Id = new Guid("d22f7215-96f6-4fe2-aee2-4acb951fe23e"),
+                            DateCreated = new DateTime(2023, 11, 30, 5, 52, 46, 390, DateTimeKind.Utc).AddTicks(2119),
                             DateModified = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Description = "Items related to garden decorations and maintenance, including plants, tools, and accessories.",
                             Name = "Garden"
                         },
                         new
                         {
-                            Id = new Guid("f0c2ade4-1352-4333-9796-6aa5a0a8f786"),
-                            DateCreated = new DateTime(2023, 11, 25, 2, 9, 1, 288, DateTimeKind.Utc).AddTicks(46),
+                            Id = new Guid("aea7805c-a3ba-48a3-b2f4-663493731e39"),
+                            DateCreated = new DateTime(2023, 11, 30, 5, 52, 46, 390, DateTimeKind.Utc).AddTicks(2121),
                             DateModified = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Description = "Circular arrangements of flowers, leaves, or other materials, often used for decorative purposes or special occasions.",
                             Name = "Wreaths"
                         },
                         new
                         {
-                            Id = new Guid("b24a1cd1-6ea9-47d7-96da-f35892399c13"),
-                            DateCreated = new DateTime(2023, 11, 25, 2, 9, 1, 288, DateTimeKind.Utc).AddTicks(58),
+                            Id = new Guid("d368a589-8538-4eed-b22e-678f4fcccdd6"),
+                            DateCreated = new DateTime(2023, 11, 30, 5, 52, 46, 390, DateTimeKind.Utc).AddTicks(2123),
                             DateModified = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Description = "A form of textile produced using knotting techniques, often used for wall hangings, plant hangers, and more.",
                             Name = "Macrame"
                         },
                         new
                         {
-                            Id = new Guid("73be4b7e-44e7-456b-a84d-aaff96bef90d"),
-                            DateCreated = new DateTime(2023, 11, 25, 2, 9, 1, 288, DateTimeKind.Utc).AddTicks(60),
-
+                            Id = new Guid("1e9b3e30-8dc3-4de3-a2f4-d0633cbd1754"),
+                            DateCreated = new DateTime(2023, 11, 30, 5, 52, 46, 390, DateTimeKind.Utc).AddTicks(2127),
                             DateModified = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Description = "The art of beautiful handwriting, often used in invitations, letters, and decorative texts.",
                             Name = "Calligraphy"
                         },
                         new
                         {
-                            Id = new Guid("1d8b35e5-4868-49ff-addb-f0fa4def48e2"),
-                            DateCreated = new DateTime(2023, 11, 25, 2, 9, 1, 288, DateTimeKind.Utc).AddTicks(63),
+                            Id = new Guid("f454fa0e-79e7-494e-b742-118c82b15433"),
+                            DateCreated = new DateTime(2023, 11, 30, 5, 52, 46, 390, DateTimeKind.Utc).AddTicks(2128),
                             DateModified = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Description = "The craft of decorating fabric using a needle to apply thread or yarn, often used in apparel, home decor, and artworks.",
                             Name = "Embroidery"
                         },
                         new
                         {
-                            Id = new Guid("7bba214d-ee01-44a0-9d04-bb5fbe8fca58"),
-                            DateCreated = new DateTime(2023, 11, 25, 2, 9, 1, 288, DateTimeKind.Utc).AddTicks(65),
+                            Id = new Guid("7a9bdf3d-5bfc-40be-aa30-b9218eccb1e0"),
+                            DateCreated = new DateTime(2023, 11, 30, 5, 52, 46, 390, DateTimeKind.Utc).AddTicks(2130),
                             DateModified = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Description = "Items that serve a decorative purpose, enhancing the aesthetics of a space without serving a practical function.",
                             Name = "Decorative"
@@ -644,6 +820,39 @@ namespace EcommerceApp.Server.Migrations
                     b.Navigation("Order");
 
                     b.Navigation("Product");
+                });
+
+            modelBuilder.Entity("EcommerceApp.Server.Models.PageModels.FAQAnswer", b =>
+                {
+                    b.HasOne("EcommerceApp.Server.Models.PageModels.FAQ", "FAQ")
+                        .WithMany("Answers")
+                        .HasForeignKey("FAQId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("FAQ");
+                });
+
+            modelBuilder.Entity("EcommerceApp.Server.Models.PageModels.FAQQuestion", b =>
+                {
+                    b.HasOne("EcommerceApp.Server.Models.PageModels.FAQ", "FAQ")
+                        .WithMany("Questions")
+                        .HasForeignKey("FAQId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("FAQ");
+                });
+
+            modelBuilder.Entity("EcommerceApp.Server.Models.PageModels.GalleryImage", b =>
+                {
+                    b.HasOne("EcommerceApp.Server.Models.PageModels.Gallery", "Gallery")
+                        .WithMany("GalleryImages")
+                        .HasForeignKey("GalleryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Gallery");
                 });
 
             modelBuilder.Entity("EcommerceApp.Server.Models.Payment", b =>
@@ -789,6 +998,18 @@ namespace EcommerceApp.Server.Migrations
                         .IsRequired();
 
                     b.Navigation("Reports");
+                });
+
+            modelBuilder.Entity("EcommerceApp.Server.Models.PageModels.FAQ", b =>
+                {
+                    b.Navigation("Answers");
+
+                    b.Navigation("Questions");
+                });
+
+            modelBuilder.Entity("EcommerceApp.Server.Models.PageModels.Gallery", b =>
+                {
+                    b.Navigation("GalleryImages");
                 });
 
             modelBuilder.Entity("EcommerceApp.Server.Models.Product", b =>

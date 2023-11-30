@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using EcommerceApp.Server.Services.OrderService;
 using EcommerceApp.Shared.DTOs;
 using EcommerceApp.Shared.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace EcommerceApp.Server.Controllers
 {
@@ -20,15 +21,13 @@ namespace EcommerceApp.Server.Controllers
         }
 
      
-      /*  
-       *  ONLY STRIPE CLI WEBHOOK CAN CALL THIS METHOD
-       *  
-       *  [HttpPost]
-        public async Task<ActionResult<ServiceResponse<bool>>> PlaceOrderAsync()
+ 
+        [HttpPost]
+        public async Task<ActionResult<ServiceResponse<bool>>> PlaceOrderAsync(Guid id)
         {
-            var response = await _orderService.PlaceOrderAsync();
+            var response = await _orderService.PlaceOrderAsync(id);
             return Ok(response);
-        }*/
+        }
 
         [HttpGet]
         public async Task<ActionResult<ServiceResponse<List<OrderOverviewResponse>>>> GetAllOrdersAsync()
@@ -56,6 +55,14 @@ namespace EcommerceApp.Server.Controllers
         {
             var response = await _orderService.DeleteOrderByIdAsync(id);
             return Ok(response);
+        }
+
+
+        [HttpGet("admin"), Authorize(Roles = "Admin")]
+        public async Task<ActionResult<ServiceResponse<List<OrderDetailsResponse>>>> GetAdminOrders()
+        {
+            var result = await _orderService.GetAdminOrders();
+            return Ok(result);
         }
     }
 }

@@ -4,12 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using EcommerceApp.Server.Models;
 using EcommerceApp.Shared.DTOs;
 using EcommerceApp.Shared.Models;
-using System.Net.Http;
-using EcommerceApp.Server.Data;
 using Azure.Storage.Blobs;
-using Azure.Storage.Blobs.Models;
-using EcommerceApp.Server.Services.TagService;
-using Microsoft.EntityFrameworkCore.Infrastructure.Internal;
 
 namespace EcommerceApp.Server.Services.ProductService
 {
@@ -221,6 +216,7 @@ namespace EcommerceApp.Server.Services.ProductService
             {
                 var products = await _context.Products!
                    .Include(p => p.ProductTags)
+                   .Where(p=>p.CategoryId == categoryId)
                    .ToListAsync();
 
                 if (products == null || !products.Any())
@@ -313,6 +309,48 @@ namespace EcommerceApp.Server.Services.ProductService
             return response;
         }
 
+        public async Task<ServiceResponse<ProductPaginationResponse>> GetAllProductsAsync(int page, int pageSize, bool isAscending)
+        {
+            var response = new ServiceResponse<ProductPaginationResponse>();
+            try
+            {
+                int totalProducts = await _context.Products.CountAsync();
+                var totalPages = (int)Math.Ceiling(totalProducts / (double)pageSize);
+                // Sorting products based on the product name in ascending or descending order
+                var productsQuery = _context.Products.AsQueryable();
+
+
+                productsQuery = isAscending ? productsQuery.OrderBy(p => p.Name) : productsQuery.OrderByDescending(p => p.Name);
+
+                var products = await productsQuery
+                    .Skip((page - 1) * pageSize)
+                    .Take(pageSize)
+                    .Include(p => p.ProductTags)
+                    .ToListAsync();
+
+                if (products == null || !products.Any())
+                {
+                    response.Success = false;
+                    response.Message = "No products found.";
+                }
+                else
+                {
+                    response.Data = new ProductPaginationResponse
+                    {
+                        Products = _mapper.Map<List<ProductDto>>(products),
+                        CurrentPage = page,
+                        Pages = totalPages
+                    };
+                    response.Message = "Products retrieved successfully.";
+                }
+            }
+            catch (Exception ex)
+            {
+                response.Success = false;
+                response.Message = $"An error occurred: {ex.Message}";
+            }
+            return response;
+        }
 
         /// <summary>
         /// Overload for getallproducts that will return a paginated list of products + category filtering.
@@ -375,6 +413,112 @@ namespace EcommerceApp.Server.Services.ProductService
                 response.Success = false;
                 response.Message = $"An error occurred: {ex.Message}, StackTrace: {ex.StackTrace}, InnerException: {ex.InnerException?.Message}";
             }
+            return response;
+        }
+        public async Task<ServiceResponse<ProductPaginationResponse>> GetAllProductsAsync(int page, int pageSize, bool isAscending, Guid categoryId)
+        {
+            var response = new ServiceResponse<ProductPaginationResponse>();
+            try
+            {
+                // Filter the products by category first
+                var query = _context.Products.AsQueryable();
+                if (categoryId != Guid.Empty)
+                {
+                    query = query.Where(p => p.CategoryId == categoryId);
+                }
+
+                // Apply sorting based on the product name
+                query = isAscending ? query.OrderBy(p => p.Name) : query.OrderByDescending(p => p.Name);
+
+                // Now get the count of products after filtering
+                int totalProducts = await query.CountAsync();
+                var totalPages = (int)Math.Ceiling(totalProducts / (double)pageSize);
+
+                // Then get the actual page of products
+                var products = await query
+                   .Skip((page - 1) * pageSize)
+                   .Take(pageSize)
+                   .Include(p => p.ProductTags)
+                   .ToListAsync();
+
+                if (products == null || !products.Any())
+                {
+                    response.Success = false;
+                    response.Message = "No products found.";
+                    response.Data = new ProductPaginationResponse
+                    {
+                        Products = _mapper.Map<List<ProductDto>>(products),
+                        CurrentPage = 1,
+                        Pages = 0
+                    };
+                }
+                else
+                {
+                    response.Data = new ProductPaginationResponse
+                    {
+                        Products = _mapper.Map<List<ProductDto>>(products),
+                        CurrentPage = page,
+                        Pages = totalPages
+                    };
+                    response.Message = "Products retrieved successfully.";
+                }
+            }
+            catch (Exception ex)
+            {
+                response.Success = false;
+                response.Message = $"An error occurred: {ex.Message}, StackTrace: {ex.StackTrace}, InnerException: {ex.InnerException?.Message}";
+            }
+            return response;
+        }
+
+
+        /// <summary>
+        /// When called gets all tags.
+        /// </summary>
+        /// <param name="page">The page size</param>
+        /// <param name="pageSize"></param>
+        /// <param name="tagId"></param>
+        /// <returns></returns>
+        public async Task<ServiceResponse<ProductPaginationResponse>> GetProductsByTagId(int page, int pageSize, bool isAscending, Guid tagId)
+        {
+            var response = new ServiceResponse<ProductPaginationResponse>();
+            // Filter the products by category first
+            var query = _context.Products.AsQueryable();
+            if (tagId != Guid.Empty)
+            {
+                // Query products by tag
+                query = _context.Products
+                .Where(p => p.ProductTags.Any(pt => pt.TagId == tagId));
+            }
+
+            // Apply sorting based on the product name
+            query = isAscending ? query.OrderBy(p => p.Name) : query.OrderByDescending(p => p.Name);
+            // Now get the count of products after filtering
+            int totalProducts = await query.CountAsync();
+            var totalPages = (int)Math.Ceiling(totalProducts / (double)pageSize);
+            // Then get the actual page of products
+            var products = await query
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            if (products == null || !products.Any())
+            {
+                response.Success = false;
+                response.StatusCode = 404;
+                response.Message = "No products found for the tag.";
+            }
+            else
+            {
+                response.Data = new ProductPaginationResponse
+                {
+                    Products = _mapper.Map<List<ProductDto>>(products),
+                    CurrentPage = page,
+                    Pages = totalPages
+                };
+                response.Message = "Products retrieved successfully.";
+            }
+
             return response;
         }
 
@@ -456,6 +600,23 @@ namespace EcommerceApp.Server.Services.ProductService
             }
             return response;
         }
+        /// <summary>
+        /// Retrieves a list of products associated with a specific category ID.
+        /// </summary>
+        /// <remarks>
+        /// This method performs the following:
+        /// - Queries the products that are linked to the specified category ID.
+        /// - Includes associated product tags in the query.
+        /// - Converts the retrieved products to a list of <see cref="ProductDto"/>.
+        /// If no products are found for the given category ID, the method returns a response indicating the absence of products.
+        /// In case of an exception, the method captures the error details in the response.
+        /// </remarks>
+        /// <param name="categoryId">The unique identifier of the category used to filter products.</param>
+        /// <returns>
+        /// A <see cref="ServiceResponse{T}"/> containing a List of <see cref="ProductDto"/> objects.
+        /// The response includes the list of products and a success or error message.
+        /// </returns>
+        /// <exception cref="Exception">Thrown when an error occurs during the database query process.</exception>
 
         public async Task<ServiceResponse<List<ProductDto>>> GetProductsByCategoryId(Guid categoryId)
         {
@@ -488,10 +649,27 @@ namespace EcommerceApp.Server.Services.ProductService
             return response;
         }
 
+
+        /// <summary>
+        /// Performs a paginated search for products based on a given search query.
+        /// </summary>
+        /// <remarks>
+        /// The method encompasses:
+        /// - Searching for products where the product name, description, or associated tag names match the search query.
+        /// - Implementing pagination to manage the volume of search results.
+        /// - Converting the search results to <see cref="ProductDto"/> for consistent data handling.
+        /// The search is conducted in a case-insensitive manner, and the method returns a paginated list of products that match the query.
+        /// </remarks>
+        /// <param name="searchQuery">The search string used to find matching products.</param>
+        /// <param name="page">The page number to retrieve in the paginated search result.</param>
+        /// <returns>
+        /// A <see cref="ServiceResponse{T}"/> containing a <see cref="ProductPaginationResponse"/> object.
+        /// The response includes the paginated list of products, the total number of pages, the current page, and a success message.
+        /// </returns>
         public async Task<ServiceResponse<ProductPaginationResponse>> SearchProducts(string searchQuery, int page)
         {
             var pageResults = 2f;
-            var numberOfPages = Math.Ceiling( (await FindProductsBySearchQuery(searchQuery) )
+            var numberOfPages = Math.Ceiling((await FindProductsBySearchQuery(searchQuery))
                 .Count / pageResults);
             // This is the query that will be used to find the products that match the search query
             // and will be used to find the
@@ -509,7 +687,7 @@ namespace EcommerceApp.Server.Services.ProductService
                                 .ToListAsync();
             // Need to map back to DTO list
             var productDtos = _mapper.Map<List<ProductDto>>(products);
-           
+
             var response = new ServiceResponse<ProductPaginationResponse>()
             {
                 Data = new ProductPaginationResponse
@@ -522,15 +700,162 @@ namespace EcommerceApp.Server.Services.ProductService
 
             };
             // Need to map to 
-          
+            return response;
+        }
+        public async Task<ServiceResponse<ProductPaginationResponse>> SearchProducts(string searchQuery, int page, decimal? minPrice, decimal? maxPrice)
+        {
+            var pageResults = 2f;
+            var numberOfPages = Math.Ceiling((await FindProductsBySearchQuery(searchQuery))
+                .Count / pageResults);
+
+            // This is the query that will be used to find the products that match the search query
+            // and will be used to find the
+            // total number of pages for the search results pagination
+            // and will be used to find the products for the requested page number
+            var query = _context.Products
+                .Include(p => p.ProductTags)
+                .ThenInclude(pt => pt.Tag)
+                .Where(p => p.Name.ToLower().Contains(searchQuery.ToLower())
+                             || p.Description.ToLower().Contains(searchQuery.ToLower())
+                             || p.ProductTags.Any(pt => pt.Tag.Name.ToLower()
+                                .Contains(searchQuery.ToLower())));
+
+            // Apply filtering by minimum and maximum price
+            if (minPrice.HasValue)
+            {
+                query = query.Where(p => p.Price >= minPrice.Value);
+            }
+            if (maxPrice.HasValue)
+            {
+                query = query.Where(p => p.Price <= maxPrice.Value);
+            }
+
+            var products = await query
+                .Skip((page - 1) * (int)pageResults)
+                .Take((int)pageResults)
+                .ToListAsync();
+
+            // Need to map back to DTO list
+            var productDtos = _mapper.Map<List<ProductDto>>(products);
+
+            var response = new ServiceResponse<ProductPaginationResponse>()
+            {
+                Data = new ProductPaginationResponse
+                {
+                    Products = productDtos,
+                    Pages = (int)numberOfPages,
+                    CurrentPage = page,
+                },
+                Message = "Products retrieved successfully."
+            };
+
             return response;
         }
 
+
+        public async Task<ServiceResponse<ProductPaginationResponse>> SearchProducts(string searchQuery, int page, bool isAscending)
+        {
+            var pageResults = 2f;
+            var query = _context.Products
+                                .Include(p => p.ProductTags)
+                                .ThenInclude(pt => pt.Tag)
+                                .Where(p => p.Name.ToLower().Contains(searchQuery.ToLower())
+                                     || p.Description.ToLower().Contains(searchQuery.ToLower())
+                                     || p.ProductTags.Any(pt => pt.Tag.Name.ToLower()
+                                     .Contains(searchQuery.ToLower())));
+
+            var numberOfPages = Math.Ceiling(await query.CountAsync() / pageResults);
+
+            // Apply sorting based on the product name
+            query = isAscending ? query.OrderBy(p => p.Name) : query.OrderByDescending(p => p.Name);
+
+            var products = await query.Skip((page - 1) * (int)pageResults)
+                                      .Take((int)pageResults)
+                                      .ToListAsync();
+
+            // Map to DTO list
+            var productDtos = _mapper.Map<List<ProductDto>>(products);
+
+            var response = new ServiceResponse<ProductPaginationResponse>
+            {
+                Data = new ProductPaginationResponse
+                {
+                    Products = productDtos,
+                    Pages = (int)numberOfPages,
+                    CurrentPage = page,
+                },
+                Message = "Products retrieved successfully."
+            };
+
+            return response;
+        }
+
+        public async Task<ServiceResponse<ProductPaginationResponse>> SearchProducts(string searchQuery, int page, bool isAscending, decimal? minPrice, decimal? maxPrice)
+        {
+            var pageResults = 2f;
+            var query = _context.Products
+                .Include(p => p.ProductTags)
+                .ThenInclude(pt => pt.Tag)
+                .Where(p => p.Name.ToLower().Contains(searchQuery.ToLower())
+                    || p.Description.ToLower().Contains(searchQuery.ToLower())
+                    || p.ProductTags.Any(pt => pt.Tag.Name.ToLower()
+                        .Contains(searchQuery.ToLower())));
+
+            // Sorting based on isAscending parameter
+            if (isAscending)
+            {
+                query = query.OrderBy(p => p.Name);
+            }
+            else
+            {
+                query = query.OrderByDescending(p => p.Name);
+            }
+
+            var numberOfPages = Math.Ceiling(await query.CountAsync() / pageResults);
+
+            // Pagination
+            var products = await query
+                .Skip((page - 1) * (int)pageResults)
+                .Take((int)pageResults)
+                .ToListAsync();
+
+            // Need to map back to DTO list
+            var productDtos = _mapper.Map<List<ProductDto>>(products);
+
+            var response = new ServiceResponse<ProductPaginationResponse>()
+            {
+                Data = new ProductPaginationResponse
+                {
+                    Products = productDtos,
+                    Pages = (int)numberOfPages,
+                    CurrentPage = page,
+                },
+                Message = "Products retrieved successfully."
+            };
+
+            return response;
+        }
+
+        /// <summary>
+        /// Finds and retrieves a list of product DTOs based on a given search query.
+        /// </summary>
+        /// <remarks>
+        /// This method searches for products by matching the search query with:
+        /// - Product name.
+        /// - Product description.
+        /// - Associated tags of the product.
+        /// The search is case-insensitive. The method returns a list of <see cref="ProductDto"/> corresponding to the matched products.
+        /// </remarks>
+        /// <param name="searchQuery">The search string used to query the products.</param>
+        /// <returns>
+        /// A List of <see cref="ProductDto"/> objects representing the products that match the search criteria.
+        /// </returns>
         private async Task<List<ProductDto>> FindProductsBySearchQuery(string searchQuery)
         {
             var products = await _context.Products
                                 .Where(p => p.Name.ToLower().Contains(searchQuery.ToLower())
                                             || p.Description.ToLower().Contains(searchQuery.ToLower())
+                                            || p.Category.Name.ToLower().Contains(searchQuery.ToLower())
                                             || p.ProductTags.Any(pt => pt.Tag.Name.ToLower().Contains(searchQuery.ToLower())))
                                 .ToListAsync();
 
@@ -549,26 +874,28 @@ namespace EcommerceApp.Server.Services.ProductService
         public async Task<ServiceResponse<List<string>>> GetProductSearchSuggestions(string searchQuery)
         {
             var products = await FindProductsBySearchQuery(searchQuery);
+            try
+            {
 
             List<string> result = new();
-            foreach(var product in products)
+            foreach (var product in products)
             {
                 if (product.Name.Contains(searchQuery, StringComparison.OrdinalIgnoreCase))
                 {
                     result.Add(product.Name);
                 }
 
-                if(product.Description != null)
+                if (product.Description != null)
                 {
                     var punctuation = product.Description.Where(Char.IsPunctuation).Distinct().ToArray();
-                    var words = product.Description.Split().Select(x => x.Trim(punctuation)); 
+                    var words = product.Description.Split().Select(x => x.Trim(punctuation));
 
-                    foreach(var word in words)
+                    foreach (var word in words)
                     {
-                        if(word.Contains(searchQuery, StringComparison.OrdinalIgnoreCase) && !result.Contains(word))
+                        if (word.Contains(searchQuery, StringComparison.OrdinalIgnoreCase) && !result.Contains(word))
                         {
                             result.Add(word);
-                        }   
+                        }
                     }
                 }
             }
@@ -576,12 +903,331 @@ namespace EcommerceApp.Server.Services.ProductService
             {
                 Data = result
             };
+            }catch (Exception ex)
+            {
+                return new ServiceResponse<List<string>>
+                {
+                    Success = false,
+                    Message = $"An error occurred: {ex.Message}"
+                };
+            }
         }
 
         public Task<ServiceResponse<ProductDto>> GetProductByIdAsync(int page, int pageSize, Guid productId)
         {
             throw new NotImplementedException();
         }
-    }
+        /// <summary>
+        /// When called gets all tags.
+        /// </summary>
+        /// <param name="page">The page size</param>
+        /// <param name="pageSize"></param>
+        /// <param name="tagId"></param>
+        /// <returns></returns>
+        public async Task<ServiceResponse<ProductPaginationResponse>> GetProductsByTagId(int page, int pageSize, Guid tagId)
+        {
+            var response = new ServiceResponse<ProductPaginationResponse>();
+            // Filter the products by tag first
+            var query = _context.Products.AsQueryable();
+            if (tagId != Guid.Empty)
+            {
+                // Query products by tag
+                query = query.Where(p => p.ProductTags.Any(pt => pt.TagId == tagId));
+            }
 
+            // Now get the count of products after filtering
+            int totalProducts = await query.CountAsync();
+            var totalPages = (int)Math.Ceiling(totalProducts / (double)pageSize);
+
+            // Then get the actual page of products
+            var products = await query
+                .OrderBy(p => p.Name) // Optional: Default sorting by name
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            if (products == null || !products.Any())
+            {
+                response.Success = false;
+                response.StatusCode = 404;
+                response.Message = "No products found for the tag.";
+            }
+            else
+            {
+                response.Data = new ProductPaginationResponse
+                {
+                    Products = _mapper.Map<List<ProductDto>>(products),
+                    CurrentPage = page,
+                    Pages = totalPages
+                };
+                response.Message = "Products retrieved successfully.";
+            }
+
+            return response;
+        }
+
+        public async Task<ServiceResponse<ProductPaginationResponse>> GetAllProductsAsync(int page, int pageSize, bool isAscending, decimal? minPrice, decimal? maxPrice, Guid? categoryId)
+        {
+            var response = new ServiceResponse<ProductPaginationResponse>();
+            try
+            {
+                // Filter the products by category first
+                var query = _context.Products.AsQueryable();
+                if (categoryId != Guid.Empty)
+                {
+                    query = query.Where(p => p.CategoryId == categoryId);
+                }
+
+                // Apply filtering by minimum and maximum price
+                if (minPrice.HasValue)
+                {
+                    query = query.Where(p => p.Price >= minPrice.Value);
+                }
+                if (maxPrice.HasValue)
+                {
+                    query = query.Where(p => p.Price <= maxPrice.Value);
+                }
+
+                // Apply sorting based on the product name
+                query = isAscending ? query.OrderBy(p => p.Name) : query.OrderByDescending(p => p.Name);
+
+                // Now get the count of products after filtering
+                int totalProducts = await query.CountAsync();
+                var totalPages = (int)Math.Ceiling(totalProducts / (double)pageSize);
+
+                // Then get the actual page of products
+                var products = await query
+                   .Skip((page - 1) * pageSize)
+                   .Take(pageSize)
+                   .Include(p => p.ProductTags)
+                   .ToListAsync();
+
+                if (products == null || !products.Any())
+                {
+                    response.Success = false;
+                    response.Message = "No products found.";
+                    response.Data = new ProductPaginationResponse
+                    {
+                        Products = _mapper.Map<List<ProductDto>>(products),
+                        CurrentPage = 1,
+                        Pages = 0
+                    };
+                }
+                else
+                {
+                    response.Data = new ProductPaginationResponse
+                    {
+                        Products = _mapper.Map<List<ProductDto>>(products),
+                        CurrentPage = page,
+                        Pages = totalPages
+                    };
+                    response.Message = "Products retrieved successfully.";
+                }
+            }
+            catch (Exception ex)
+            {
+                response.Success = false;
+                response.Message = $"An error occurred: {ex.Message}, StackTrace: {ex.StackTrace}, InnerException: {ex.InnerException?.Message}";
+            }
+            return response;
+        }
+
+
+        public async Task<ServiceResponse<ProductPaginationResponse>> GetAllProductsAsync(
+            int page,
+            int pageSize,
+            decimal? minPrice = null,
+            decimal? maxPrice = null,
+            Guid? categoryId = null)
+        {
+            var response = new ServiceResponse<ProductPaginationResponse>();
+
+            // Price Validation
+            if (minPrice > maxPrice)
+            {
+                response.Success = false;
+                response.Message = "Minimum price cannot be higher than maximum price.";
+                return response;
+            }
+
+            try
+            {
+                var query = _context.Products.AsQueryable();
+
+                if (categoryId.HasValue && categoryId.Value != Guid.Empty)
+                {
+                    query = query.Where(p => p.CategoryId == categoryId.Value);
+                }
+
+                // Apply price filtering in a single step
+                query = query.Where(p => (!minPrice.HasValue || p.Price >= minPrice.Value) &&
+                                         (!maxPrice.HasValue || p.Price <= maxPrice.Value));
+
+                // Get the total count and the products in a single database call
+                var pagedData = await query
+                                     .OrderBy(p => p.Name) // or however you want to sort
+                                     .Skip((page - 1) * pageSize)
+                                     .Take(pageSize)
+                                     .Include(p => p.ProductTags)
+                                     .ToListAsync();
+
+                var totalProducts = pagedData.Count;
+
+                // If pagedData is empty and the page is greater than 1, it might mean we are over the available pages
+                if (!pagedData.Any() && page > 1)
+                {
+                    // Optional: adjust the logic here to better suit how you want to handle this case
+                    response.Success = false;
+                    response.Message = "No products found. You may be over the last page.";
+                    return response;
+                }
+
+                var totalPages = (int)Math.Ceiling((double)totalProducts / pageSize);
+
+                response.Data = new ProductPaginationResponse
+                {
+                    Products = _mapper.Map<List<ProductDto>>(pagedData),
+                    CurrentPage = page,
+                    Pages = totalPages
+                };
+
+                response.Message = totalProducts > 0 ? "Products retrieved successfully." : "No products found.";
+            }
+            catch (Exception ex)
+            {
+                response.Success = false;
+                response.Message = $"An error occurred: {ex.Message}";
+            }
+
+            return response;
+        }
+
+
+        public async Task<ServiceResponse<ProductPaginationResponse>> GetProductsByTagId(int page, int pageSize, Guid tagId, decimal? minPrice, decimal? maxPrice)
+        {
+            var response = new ServiceResponse<ProductPaginationResponse>();
+
+            try
+            {
+                // Filter the products by tag first
+                var query = _context.Products.AsQueryable();
+                if (tagId != Guid.Empty)
+                {
+                    // Query products by tag
+                    query = query.Where(p => p.ProductTags.Any(pt => pt.TagId == tagId));
+                }
+
+                // Apply filtering by minimum and maximum price
+                if (minPrice.HasValue)
+                {
+                    query = query.Where(p => p.Price >= minPrice.Value);
+                }
+                if (maxPrice.HasValue)
+                {
+                    query = query.Where(p => p.Price <= maxPrice.Value);
+                }
+
+                // Now get the count of products after filtering
+                int totalProducts = await query.CountAsync();
+                var totalPages = (int)Math.Ceiling(totalProducts / (double)pageSize);
+
+                // Then get the actual page of products
+                var products = await query
+                    .OrderBy(p => p.Name) // Optional: Default sorting by name
+                    .Skip((page - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToListAsync();
+
+                if (products == null || !products.Any())
+                {
+                    response.Success = false;
+                    response.StatusCode = 404;
+                    response.Message = "No products found for the tag.";
+                }
+                else
+                {
+                    response.Data = new ProductPaginationResponse
+                    {
+                        Products = _mapper.Map<List<ProductDto>>(products),
+                        CurrentPage = page,
+                        Pages = totalPages
+                    };
+                    response.Message = "Products retrieved successfully.";
+                }
+            }
+            catch (Exception ex)
+            {
+                response.Success = false;
+                response.Message = $"An error occurred: {ex.Message}, StackTrace: {ex.StackTrace}, InnerException: {ex.InnerException?.Message}";
+            }
+
+            return response;
+        }
+
+
+        public async Task<ServiceResponse<ProductPaginationResponse>> GetProductsByTagId(int page, int pageSize, bool isAscending, Guid tagId, decimal? minPrice, decimal? maxPrice)
+        {
+            var response = new ServiceResponse<ProductPaginationResponse>();
+
+            try
+            {
+                // Filter the products by tag first
+                var query = _context.Products.AsQueryable();
+                if (tagId != Guid.Empty)
+                {
+                    // Query products by tag
+                    query = query.Where(p => p.ProductTags.Any(pt => pt.TagId == tagId));
+                }
+
+                // Apply filtering by minimum and maximum price
+                if (minPrice.HasValue)
+                {
+                    query = query.Where(p => p.Price >= minPrice.Value);
+                }
+                if (maxPrice.HasValue)
+                {
+                    query = query.Where(p => p.Price <= maxPrice.Value);
+                }
+
+                // Apply sorting based on the product name
+                query = isAscending ? query.OrderBy(p => p.Name) : query.OrderByDescending(p => p.Name);
+
+                // Now get the count of products after filtering
+                int totalProducts = await query.CountAsync();
+                var totalPages = (int)Math.Ceiling(totalProducts / (double)pageSize);
+
+                // Then get the actual page of products
+                var products = await query
+                    .Skip((page - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToListAsync();
+
+                if (products == null || !products.Any())
+                {
+                    response.Success = false;
+                    response.StatusCode = 404;
+                    response.Message = "No products found for the tag.";
+                }
+                else
+                {
+                    response.Data = new ProductPaginationResponse
+                    {
+                        Products = _mapper.Map<List<ProductDto>>(products),
+                        CurrentPage = page,
+                        Pages = totalPages
+                    };
+                    response.Message = "Products retrieved successfully.";
+                }
+            }
+            catch (Exception ex)
+            {
+                response.Success = false;
+                response.Message = $"An error occurred: {ex.Message}, StackTrace: {ex.StackTrace}, InnerException: {ex.InnerException?.Message}";
+            }
+
+            return response;
+        }
+
+    
+    }
 }

@@ -1,1 +1,79 @@
-﻿
+﻿.homepage-container {
+    display: flex;
+    flex-direction: column; /* Stack children vertically */
+    align-items: center; /* Center children horizontally */
+    min-height: 100vh;
+    font-family: Arial, sans-serif;
+    color: #333;
+    max-width: 1200px; /* Maximum width of the container */
+    margin: auto; /* Center the container */
+}
+
+.section {
+    padding:20px 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.image-container,
+.text-container,
+.image-content {
+    flex: 1;
+    padding: 20px;
+    box-sizing: border-box;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.button-content {
+    flex: 1;
+    padding: 20px;
+    box-sizing: border-box;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.text-container,
+.image-content {
+    flex-direction: column; /* Stack the text and image vertically */
+}
+
+.cta-button {
+    margin-top: 20px;
+    padding: 10px 20px;
+    background-color: #000;
+    color: #fff;
+    text-decoration: none;
+    display: inline-block;
+}
+
+/* Ensure CTA buttons are at the bottom of the text container */
+.text-container {
+    justify-content: space-between;
+}
+
+.image-container img,
+.image-content img {
+    width: 350px; /* Full width of the parent container */
+    height: auto;
+    max-width: 600px; /* Maximum width of the image */
+}
+
+/* Responsive layout for smaller screens */
+@media (max-width: 768px) {
+    .section {
+        flex-direction: column;
+    }
+
+    .image-container img,
+    .image-content img {
+        max-width: 100%; /* Full width on smaller screens */
+    }
+
+    .text-container,
+    .image-content {
+        align-items: center; /* Center content on smaller screens */
+    }
+}

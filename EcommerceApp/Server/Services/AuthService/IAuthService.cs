@@ -13,6 +13,15 @@ namespace EcommerceApp.Server.Services.AuthService
         Task<ServiceResponse<bool>> UpdateUser(string userId, string email, string firstName, string lastName);
         Guid GetUserId();
         string GetUserEmail();
-        Task<ApplicationUser> GetApplicationUserByEmail(string email);
+        Task<ApplicationUser?> GetApplicationUserByEmail(string email);
+        Task GetUsers();
+        Task GetUserById(Guid userId);
+
+
+        Task<ServiceResponse<List<AppUserDto>>> GetAllUserAdmin();
+        Task<ServiceResponse<AppUserDto>> GetUserByIdAdmin(Guid userId);
+        Task<ServiceResponse<bool>> UpdateUser(AppUserDto appUserDto);
+        Task<ServiceResponse<bool>> AddUser(AppUserDto appUserDto);
+
     }
 }

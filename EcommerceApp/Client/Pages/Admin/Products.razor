@@ -1,0 +1,177 @@
+﻿@page "/admin-dashboard/product-catelogue"
+@inject ICategoryService CategoryService
+@attribute [Authorize(Roles = "Admin")]
+@implements IDisposable
+
+<MudContainer>
+    <MudMainContent>
+
+        <MudText Style="padding:30px" Typo="Typo.h3">Product Categories</MudText>
+
+        <div class="header">
+            <div class="col">Name</div>
+            <div class="col">Description</div>
+            <div class="col">Visible</div>
+            <div class="col"></div>
+        </div>
+        @if (isLoading)
+        {
+            <div class="d-flex align-items-center justify-content-center">
+                <MudProgressCircular Color="Color.Primary" Size="Size.Large" Indeterminate="true" />
+            </div>
+        }
+        else
+        {
+            @foreach (var category in CategoryService.AdminCategories)
+            {
+                @if (category.Editing)
+                {
+                    Console.WriteLine($"Editing category: {category.Name}");
+                    <EditForm Model="editingCategory" OnSubmit="UpdateCategory">
+                        <div class="row">
+                            <div class="col">
+                                <InputText @bind-Value="editingCategory.Name" class="form-control" />
+                            </div>
+                            <div class="col">
+                                <InputText @bind-Value="editingCategory.Description" class="form-control" />
+                            </div>
+                            <div class="col col-visible">
+                                <InputCheckbox @bind-Value="editingCategory.Visible" class="big-checkbox" />
+                            </div>
+
+                            <div class="col">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="oi oi-cloud-upload"></i>
+                                </button>
+                                <button class="btn btn-primary" @onclick="(()=>CancelEditing())">
+                                    <i class="oi oi-circle-x"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </EditForm>
+
+                }else {
+                    <div class="row">
+                        <div class="col">
+                            @category.Name
+                        </div>
+                        <div class="col">
+                            @category.Description
+                        </div>
+                        <div class="col col-visible">
+                            <span>@(category.Visible ? "✔️" : "")</span>"
+                        </div>
+                        <div class="col">
+                            <button class="btn btn-primary" @onclick="(()=>EditCategory(category))">
+                                <i class="oi oi-pencil"></i>
+                            </button>
+                            <button class="btn btn-primary" @onclick="(()=>DeleteCategory(category.Id))">
+                                <i class="oi oi-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                }
+   
+            }
+        }
+        <button class="btn btn-primary" @onclick="(()=>CreateNewCategory())">
+            <i class="oi oi-plus"></i> Add new category
+        </button>
+
+    </MudMainContent>
+</MudContainer>
+@code {
+    CategoryDto? editingCategory = null;
+    private bool isLoading = true; // New flag to track loading state
+    protected override async Task OnInitializedAsync()
+    {
+        isLoading = true; // Start loading
+        Console.WriteLine("Loading categories...");
+        await CategoryService.GetAdminCategories();
+        isLoading = false; // Loading complete
+        Console.WriteLine("Categories loaded.");
+        CategoryService.OnChange += StateHasChanged;
+    }
+
+    public void Dispose()
+    {
+        CategoryService.OnChange -= StateHasChanged;
+    }
+
+    private void CreateNewCategory()
+    {
+        Console.WriteLine("Creating a new category.");
+        editingCategory = CategoryService.CreateNewCategory();
+    }
+
+
+    private void EditCategory(CategoryDto category)
+    {
+        Console.WriteLine($"Editing category: {category.Name}");
+
+        // If another category is being edited, cancel that edit.
+        if (editingCategory != null)
+        {
+            editingCategory.Editing = false;
+        }
+
+        // Toggle the editing mode for the current category.
+        category.Editing = !category.Editing;
+        editingCategory = category.Editing ? category : null;
+
+        StateHasChanged();
+    }
+
+
+
+    private async Task UpdateCategory()
+    {
+        if (editingCategory != null)
+        {
+            Console.WriteLine($"Updating category: {editingCategory.Name}");
+            if (editingCategory.IsNew)
+            {
+                await CategoryService.AddCategory(editingCategory);
+                Console.WriteLine("Added new category.");
+            }
+            else
+            {
+                await CategoryService.UpdateCategory(editingCategory);
+                Console.WriteLine("Updated existing category.");
+            }
+
+            // Set the Editing property to false to exit the editing mode.
+            editingCategory.Editing = false;
+
+            // Reset the editing category to clear the form fields.
+            editingCategory = new CategoryDto();
+
+            // Optionally, refresh the categories list to show the updated data.
+            await CategoryService.GetAdminCategories();
+
+            Console.WriteLine("Finished editing category.");
+            StateHasChanged();
+        }
+        else
+        {
+            Console.WriteLine("UpdateCategory called but editingCategory is null.");
+        }
+    }
+
+
+
+
+    private async Task CancelEditing()
+    {
+        Console.WriteLine("Cancelling edit.");
+        editingCategory = new CategoryDto();
+        await CategoryService.GetAdminCategories();
+    }
+
+    private async Task DeleteCategory(Guid id)
+    {
+        Console.WriteLine($"Deleting category with ID: {id}");
+        await CategoryService.DeleteCategory(id);
+    }
+
+}

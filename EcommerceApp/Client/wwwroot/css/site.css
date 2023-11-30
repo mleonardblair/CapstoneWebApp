@@ -1,5 +1,30 @@
-﻿
-    .nav-button {
+﻿@font-face {
+    font-family: 'Outfit';
+    src: url('./fonts/Outfit-Regular.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Outfit';
+    src: url('./fonts/Outfit-Bold.ttf') format('truetype');
+    font-weight: bold;
+    font-style: normal;
+}
+
+.tolowercase {
+    text-transform: lowercase;
+}
+.mud-button {
+    text-transform: capitalize !important; /*For Lower case use lowercase*/
+}
+.tocapitalize {
+    text-transform: capitalize;
+}
+.mud-grid.mud-grid-spacing-xs-3.justify-start.login-grid {
+    justify-content: center!important;
+}
+.nav-button {
     transition: all 0.2s ease; /* Smooth transition for all properties */
 }
 

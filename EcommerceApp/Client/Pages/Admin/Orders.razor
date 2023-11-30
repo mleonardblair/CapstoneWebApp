@@ -1,0 +1,119 @@
+﻿@page "/admin-dashboard/orders"
+@inject IOrderService OrderService
+@attribute [Authorize(Roles = "Admin")]
+@inject NavigationManager NavigationManager
+@implements IDisposable
+@using System.Net.Http.Json
+<MudContainer>
+    <MudMainContent>
+        <MudDataGrid T="OrderDetailsResponse" 
+            Items="@OrderService.AdminOrders" 
+            Filterable="true" 
+            FixedHeader="true" 
+            FilterMode="@DataGridFilterMode.ColumnFilterRow"
+            Height="calc(100vh-64px)">
+            <Columns>
+                <PropertyColumn Property="x => x.OrderDate" Title="Order Date" Format="d" />
+                <PropertyColumn Property="x => x.TotalPrice" Title="Total Price" Format="C" />
+                <PropertyColumn Property="x => x.Products" Title="Products">
+                    <CellTemplate>
+                        @foreach (var product in context.Item.Products)
+                        {
+                            <div>
+                                <span>@product.Name</span>
+                                <span> (Qty: @product.Quantity)</span>
+                                <span> - @product.TotalPrice.ToString("C")</span>
+                                @if (!string.IsNullOrEmpty(product.ImageURI))
+                                {
+                                    <img src="@product.ImageURI" alt="@product.Name" style="width:50px; height:auto;" />
+                                }
+                            </div>
+                        }
+                    </CellTemplate>
+                </PropertyColumn>
+                <!-- Additional columns for actions like Edit, Delete can be added here -->
+            </Columns>
+            <PagerContent>
+                <MudDataGridPager T="OrderDetailsResponse" />
+            </PagerContent>
+        </MudDataGrid>
+    </MudMainContent>
+</MudContainer>
+
+@code {
+    private bool isLoading = true; // Flag to track loading state
+    private string check = "✔️";
+
+    IEnumerable<OrderDetailsResponse> lists; // Changed from Elements
+    HashSet<OrderDetailsResponse> _selectedItems = new();
+    HashSet<OrderDetailsResponse> _filterItems = new();
+    FilterDefinition<OrderDetailsResponse> _filterDefinition; // Changed type from Element to OrderDetailsResponse
+    bool _selectAll = true;
+    string _icon = Icons.Material.Outlined.FilterAlt;
+    bool _filterOpen = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        isLoading = true; // Start loading
+        Console.WriteLine("Loading orders...");
+        await OrderService.GetAdminOrders();
+        lists = OrderService.AdminOrders; // Assuming AdminOrders is of type List<OrderDetailsResponse>
+        isLoading = false; // Loading complete
+        Console.WriteLine("Orders loaded.");
+        OrderService.OnChange += StateHasChanged;
+
+        _selectedItems = lists.ToHashSet();
+        _filterItems = lists.ToHashSet();
+        _filterDefinition = new FilterDefinition<OrderDetailsResponse>
+            {
+                FilterFunction = x => _filterItems.Contains(x)
+            };
+    }
+
+    public void Dispose() => OrderService.OnChange -= StateHasChanged;
+
+    void OpenFilter()
+    {
+        _filterOpen = true;
+    }
+
+    private void SelectedChanged(bool value, OrderDetailsResponse order)
+    {
+        if (value)
+            _selectedItems.Add(order);
+        else
+            _selectedItems.Remove(order);
+
+        _selectAll = _selectedItems.Count == lists.Count();
+    }
+
+    private async Task ClearFilterAsync(FilterContext<OrderDetailsResponse> context)
+    {
+        _selectedItems = lists.ToHashSet();
+        _filterItems = lists.ToHashSet();
+        _icon = Icons.Material.Outlined.FilterAlt;
+        await context.Actions.ClearFilterAsync(_filterDefinition);
+        _filterOpen = false;
+    }
+
+    private async Task ApplyFilterAsync(FilterContext<OrderDetailsResponse> context)
+    {
+        _filterItems = _selectedItems.ToHashSet();
+        _icon = _filterItems.Count == lists.Count() ? Icons.Material.Outlined.FilterAlt : Icons.Material.Filled.FilterAlt;
+        await context.Actions.ApplyFilterAsync(_filterDefinition);
+        _filterOpen = false;
+    }
+
+    private void SelectAll(bool value)
+    {
+        _selectAll = value;
+        if (value)
+        {
+            _selectedItems = lists.ToHashSet();
+        }
+        else
+        {
+            _selectedItems.Clear();
+        }
+    }
+}

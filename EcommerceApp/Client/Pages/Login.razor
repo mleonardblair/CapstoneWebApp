@@ -6,10 +6,10 @@
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject ICartService CartService
 <PageTitle>Login</PageTitle>
-<MudContainer>
+<MudContainer Class="lg-py-2" Style="padding-top:10rem">
     <MudMainContent>
-        <MudText Typo="Typo.h3">Login</MudText>
-        <MudGrid Class="d-flex justify-content-center">
+        <MudText Typo="Typo.h3" Style="text-align:center;">Login</MudText>
+        <MudGrid Class="login-grid" Style="display:flex; justify-content:center;align-self:center; padding-top:100px;">
             <MudItem xs="12" lg="6" xl="6" Style="align-self:center">
                 <EditForm Model="user" OnValidSubmit="HandleLogin">
                     <DataAnnotationsValidator />
@@ -24,7 +24,11 @@
                         @* Added validation message for password confirmation and removed validation summary. *@
                         <ValidationMessage For="@(()=> user.Password)" />
                     </div>
-                    <button type="submit" class="btn btn-primary">Login</button>
+                 
+                     <button type="submit" class="btn btn-primary my-5 w-100 w-md-auto w-md-50">Login</button>
+
+
+
                     <ReusableResultSnackbar @ref="resultSnackbar"
                                             Message="@Message"
                                             Severity="@s" />

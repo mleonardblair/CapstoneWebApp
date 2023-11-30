@@ -2,6 +2,7 @@ global using EcommerceApp.Server.Services.OrderService;
 global using EcommerceApp.Server.Services.FavouriteService;
 global using EcommerceApp.Server.Services.PaymentService;
 global using EcommerceApp.Server.Services.CartService;
+global using EcommerceApp.Server.Services.ReportService;
 global using EcommerceApp.Server.Services.AuthService;
 global using EcommerceApp.Server.Services.AddressService;
 global using EcommerceApp.Server.Services.TagService;
@@ -19,7 +20,7 @@ using System.Text;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-var connectionString = builder.Configuration.GetConnectionString("DevelopmentLocalConnection");
+var connectionString = builder.Configuration.GetConnectionString("AzureDBConnection");
 builder.Services.AddSingleton(x => new BlobServiceClient(builder.Configuration.GetConnectionString("AzureBlobStorage")));
 builder.Services.AddSwaggerGen(c =>
 {
@@ -40,6 +41,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IAddressService, AddressService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
+builder.Services.AddScoped<IReportService, ReportService>();
 builder.Services.AddScoped<ITagService, TagService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IProductTagService, ProductTagService>();

@@ -1,0 +1,100 @@
+﻿@page "/admin-dashboard/reports"
+@inject IReportService ReportService
+@inject IJSRuntime JSRuntime
+@implements IDisposable
+
+@using EcommerceApp.Shared.DTOs.Report;
+
+<h3>Reports and Filters Admin</h3>
+
+<div class="filter-section">
+    <button>Recent Sales</button>
+    <button>Most Successful Products</button>
+    <button>Total Gross & Net Sales</button>
+
+    <select @onchange="UpdateTimePeriod">
+        <option value="">Select Time Period</option>
+        <option value="Last Week">Last Week</option>
+        <option value="Last Month">Last Month</option>
+        <!-- ... other time periods ... -->
+    </select>
+
+    <select @onchange="UpdateRegion">
+        <option value="">Select Province</option>
+        <option value="Alberta">Alberta</option>
+        <option value="British Columbia">British Columbia</option>
+        <!-- ... other Canadian provinces ... -->
+    </select>
+</div>
+
+@if (ReportService.FinanceSummary != null)
+{
+    <div class="finance-report-container">
+        <div class="sales-summary">
+            <h4>Sales</h4>
+            <table>
+                <tr><td>Gross Sales</td><td>@ReportService.FinanceSummary.Sales.GrossSales.ToString("C")</td></tr>
+                <tr><td>Discounts</td><td>@ReportService.FinanceSummary.Sales.Discounts.ToString("C")</td></tr>
+                <tr><td>Returns</td><td>@ReportService.FinanceSummary.Sales.Returns.ToString("C")</td></tr>
+                <tr><td>Net Sales</td><td>@ReportService.FinanceSummary.Sales.NetSales.ToString("C")</td></tr>
+                <tr><td>Shipping</td><td>@ReportService.FinanceSummary.Sales.Shipping.ToString("C")</td></tr>
+                <tr><td>Taxes</td><td>@ReportService.FinanceSummary.Sales.Taxes.ToString("C")</td></tr>
+                <tr><td>Total Sales</td><td>@ReportService.FinanceSummary.Sales.TotalSales.ToString("C")</td></tr>
+            </table>
+        </div>
+
+        <div class="gross-profit-summary">
+            <h4>Gross Profit</h4>
+            <table>
+                <tr><td>Net Sales</td><td>@ReportService.FinanceSummary.GrossProfit.NetSales.ToString("C")</td></tr>
+                <tr><td>Net Sales without cost recorded</td><td>@ReportService.FinanceSummary.GrossProfit.NetSalesWithoutCostRecorded.ToString("C")</td></tr>
+                <tr><td>Net sales with cost recorded</td><td>@ReportService.FinanceSummary.GrossProfit.NetSalesWithCostRecorded.ToString("C")</td></tr>
+                <tr><td>Cost of goods sold</td><td>@ReportService.FinanceSummary.GrossProfit.CostOfGoodsSold.ToString("C")</td></tr>
+                <tr><td>Gross profits</td><td>@ReportService.FinanceSummary.GrossProfit.GrossProfits.ToString("C")</td></tr>
+            </table>
+        </div>
+    </div>
+}
+else
+{
+    <p>Loading financial data...</p>
+}
+
+@code {
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        await ReportService.GetFinancialSummary();
+        ReportService.ReportChanged += StateHasChanged;
+
+    }
+    public void Dispose()
+    {
+        ReportService.ReportChanged -= StateHasChanged;
+    }
+    private async Task UpdateRegion(ChangeEventArgs e)
+    {
+        // Logic to update report based on region   
+        // For example, filter the reportData based on the selected region
+    }
+
+    private async Task UpdateTimePeriod(ChangeEventArgs e)
+    {
+        // Logic to update report based on time period
+        // For example, filter the reportData based on the selected time period
+    }
+
+    private async Task<List<ReportDto>> FetchInitialReportDataAsync()
+    {
+        // Fetch your initial report data here
+        // For now, returning mock data
+        return new List<ReportDto>
+        {
+         
+        };
+    }
+
+
+
+}

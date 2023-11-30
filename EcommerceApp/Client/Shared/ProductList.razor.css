@@ -1,36 +1,53 @@
-﻿.media {
+﻿/*.media {
     display: flex;
-    align-items: flex-start;
-    flex-wrap: wrap; /* Ensures that items can wrap as needed */
-}
+    align-items: stretch;;
+    height:100%;
+    flex-wrap: wrap;*/ /* Ensures that items can wrap as needed */
+/*}
 
 .media-body {
-    flex: 1; /* Allows the text container to fill the available space */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;*/ /* This will push the price to the bottom */
+    /*flex: 1;
+    height:100%;
 }
-
+.container-center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;*/ /* Full height of the viewport */
+    /*margin: auto;*/ /* Centering horizontally in case of any extra width */
+/*}
 .media-img-wrapper {
-    width: 200px;
-    padding-top: 200px; /* 1:1 Aspect Ratio */
-    position: relative; /* For absolute positioning of the image */
-    text-align: center;
-    overflow: hidden; /* Prevents images from overflowing */
-}
+    width: 150px;
+    width: 150px;
+    position: relative;*/ /* For absolute positioning of the image */
+    /*text-align: center;
+    overflow: hidden;*/ /* Prevents images from overflowing */
+/*}
 
+    .media-img-wrapper:hover {
+        box-shadow: 5px 4px 5px rgba(0, 0, 0, 0.2);*/ /* Adds a shadow effect */
+    /*}
 .media-img {
     max-width: 100%;
     max-height: 100%;
     border-radius: 6px;
-    transition: transform .2s;
-    object-fit: cover; /* Cover might work better than contain */
-    position: absolute; /* Absolute position */
-    top: 0;
+    transition: transform .3s;
+    object-fit: cover;*//* Cover might work better than contain */
+    /*top: 0;
     left: 0;
 }
 
     .media-img:hover {
-        transform: scale(1.1);
-    }
-
+        transform: scale(1.05);
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);*/ /* Adds a shadow effect */
+    /*}
+.price {
+    margin-top: auto;*/ /* This will push the price to the bottom */
+   /*align-self:flex-end;*/ /* This will push the price to the bottom of the .media-body */
+/*}
 @media (max-width: 1023.98px) {
     .media {
         flex-direction: column;
@@ -38,6 +55,61 @@
 
     .media-img-wrapper {
         width: 100%;
-        padding-top: 56.25%; /* 16:9 Aspect Ratio */
+    }
+}*/
+.media {
+    display: flex;
+    align-items: stretch; /* This will make all the children stretch to fill the container height */
+    flex-wrap: wrap;
+}
+
+.media-img-wrapper {
+    flex: 0 0 150px; /* Prevents the image wrapper from growing or shrinking */
+    height: auto; /* Height should be auto to contain the image naturally */
+    position: relative;
+    text-align: center;
+    overflow: hidden;
+}
+
+.media-img {
+    width: 100%; /* Ensures the image fills the wrapper width */
+    height: auto; /* Ensures the image maintains its aspect ratio */
+    border-radius: 6px;
+    object-fit: cover;
+}
+
+.media-body {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* Pushes the price to the bottom */
+    flex: 1; /* Takes up the remaining space */
+    min-height: 0; /* Prevents flex items from overflowing their container */
+}
+
+.price {
+    margin-top: auto; /* Pushes the price to the bottom */
+    align-self: flex-end; /* Aligns the price to the right */
+}
+
+@media (max-width: 600px) {
+    .media {
+        flex-direction: column;
+        align-items: stretch; /* Ensures children fill the width */
+    }
+
+    .media-img-wrapper,
+    .media-body {
+        width: 100%; /* Ensures full width */
+        height: auto; /* Allows natural height */
+    }
+
+    .media-body {
+        justify-content: space-between; /* Keeps the price at the bottom */
+    }
+
+    .price {
+        margin-top: auto; /* Pushes the price to the bottom */
+        align-self: center; /* Centers the price at this viewport size */
+        width: 100%; /* Ensures the price element fills the container */
     }
 }

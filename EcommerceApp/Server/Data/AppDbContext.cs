@@ -1,4 +1,6 @@
-﻿using EcommerceApp.Server.Models;
+﻿using EcommerceApp.Client.Pages;
+using EcommerceApp.Server.Models;
+using EcommerceApp.Server.Models.PageModels;
 using Microsoft.EntityFrameworkCore;
 
 namespace EcommerceApp.Server.Data
@@ -24,22 +26,51 @@ namespace EcommerceApp.Server.Data
         public DbSet<Tag> Tags { get; set; }
         public DbSet<ApplicationUser> ApplicationUsers { get; set; }
         public DbSet<UserAddress> UserAddresses { get; set; }
+        public DbSet<Models.PageModels.Gallery> Galleries { get; set; }
+        public DbSet<FAQ> FAQs { get; set; }
+        public DbSet<AboutUs> AboutUs { get; set; }
+        public DbSet<ContactUs> ContactUs { get; set; }
+        public DbSet<Banner> Banners { get; set; }
+
         #nullable restore
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
+            modelBuilder.Entity<Banner>()
+                .HasKey(b => b.Id);
+                
+
+            modelBuilder.Entity<Banner>()
+                .Property(b => b.BannerImageURI)
+                .IsRequired();
+
+            modelBuilder.Entity<AboutUs>()
+                .HasKey(a => a.Id);
+
+            modelBuilder.Entity<ContactUs>()
+                 .HasKey(c => c.Id);
+
+            modelBuilder.Entity<FAQ>()
+               .HasMany(f => f.Questions)
+               .WithOne(q => q.FAQ)
+               .HasForeignKey(q => q.FAQId);
+
+            modelBuilder.Entity<FAQ>()
+                .HasMany(f => f.Answers)
+                .WithOne(a => a.FAQ)
+                .HasForeignKey(a => a.FAQId);
+
+            modelBuilder.Entity<Models.PageModels.Gallery>()
+                .HasMany(g => g.GalleryImages)
+                .WithOne(i => i.Gallery)
+                .HasForeignKey(i => i.GalleryId);
             modelBuilder.Entity<ApplicationUser>(entity =>
             {
                 entity.HasOne(u => u.ShoppingCart)
                       .WithOne(s => s.ApplicationUser)
                       .HasForeignKey<ShoppingCart>(s => s.ApplicationUserId);
             });
-
-
-            // Seed data for Categories
-            Guid category1Id = Guid.NewGuid();
-            Guid category2Id = Guid.NewGuid();
 
             // ProductTag Configuration
             modelBuilder.Entity<ProductTag>()
@@ -216,6 +247,9 @@ namespace EcommerceApp.Server.Data
                 .Property(c => c.Name)
                 .IsRequired()
                 .HasMaxLength(50);
+            modelBuilder.Entity<Category>()
+                .HasIndex(c => c.Name)
+                .IsUnique();
 
             modelBuilder.Entity<Category>()
                 .Property(c => c.Description)

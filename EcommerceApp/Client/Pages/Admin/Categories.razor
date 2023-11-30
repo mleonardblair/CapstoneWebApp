@@ -1,4 +1,4 @@
-﻿@page "/admin/categories"
+﻿@page "/admin-dashboard/categories"
 @inject ICategoryService CategoryService
 @attribute [Authorize(Roles = "Admin")]
 @implements IDisposable
@@ -6,22 +6,25 @@
 <MudContainer>
     <MudMainContent>
 
-        <MudText Style="padding:30px" Typo="Typo.h3">Product Categories</MudText>
-
+        <MudText Style="padding:30px; display:flex; align-self:center; justify-self:center;" Typo="Typo.h5">Product Categories</MudText>
         <div class="header">
             <div class="col">Name</div>
             <div class="col">Description</div>
             <div class="col">Visible</div>
             <div class="col"></div>
         </div>
-        @if(CategoryService.AdminCategories == null){
-            <MudProgressCircular Color="Color.Primary" Size="Size.Large" Indeterminate="true" />
-        }else {
+        @if (isLoading)
+        {
+            <div class="d-flex align-items-center justify-content-center">
+                <MudProgressCircular Color="Color.Primary" Size="Size.Large" Indeterminate="true" />
+            </div>
+        }
+        else
+        {
             @foreach (var category in CategoryService.AdminCategories)
             {
                 @if (category.Editing)
                 {
-                    Console.WriteLine($"Editing category: {category.Name}");
                     <EditForm Model="editingCategory" OnSubmit="UpdateCategory">
                         <div class="row">
                             <div class="col">
@@ -45,7 +48,9 @@
                         </div>
                     </EditForm>
 
-                }else {
+                }
+                else
+                {
                     <div class="row">
                         <div class="col">
                             @category.Name
@@ -54,96 +59,97 @@
                             @category.Description
                         </div>
                         <div class="col col-visible">
-                            <span>@(category.Visible ? "✔️" : "")</span>"
+                            <span>@(category.Visible ? "✔️" : "")</span>
                         </div>
                         <div class="col">
                             <button class="btn btn-primary" @onclick="(()=>EditCategory(category))">
                                 <i class="oi oi-pencil"></i>
                             </button>
-                            <button class="btn btn-primary" @onclick="(()=>DeleteCategory(category.Id))">
+                            <button class="btn btn-primary" 
+                            @onmouseover="OnMouseOver"
+                            @onmouseout="OnMouseOut" 
+                            @onclick="(()=>DeleteCategory(category.Id))">
                                 <i class="oi oi-trash"></i>
                             </button>
                         </div>
                     </div>
                 }
-   
+
             }
         }
-        <button class="btn btn-primary" @onclick="(()=>CreateNewCategory())">
+        <button class="btn btn-primary" @onclick="(()=>CreateNewCategory())" disabled="@IsAddNewDisabled">
             <i class="oi oi-plus"></i> Add new category
         </button>
-
+        <ReusableResultSnackbar @ref="@resultSnackbar"
+                                Message="@CategoryService.SnackMessage"
+                                Severity="@CategoryService.Severity" />
     </MudMainContent>
 </MudContainer>
 @code {
+    private string buttonStyle = "background-color: blue;"; // Default color
+    private ReusableResultSnackbar? resultSnackbar;
+    private bool IsAddNewDisabled = false;
     CategoryDto? editingCategory = null;
-
+    private bool isLoading = true; // New flag to track loading state
+    private string check = "✔️";
     protected override async Task OnInitializedAsync()
     {
-        Console.WriteLine("Loading categories...");
+        isLoading = true; // Start loading
         await CategoryService.GetAdminCategories();
-        Console.WriteLine("Categories loaded.");
-
+        isLoading = false; // Loading complete
         CategoryService.OnChange += StateHasChanged;
     }
 
-    public void Dispose()
-    {
-        CategoryService.OnChange -= StateHasChanged;
-    }
+    public void Dispose() => CategoryService.OnChange -= StateHasChanged;
 
     private void CreateNewCategory()
     {
-        Console.WriteLine("Creating a new category.");
         editingCategory = CategoryService.CreateNewCategory();
+        IsAddNewDisabled = true;
     }
-
 
     private void EditCategory(CategoryDto category)
     {
-        Console.WriteLine($"Editing category: {category.Name}");
         category.Editing = true;
+        IsAddNewDisabled = true;
         editingCategory = category;
     }
-
-
 
     private async Task UpdateCategory()
     {
         if (editingCategory != null)
         {
-            Console.WriteLine($"Updating category: {editingCategory.Name}");
             if (editingCategory.IsNew)
-            {
                 await CategoryService.AddCategory(editingCategory);
-                Console.WriteLine("Added new category.");
-            }
             else
-            {
                 await CategoryService.UpdateCategory(editingCategory);
-                Console.WriteLine("Updated existing category.");
-            }
-            editingCategory = new CategoryDto();
-        }
-        else
-        {
-            Console.WriteLine("UpdateCategory called but editingCategory is null.");
+            editingCategory = new CategoryDto(); // or null, if that represents a default state in your 
+            resultSnackbar?.Show();
+            IsAddNewDisabled = false;
+            CategoryService.ResetSnackbarMessage();
         }
     }
-
-
 
     private async Task CancelEditing()
     {
-        Console.WriteLine("Cancelling edit.");
         editingCategory = new CategoryDto();
+        IsAddNewDisabled = false;
         await CategoryService.GetAdminCategories();
     }
 
-    private async Task DeleteCategory(Guid id)
-    {
-        Console.WriteLine($"Deleting category with ID: {id}");
+    private async Task DeleteCategory(Guid id) {
         await CategoryService.DeleteCategory(id);
+        IsAddNewDisabled = false;
+        resultSnackbar?.Show();
+        CategoryService.ResetSnackbarMessage();
+    }
+    private void OnMouseOver()
+    {
+        buttonStyle = "background-color: red;"; // Change to red on mouse over
     }
 
+    private void OnMouseOut()
+    {
+        buttonStyle = "background-color: blue;"; // Revert to default color on mouse out
+    }
 }

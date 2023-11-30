@@ -10,46 +10,33 @@
 </div>
 <MudContainer>
 
-<MudCarousel 
-    Class="mud-carousel" 
-    Style="" 
-    @ref="carousel" 
-    ShowArrows="false" 
-    ShowBullets="false" 
-    EnableSwipeGesture="true" 
-    AutoCycle="false" 
-    TData="object"
-    @bind-SelectedIndex="currentIndex">
-    @* WARNING : THE CONSTRAINTS OF A VERTICAL IMPLEMENTATION OF THE CAROUSEL WITH LOOP AROUND REMOVED ( AND JSINTEROP CALLING THE TRANSVERSAL METHODS ON SCROLL BEING INVERTED ) BECAUSE OF THE TRANSFORMATION 90 DEGREES, IMPLIES A CERTAIN AMOUNT OF CONFUSION WITH THE SLIDE TRANSITION ANIMATIONS ALSO INVERTED. AVOID OVERRIDING THE CAROUSEL TRANSITION ANIMATIONS, INSTEAD ORDER THE RAZOR COMPONENTS / IMAGES IN DESCENDING ORDER THAT THE PAGES SHOULD APPEAR IE: FIRST PAGE TO APPEAR BY DEFAULT AT THE BOTTOM, LAST AT THE TOP *@
+    <div class="homepage-container">
+        <!-- Top section -->
+        <div class="section">
+            <div class="image-container">
+                <img src="/images/ImagePlaceholder.svg" alt="Decorative Image">
+            </div>
+            <div class="text-container">
+                <h1>Discover Home Decor</h1>
+                <p>Find the perfect piece to liven up your home.</p>
+                <div>
+                    <a href="gallery.html" class="cta-button" style="background-color:#EC7063">See Gallery</a>
+                    <a href="shop.html" class="cta-button">Shop</a>
+                </div>
+            </div>
+        </div>
+        <!-- Bottom section -->
+        <div class="section">
+            <div class="text-content">
+                <h2>Liven up your special event</h2>
+                <p>Glamorize your wedding or bridal shower.</p>
+            </div>
+            <div class="image-content">
+                <img src="/images/ImagePlaceholder.svg" alt="Event Image">
+            </div>
+        </div>
+    </div>
 
-    <MudCarouselItem Transition="@Transition.Slide" Color="@Color.Primary" >
-        <Home1 OnItemChanged="OnCarouselItemChanged" />
-    </MudCarouselItem>
-
-    <MudCarouselItem Transition="@Transition.Slide" Color="@Color.Secondary">
-        <Home2 OnItemChanged="OnCarouselItemChanged" />
-    </MudCarouselItem>
-
-    <MudCarouselItem Transition="@Transition.Slide" Color="@Color.Warning">
-        <Home3 OnItemChanged="OnCarouselItemChanged" />
-    </MudCarouselItem>
-
-</MudCarousel>
-@*    <!-- First Section -->
-    <MudPaper Style="@_paperStyle"
-        Class="section" 
-        Elevation="3" 
-        Align="Align.Left">
-        <MudText Typo="Typo.h1">First Section</MudText>
-        <!-- Your content here -->
-    </MudPaper>
-
-    <!-- Second Section -->
-    <MudPaper Style="@_paperStyle" Class="section" Elevation="3" Align="Align.Right">
-       
-            <MudText Typo="Typo.h1">Second Section</MudText>
-            <!-- Your content here -->
-    </MudPaper>*@
 </MudContainer>
 @*<style>
     @media (max-width: 599.98px) {

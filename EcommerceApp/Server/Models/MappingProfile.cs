@@ -8,12 +8,21 @@ using Newtonsoft.Json;
 
 public class MappingProfile : Profile
 {
-    public MappingProfile()
+    private readonly IAuthService _authService;
+
+    public MappingProfile(IAuthService authService)
     {
+        _authService = authService;
         // Product
         CreateMap<Product, ProductDto>()
-            .ForMember(dest => dest.Images, opt => opt.MapFrom(src => src.Images ?? new string[0]));
-
+            .ForMember(dest => dest.Images, opt => opt.MapFrom(src => src.Images ?? new string[0]))
+            .ForMember(dest => dest.isFavourite, opt => opt.MapFrom((src, dest, destMember, context) =>
+             {
+                 // Get the current user's ID
+                 var currentUserId = _authService.GetUserId();
+                 // Check if the current product is favorited by this user
+                 return src.Favourites.Any(f => f.ApplicationUserId == currentUserId);
+             }));
         CreateMap<ProductDto, Product>()
             .ForMember(dest => dest.ImagesJson, opt => opt.MapFrom(src => src.Images == null ? "[]" : JsonConvert.SerializeObject(src.Images)))
             .ForMember(dest => dest.Images, opt => opt.Ignore());
@@ -48,9 +57,11 @@ public class MappingProfile : Profile
         CreateMap<OrderItemDto, OrderItem>();
 
         // Favourite
+        CreateMap<Favourite, FavouriteProductResponse>();
+        CreateMap<FavouriteProductResponse, Favourite>();
+        // Favourite
         CreateMap<Favourite, FavouriteDto>();
         CreateMap<FavouriteDto, Favourite>();
-
         // Cart
         CreateMap<ShoppingCart, CartDto>();
         CreateMap<CartDto, ShoppingCart>();
@@ -62,9 +73,7 @@ public class MappingProfile : Profile
         // ProductTags
         CreateMap<ProductTag, ProductTagDto>();
         CreateMap<ProductTagDto, ProductTag>();
-
-
-
+        _authService = authService;
     }
 
 }

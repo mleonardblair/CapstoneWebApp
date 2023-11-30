@@ -21,38 +21,15 @@ namespace EcommerceApp.Server.Controllers
 
         // Asynchronous call to get a list of products, basically IActionResult defines a contract that is the result of a request.
         // When the client (in my case, the Blazor WASM app) sends a GET request to the server to ask for products, this method will be executed.The IActionResult is a way for the server to package up its response to the client's HTTP request. and The Ok(Products) part essentially means that the server is responding with a "200 OK" status code along with the data (Products in this example). This is a standard way to say "Hey, everything went well, and here's the data you asked for."
-        [HttpGet]
-        public async Task<ActionResult<ServiceResponse<List<Product>>>> GetAllProductsAsync()
-        {
-            var response = await _productService.GetAllProductsAsync();
-            return Ok(response);
-        }
+
         /// <summary>
         /// Overloaded route for pagination.
         /// </summary>
         /// <param name="page"></param>
         /// <param name="pageSize"></param>
         /// <returns></returns>
-        [HttpGet("page={page}&pageSize={pageSize}")]
-        public async Task<ActionResult<ServiceResponse<ProductPaginationResponse>>> GetAllProductsAsync(int page, int pageSize)
-        {
-            var response = await _productService.GetAllProductsAsync(page, pageSize);
-            return Ok(response);
-        }
 
-        /// <summary>
-        /// Overloaded route for pagination + category filtering.
-        /// </summary>
-        /// <param name="page"></param>
-        /// <param name="pageSize"></param>
-        /// <param name="categoryId"></param>
-        /// <returns></returns>
-        [HttpGet("category/{categoryId}/page={page}&pageSize={pageSize}")]
-        public async Task<ActionResult<ServiceResponse<ProductPaginationResponse>>> GetAllProductsAsync(int page, int pageSize, Guid categoryId)
-        {
-            var response = await _productService.GetAllProductsAsync(page, pageSize, categoryId);
-            return Ok(response);
-        }
+
 
         [HttpGet("category/{categoryId}")]
         public async Task<ActionResult<ServiceResponse<List<Product>>>> GetProductsByCategoryId(Guid categoryId)
@@ -61,12 +38,6 @@ namespace EcommerceApp.Server.Controllers
             return Ok(response);
         }
 
-        [HttpGet("search/{searchQuery}/{page}")]
-        public async Task<ActionResult<ServiceResponse<ProductPaginationResponse>>> SearchProducts(string searchQuery, int page)
-        {
-            var response = await _productService.SearchProducts(searchQuery, page);
-            return Ok(response);
-        }
 
         [HttpGet("{productId}")]
         public async Task<ActionResult<ServiceResponse<Product>>> GetProductByIdAsync(Guid productId)
@@ -132,6 +103,207 @@ namespace EcommerceApp.Server.Controllers
             return BadRequest(response); // or NotFound(response) based on your logic
         }
 
+        [HttpGet("search")]
+        public async Task<ActionResult<ServiceResponse<ProductPaginationResponse>>> SearchProducts(
+        [FromQuery] string searchQuery,
+        [FromQuery] int? page,
+        [FromQuery] bool? isAscending,
+        [FromQuery] decimal? minPrice,
+        [FromQuery] decimal? maxPrice)
+        {
+            if (string.IsNullOrEmpty(searchQuery) || !page.HasValue)
+            {
+                return Ok(
+                    new ServiceResponse<ProductPaginationResponse>
+                    {
+                        Data = new ProductPaginationResponse
+                        {
+                            Products = new List<ProductDto>(),
+                            CurrentPage = 0,
+                            Pages = 0
 
+                        },
+                        Message = "A search query is required.",
+                        StatusCode = 404,
+                        Success = false
+                    }
+                );
+            }
+            // Call the appropriate ProductService method based on the provided query parameters
+            if (isAscending.HasValue && minPrice.HasValue && maxPrice.HasValue)
+            {
+                return Ok(await _productService.SearchProducts(searchQuery, page.Value, isAscending.Value, minPrice.Value, maxPrice.Value));
+            }
+            else if (minPrice.HasValue && maxPrice.HasValue)
+            {
+                return Ok(await _productService.SearchProducts(searchQuery, page.Value, minPrice.Value, maxPrice.Value));
+            }
+            else if (isAscending.HasValue)
+            {
+                return Ok(await _productService.SearchProducts(searchQuery, page.Value, isAscending.Value));
+            }
+            else
+            {
+                return Ok(await _productService.SearchProducts(searchQuery, page.Value));
+            }
+        }
+
+        [HttpGet("tag")]
+        public async Task<ActionResult<ServiceResponse<ProductPaginationResponse>>> GetProductsByTag(
+        [FromQuery] Guid? tagId,
+        [FromQuery] int? page,
+        [FromQuery] int? pageSize,
+        [FromQuery] bool? isAscending,
+        [FromQuery] decimal? minPrice,
+        [FromQuery] decimal? maxPrice)
+        {
+            if (!tagId.HasValue || !page.HasValue || !pageSize.HasValue)
+            {
+                return Ok(
+                    new ServiceResponse<ProductPaginationResponse>
+                    {
+                        Data = new ProductPaginationResponse
+                        {
+                            Products = new List<ProductDto>(),
+                            CurrentPage = 0,
+                            Pages = 0
+
+                        },
+                        Message = "Something went wrong! Try back again later.",
+                        StatusCode = 404,
+                        Success = false
+                    }
+                );
+            }
+
+            if (isAscending.HasValue && minPrice.HasValue && maxPrice.HasValue)
+            {
+                return Ok(await _productService.GetProductsByTagId(page.Value, pageSize.Value, isAscending.Value, tagId.Value, minPrice.Value, maxPrice.Value));
+            }
+            else if (minPrice.HasValue && maxPrice.HasValue)
+            {
+                return Ok(await _productService.GetProductsByTagId(page.Value, pageSize.Value, tagId.Value, minPrice.Value, maxPrice.Value));
+            }
+            else if (isAscending.HasValue)
+            {
+                return Ok(await _productService.GetProductsByTagId(page.Value, pageSize.Value, isAscending.Value, tagId.Value));
+            }
+            else
+            {
+                return Ok(await _productService.GetProductsByTagId(page.Value, pageSize.Value, tagId.Value));
+            }
+        }
+
+        [HttpGet]
+        public async Task<ActionResult<ServiceResponse<ProductPaginationResponse>>> GetAllProductsAsync(
+        [FromQuery] int? page,
+        [FromQuery] int? pageSize,
+        [FromQuery] bool? isAscending,
+        [FromQuery] decimal? minPrice,
+        [FromQuery] decimal? maxPrice,
+        [FromQuery] Guid? categoryId)
+        {
+            if (page.HasValue && pageSize.HasValue && isAscending.HasValue && minPrice.HasValue && maxPrice.HasValue && categoryId.HasValue)
+            {
+                return Ok(await _productService.GetAllProductsAsync(page.Value, pageSize.Value, isAscending.Value, minPrice.Value, maxPrice.Value, categoryId.Value));
+            }
+            else if (page.HasValue && pageSize.HasValue && isAscending.HasValue && minPrice.HasValue && maxPrice.HasValue && categoryId.HasValue)
+            {
+                return Ok(await _productService.GetAllProductsAsync(page.Value, pageSize.Value, isAscending.Value, minPrice.Value, maxPrice.Value, categoryId.Value));
+            }
+            else if (page.HasValue && pageSize.HasValue && minPrice.HasValue && maxPrice.HasValue && categoryId.HasValue)
+            {
+                return Ok(await _productService.GetAllProductsAsync(page.Value, pageSize.Value, minPrice.Value, maxPrice.Value, categoryId.Value));
+            }
+            else if (page.HasValue && pageSize.HasValue && isAscending.HasValue && categoryId.HasValue)
+            {
+                return Ok(await _productService.GetAllProductsAsync(page.Value, pageSize.Value, isAscending.Value, categoryId.Value));
+            }
+            else if (page.HasValue && pageSize.HasValue && minPrice.HasValue && maxPrice.HasValue)
+            {
+                return Ok(await _productService.GetAllProductsAsync(page.Value, pageSize.Value, minPrice.Value, maxPrice.Value));
+            }
+            else if (page.HasValue && pageSize.HasValue && minPrice.HasValue) 
+            {
+                return Ok(await _productService.GetAllProductsAsync(page.Value, pageSize.Value, minPrice.Value));
+            }
+            else if (page.HasValue && pageSize.HasValue && maxPrice.HasValue)
+            {
+                return Ok(await _productService.GetAllProductsAsync(page.Value, pageSize.Value, maxPrice.Value));
+            }
+            else if (page.HasValue && pageSize.HasValue && isAscending.HasValue)
+            {
+                return Ok(await _productService.GetAllProductsAsync(page.Value, pageSize.Value, isAscending.Value));
+
+            }
+            else if (page.HasValue && pageSize.HasValue && categoryId.HasValue)
+            {
+                return Ok(await _productService.GetAllProductsAsync(page.Value, pageSize.Value, categoryId.Value));
+
+            }
+            else if (categoryId.HasValue)
+            {
+                return Ok(await _productService.GetAllProductsAsync(categoryId.Value));
+            }
+            else if (page.HasValue && pageSize.HasValue)
+            {
+                return Ok(await _productService.GetAllProductsAsync(page.Value, pageSize.Value));
+            }
+            else
+            {
+                return Ok(await _productService.GetAllProductsAsync());
+            }
+        }
+
+
+
+        /*        [HttpGet("page={page}&pageSize={pageSize}&isAscending={isAscending}&minPrice={minPrice}&maxPrice={maxPrice}")]
+                public async Task<ActionResult<ServiceResponse<ProductPaginationResponse>>> GetAllProductsAsync(int page, int pageSize, bool isAscending, decimal minPrice, decimal maxPrice, Guid categoryId)
+                {
+                  var response = await _productService.GetAllProductsAsync(page, pageSize, isAscending, minPrice, maxPrice, categoryId);
+                    return Ok(response);
+                }
+
+
+                [HttpGet("page={page}&pageSize={pageSize}&minPrice={minPrice}&maxPrice={maxPrice}")]
+                public async Task<ActionResult<ServiceResponse<ProductPaginationResponse>>> GetAllProductsAsync(int page, int pageSize, decimal minPrice, decimal maxPrice, Guid categoryId)
+                {
+                    var response = await _productService.GetAllProductsAsync(page, pageSize,  minPrice, maxPrice, categoryId);
+                    return Ok(response);
+                }
+
+
+                [HttpGet("category/{categoryId}/page={page}&pageSize={pageSize}&isAscending={isAscending}")]
+                public async Task<ActionResult<ServiceResponse<ProductPaginationResponse>>> GetAllProductsAsync(int page, int pageSize, bool isAscending, Guid categoryId)
+                {
+                    var response = await _productService.GetAllProductsAsync(page, pageSize, isAscending, categoryId);
+                    return Ok(response);
+                }
+                [HttpGet("page={page}&pageSize={pageSize}")]
+                public async Task<ActionResult<ServiceResponse<ProductPaginationResponse>>> GetAllProductsAsync(int page, int pageSize)
+                {
+                    var response = await _productService.GetAllProductsAsync(page, pageSize);
+                    return Ok(response);
+                }
+                [HttpGet("page={page}&pageSize={pageSize}&isAscending={isAscending}")]
+                public async Task<ActionResult<ServiceResponse<ProductPaginationResponse>>> GetAllProductsAsync(int page, int pageSize, bool isAscending)
+                {
+                    var response = await _productService.GetAllProductsAsync(page, pageSize, isAscending);
+                    return Ok(response);
+                }
+                /// <summary>
+                /// Overloaded route for pagination + category filtering.
+                /// </summary>
+                /// <param name="page"></param>
+                /// <param name="pageSize"></param>
+                /// <param name="categoryId"></param>
+                /// <returns></returns>
+                [HttpGet("category/{categoryId}/page={page}&pageSize={pageSize}")]
+                public async Task<ActionResult<ServiceResponse<ProductPaginationResponse>>> GetAllProductsAsync(int page, int pageSize, Guid categoryId)
+                {
+                    var response = await _productService.GetAllProductsAsync(page, pageSize, categoryId);
+                    return Ok(response);
+                }*/
     }
 }
+

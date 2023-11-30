@@ -18,7 +18,7 @@ namespace EcommerceApp.Server.Services.CategoryService
         /// </summary>
         /// <returns></returns>
         Task<ServiceResponse<List<CategoryDto>>> GetAdminCategories();
-        Task<ServiceResponse<List<CategoryDto>>> AddCategory(CategoryDto category);
+        Task<ServiceResponse<bool>> AddCategory(CategoryDto category);
         Task<ServiceResponse<List<CategoryDto>>> UpdateCategory(CategoryDto category);
         Task<ServiceResponse<List<CategoryDto>>> DeleteCategory(Guid categoryId);
     }
