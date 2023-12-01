@@ -3,24 +3,29 @@
 @inject ISyncLocalStorageService LocalStorage
 @implements IDisposable
 
-<MudBadge Content="@GetCartItemsCount()" Color="Color.Warning" Overlap="true"Origin="Origin.BottomRight" Dot="false">
+@if (GetCartItemsCount() > 0)
+{
+    <MudBadge Content="@GetCartItemsCount()" Color="Color.Warning" Overlap="true" Origin="Origin.BottomRight" Dot="false">
+        <MudIconButton Icon="@Icons.Material.Filled.ShoppingCart" Color="Color.Inherit" OnClick="@CartClicked" Style="transition: color 0.3s;" Class="cart my-custom-hover-button" />
+    </MudBadge>
+}
+else
+{
     <MudIconButton Icon="@Icons.Material.Filled.ShoppingCart" Color="Color.Inherit" OnClick="@CartClicked" Style="transition: color 0.3s;" Class="cart my-custom-hover-button" />
-</MudBadge>
-
+}
 
 @code {
-    
+
     private int GetCartItemsCount()
     {
         var count = LocalStorage.GetItem<int>("cartItemsCount");
         return count;
     }
 
-
-    protected override void OnInitialized(){
+    protected override void OnInitialized()
+    {
         CartService.OnChange += StateHasChanged;
     }
-
 
     public void Dispose()
     {

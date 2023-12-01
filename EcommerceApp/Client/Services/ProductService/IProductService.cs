@@ -29,6 +29,7 @@ namespace EcommerceApp.Client.Services.ProductService
         Task<string> GetDynamicHeading();
         Task SetSelectedCategory(Guid? categoryId);
         Task SetSelectedTag(Guid? tagId);
+        Task<ProductDto> AddOrUpdateProductAsync(ProductDto product);
         // handle filter
         Task<List<string>> GetProductSearchSuggestions(string searchQuery);
         Task GetAllProductsAsync(int page, int pageSize);

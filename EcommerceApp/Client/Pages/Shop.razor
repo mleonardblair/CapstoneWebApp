@@ -12,9 +12,12 @@
 @using System.Security.Claims;
 @*<MudText Typo="Typo.h3">Shop</MudText>*@
 
-<MudMainContent Style="height: 100%;">
-    <MudContainer Style="height: 100%;">
+<MudMainContent>
+    <MudContainer>
         <div class="page">
+            <MudScrollToTop>
+                <MudFab Color="Color.Tertiary" Icon="@Icons.Material.Filled.ArrowCircleUp" />
+            </MudScrollToTop>
             <ReusableResultSnackbar @ref="resultSnackbar"
                                     Message="@message"
                                     Severity="@s" />

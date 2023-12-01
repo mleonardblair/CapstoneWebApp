@@ -1,10 +1,21 @@
 ﻿@page "/order-success"
 @inject ICartService CartService
 
-<PageTitle> Thank You !</PageTitle>
-<h3>Thanks !</h3>
-
-<span>Thank you for your order! You can check your orders <a href="orders"> here</a></span>
+<PageTitle> Order Success - Thank You!</PageTitle>
+<MudContainer Class="lg-py-2" Style="padding-top:10rem">
+    <MudMainContent Style="background-color:white;">
+        <MudText Typo="Typo.h4" Style="text-align:center;">Order Successfully Placed!</MudText>
+        <MudGrid Class="login-grid" Style="display:flex; justify-content:center;align-self:center; padding-top:60px;">
+            <MudItem xs="12" lg="6" xl="6" Style="align-self:center">
+                <MudText Typo="Typo.h6" Align="Align.Center"> Thank you for your order!
+                 You can check your orders <a style="color:blue; text-decoration:underline;"href="orders"> here</a>
+                   
+                </MudText>
+                <MudImage style="max-height:700px; max-width:700px; object-fit:contain;" Alt="Checkmark highly stylized" Src="/order-success.png" />
+            </MudItem>
+        </MudGrid>
+    </MudMainContent>
+</MudContainer>
 @code {
     protected override async Task OnInitializedAsync()
     {

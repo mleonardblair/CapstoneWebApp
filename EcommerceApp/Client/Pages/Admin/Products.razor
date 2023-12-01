@@ -1,4 +1,5 @@
-﻿@page "/admin-dashboard/product-catelogue"
+﻿@page "/admin-dashboard/products"
+@inject IProductService ProductService
 @inject ICategoryService CategoryService
 @attribute [Authorize(Roles = "Admin")]
 @implements IDisposable
@@ -6,12 +7,14 @@
 <MudContainer>
     <MudMainContent>
 
-        <MudText Style="padding:30px" Typo="Typo.h3">Product Categories</MudText>
+        <MudText Style="padding:30px" Typo="Typo.h6">Product Listings</MudText>
 
         <div class="header">
             <div class="col">Name</div>
             <div class="col">Description</div>
+            <div class="col">Price</div>
             <div class="col">Visible</div>
+            <div class="col"></div>
             <div class="col"></div>
         </div>
         @if (isLoading)
@@ -22,21 +25,36 @@
         }
         else
         {
-            @foreach (var category in CategoryService.AdminCategories)
+            <ProductForm/>
+            @foreach (var product in ProductService.AdminProducts)
             {
-                @if (category.Editing)
+                @if (product.Editing)
                 {
-                    Console.WriteLine($"Editing category: {category.Name}");
-                    <EditForm Model="editingCategory" OnSubmit="UpdateCategory">
+                    Console.WriteLine($"Editing product: {product.Name}");
+                    <EditForm Model="editingProduct" OnSubmit="UpdateProduct">
                         <div class="row">
-                            <div class="col">
-                                <InputText @bind-Value="editingCategory.Name" class="form-control" />
+                            <div class="col" style="display:block;">
+                                <img src="@product.ImageURI" alt="Thumbnail" class="product-thumbnail" style="display:block;max-height:500px;max-width:500px;"> <!-- This is where the image will be displayed -->
                             </div>
                             <div class="col">
-                                <InputText @bind-Value="editingCategory.Description" class="form-control" />
+                                <InputText 
+                                    @bind-Value="editingProduct.Name" 
+                                    class="form-control" />
+                            </div>
+                            <div class="col">
+                                <InputText 
+                                    @bind-Value="editingProduct.Description" 
+                                    class="form-control" />
+                            </div>
+                            <div class="col">
+                                <MudTextField Label="Price"
+                                  HelperText="Enter price"
+                                  Class="mt-3"
+                                  @bind-Value="editingProduct.Price" For="@(() => editingProduct.Price)"
+                                  />
                             </div>
                             <div class="col col-visible">
-                                <InputCheckbox @bind-Value="editingCategory.Visible" class="big-checkbox" />
+                                <InputCheckbox @bind-Value="editingProduct.Visible" class="big-checkbox" />
                             </div>
 
                             <div class="col">
@@ -53,19 +71,22 @@
                 }else {
                     <div class="row">
                         <div class="col">
-                            @category.Name
+                            @product.Name
                         </div>
                         <div class="col">
-                            @category.Description
+                            @product.Description
+                        </div>
+                           <div class="col">
+                            @product.Price
                         </div>
                         <div class="col col-visible">
-                            <span>@(category.Visible ? "✔️" : "")</span>"
+                            <span>@(product.Visible ? "✔️" : "")</span>"
                         </div>
-                        <div class="col">
-                            <button class="btn btn-primary" @onclick="(()=>EditCategory(category))">
+                        <div class="col" style="text-align:right;">
+                            <button class="btn btn-primary" @onclick="(()=>EditProduct(product))">
                                 <i class="oi oi-pencil"></i>
                             </button>
-                            <button class="btn btn-primary" @onclick="(()=>DeleteCategory(category.Id))">
+                            <button class="btn btn-primary" @onclick="(()=>DeleteProduct(product.Id))">
                                 <i class="oi oi-trash"></i>
                             </button>
                         </div>
@@ -74,87 +95,88 @@
    
             }
         }
-        <button class="btn btn-primary" @onclick="(()=>CreateNewCategory())">
-            <i class="oi oi-plus"></i> Add new category
+        <button class="btn btn-primary" @onclick="(()=>CreateNewProduct())">
+            <i class="oi oi-plus"></i> Add new product
         </button>
 
     </MudMainContent>
 </MudContainer>
 @code {
-    CategoryDto? editingCategory = null;
+    ProductDto? editingProduct = null;
+    private Dictionary<string, MudBlazor.Color> TagColors = new Dictionary<string, MudBlazor.Color>();
     private bool isLoading = true; // New flag to track loading state
     protected override async Task OnInitializedAsync()
     {
+        await CategoryService.GetAllCategoriesAsync();
+        await ProductService.GetAllProductsAsync();
         isLoading = true; // Start loading
-        Console.WriteLine("Loading categories...");
-        await CategoryService.GetAdminCategories();
+        await ProductService.GetAdminProducts();
         isLoading = false; // Loading complete
-        Console.WriteLine("Categories loaded.");
-        CategoryService.OnChange += StateHasChanged;
+        ProductService.ProductsChanged += StateHasChanged;
     }
 
     public void Dispose()
     {
-        CategoryService.OnChange -= StateHasChanged;
+        ProductService.ProductsChanged -= StateHasChanged;
     }
 
-    private void CreateNewCategory()
+    private void CreateNewProduct()
     {
-        Console.WriteLine("Creating a new category.");
-        editingCategory = CategoryService.CreateNewCategory();
+        Console.WriteLine("Creating a new product.");
+        editingProduct = ProductService.CreateNewProduct();
     }
 
 
-    private void EditCategory(CategoryDto category)
+    private void EditProduct(ProductDto product)
     {
-        Console.WriteLine($"Editing category: {category.Name}");
+        Console.WriteLine($"Editing category: {product.Name}");
 
         // If another category is being edited, cancel that edit.
-        if (editingCategory != null)
+        if (editingProduct != null)
         {
-            editingCategory.Editing = false;
+            editingProduct.Editing = false;
         }
 
         // Toggle the editing mode for the current category.
-        category.Editing = !category.Editing;
-        editingCategory = category.Editing ? category : null;
+        product.Editing = !product.Editing;
+        editingProduct = product.Editing ? product : null;
 
         StateHasChanged();
     }
 
 
 
-    private async Task UpdateCategory()
+    private async Task UpdateProduct()
     {
-        if (editingCategory != null)
+        if (editingProduct != null)
         {
-            Console.WriteLine($"Updating category: {editingCategory.Name}");
-            if (editingCategory.IsNew)
+            Console.WriteLine($"Updating product: {editingProduct.Name}");
+            if (editingProduct.IsNew)
             {
-                await CategoryService.AddCategory(editingCategory);
-                Console.WriteLine("Added new category.");
+                await ProductService.AddProduct(editingProduct);
+                Console.WriteLine("Added new product.");
             }
             else
             {
-                await CategoryService.UpdateCategory(editingCategory);
-                Console.WriteLine("Updated existing category.");
+                await ProductService.UpdateProduct(editingProduct);
+                Console.WriteLine("Updated existing product.");
             }
 
             // Set the Editing property to false to exit the editing mode.
-            editingCategory.Editing = false;
+            editingProduct.Editing = false;
 
             // Reset the editing category to clear the form fields.
-            editingCategory = new CategoryDto();
+            editingProduct = new ProductDto();
 
             // Optionally, refresh the categories list to show the updated data.
-            await CategoryService.GetAdminCategories();
+            await ProductService.GetAdminProducts();
 
-            Console.WriteLine("Finished editing category.");
+            Console.WriteLine("Finished editing product.");
             StateHasChanged();
         }
         else
         {
-            Console.WriteLine("UpdateCategory called but editingCategory is null.");
+            Console.WriteLine("UpdateProduct called but editingProduct is null.");
         }
     }
 
@@ -164,14 +186,15 @@
     private async Task CancelEditing()
     {
         Console.WriteLine("Cancelling edit.");
-        editingCategory = new CategoryDto();
-        await CategoryService.GetAdminCategories();
+        editingProduct = new ProductDto();
+        await ProductService.GetAdminProducts();
     }
 
-    private async Task DeleteCategory(Guid id)
+    private async Task DeleteProduct(Guid id)
     {
-        Console.WriteLine($"Deleting category with ID: {id}");
-        await CategoryService.DeleteCategory(id);
+        Console.WriteLine($"Deleting product with ID: {id}");
+        await ProductService.DeleteProduct(id);
+
     }
 
 }

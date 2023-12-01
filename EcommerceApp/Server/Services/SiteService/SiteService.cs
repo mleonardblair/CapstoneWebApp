@@ -1,5 +1,7 @@
 ﻿using AutoMapper;
 using EcommerceApp.Shared.DTOs.PageDtos;
+using EcommerceApp.Shared.Models;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace EcommerceApp.Server.Services.SiteService
@@ -14,29 +16,18 @@ namespace EcommerceApp.Server.Services.SiteService
             _context = context;
             _mapper = mapper;
         }
-        public async Task<GalleryDto> GetGalleryDataAsync()
+        public async Task<ServiceResponse<GalleryDto>> GetGalleryDataAsync()
         {
-            // Simulate fetching data from a database or other source
-            var galleryDto = new GalleryDto
+            var response = new ServiceResponse<GalleryDto>();
+            var gallery = await _context.Galleries.FirstOrDefaultAsync();
+            if (gallery != null)
             {
-                Title = "Gallery",
-                Subtitle = "This is where I host work and whatnot.",
-                GalleryImages = new List<string>
-            {
-                "https://ecommerceblobstorage.blob.core.windows.net/sitecontent/wreath1.jpg",
-                "https://ecommerceblobstorage.blob.core.windows.net/sitecontent/wreath2.jpg",
-                "https://ecommerceblobstorage.blob.core.windows.net/sitecontent/wreath3.jpg",
-                "https://ecommerceblobstorage.blob.core.windows.net/sitecontent/wreath4.jpg",
-                "https://ecommerceblobstorage.blob.core.windows.net/sitecontent/wreath5.jpg",
-            },
-                DateModified = DateTime.UtcNow
-            };
-
-            return galleryDto;
-
-
-/*            var galleryEntity = await _context.Galleries.FirstOrDefaultAsync();
-            return _mapper.Map<GalleryDto>(galleryEntity);*/
+                var galleryDto = _mapper.Map<GalleryDto>(gallery);
+                response.Data = galleryDto;
+                response.Success = true;
+                response.Message = "Gallery data retrieved successfully.";
+            }
+            return response;
         }
     }
 }

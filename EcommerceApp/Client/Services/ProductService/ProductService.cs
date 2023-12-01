@@ -58,6 +58,21 @@ namespace EcommerceApp.Client.Services.ProductService
 
             return result;
         }
+        public async Task<ProductDto> AddOrUpdateProductAsync(ProductDto product)
+        {
+            var response = await _http.PostAsJsonAsync("api/product", product);
+            if (response.IsSuccessStatusCode)
+            {
+                var serviceResponse = await response.Content.ReadFromJsonAsync<ServiceResponse<ProductDto>>();
+                return serviceResponse.Data;
+            }
+            else
+            {
+                // Handle the error, log it, or throw an exception with more details.
+                var errorContent = await response.Content.ReadAsStringAsync();
+                throw new HttpRequestException($"Error calling API: {errorContent}");
+            }
+        }
 
         public async Task GetAllProductsAsync(Guid? categoryId)
         {
@@ -749,7 +764,7 @@ namespace EcommerceApp.Client.Services.ProductService
             if (categoryId.HasValue && categoryId.Value != Guid.Empty)
             {
                 // Fetch the category name based on the ID
-                var categoryResponse = await _http.GetFromJsonAsync<ServiceResponse<CategoryDto>>($"api/categories/{categoryId}");
+                var categoryResponse = await _http.GetFromJsonAsync<ServiceResponse<ProductDto>>($"api/categories/{categoryId}");
                 if (categoryResponse != null && categoryResponse.Data != null)
                 {
                     SelectedCategoryName = categoryResponse.Data.Name;

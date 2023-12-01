@@ -9,6 +9,7 @@ namespace EcommerceApp.Server.Services.ProductService
     /// </summary>
     public interface IProductService
     {
+        Task<ServiceResponse<ProductDto>> AddOrUpdateProductAsync(ProductDto productDto);
         Task<ServiceResponse<ProductDto>> GetProductByIdAsync(Guid productId);
         // Overloaded method for pagination.
         Task<ServiceResponse<ProductDto>> GetProductByIdAsync(int page, int pageSize, Guid productId);
@@ -43,7 +44,7 @@ namespace EcommerceApp.Server.Services.ProductService
         // Update admin method
         Task<ServiceResponse<List<ProductDto>>> UpdateProduct(ProductDto productDto);
         // Add admin method
-        Task<ServiceResponse<List<ProductDto>>> AddProduct(ProductDto productDto);
+        Task<ServiceResponse<bool>> AddProduct(ProductDto productDto);
 
 
     }

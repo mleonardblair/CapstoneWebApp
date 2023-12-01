@@ -1,0 +1,304 @@
+﻿@using EcommerceApp.Shared.DTOs
+@using System.Net.Http.Headers
+@using EcommerceApp.Client.Helpers
+@using MudBlazor
+@using MudBlazor.Components
+@inject HttpClient Http
+@inject IProductService ProductService
+@inject ICategoryService CategoryService
+@inject NavigationManager NavigationManager
+@using EcommerceApp.Shared.Models
+@using Newtonsoft.Json
+@implements IDisposable
+
+
+
+<ReusableResultSnackbar @ref="ProductService.Snackbar"
+                        Message="@Message"
+                        Severity="@s" />
+
+@if (product != null)
+{
+    <EditForm Model="product" OnValidSubmit="HandleValidSubmit">
+        <DataAnnotationsValidator />
+        <MudGrid>
+            <MudItem xs="12" sm="7">
+                <MudCard>
+                    <MudCardContent>
+                        <MudTextField Label="Name" @bind-Value="product.Name" For="@(() => product.Name)" />
+
+                        <MudTextField Label="Description"
+                                      Class="mt-3"
+                                      @bind-Value="product.Description"
+                                      Lines="3"
+                                      AutoGrow ="true"
+                                      MaxLines="4"
+                                  For="@(() => product.Description)" />
+
+                        <MudTextField Label="Price" 
+                                      HelperText="Enter price" 
+                                      Class="mt-3" 
+                                      @bind-Value="product.Price"
+                                  InputType="InputType.Number" For="@(() => product.Price)" />
+
+                        <MudSelect Label="Select Category" @bind-Value="product.CategoryId" T="Guid" Required="true" ErrorText="A category must be selected" For="@(() => product.CategoryId)">
+                            <MudSelectItem Disabled="true" Value="Guid.Empty">Select Category</MudSelectItem>
+                            @foreach (var category in CategoryService.Categories)
+                            {
+                                <MudSelectItem Value="@category.Id">@category.Name</MudSelectItem>
+                            }
+                        </MudSelect>
+
+                        <MudTextField Label="Stock Quantity" 
+                                      HelperText="Enter stock quantity" 
+                                      Class="mt-3" 
+                                      @bind-Value="product.StockQuantity"
+                                  InputType="InputType.Number" For="@(() => product.StockQuantity)" />
+
+                        <MudTextField @bind-Value="CurrentTagInput"
+                                      Immediate="true"
+                                      Label="Add Tags"
+                                      InputType="InputType.Text"
+                                      HelperText="Type a tag and press space to add it"
+                                      AdornmentIcon="@Icons.Material.Filled.Tag"
+                                      Adornment="Adornment.End"
+                                      OnKeyUp="@HandleTagInputKeyPress" />
+
+                        <MudChipSet>
+                            @foreach (var tag in product.TagNames)
+                            {
+                                <MudChip Text="@tag" Color="@TagColors[tag]" OnClose="() => RemoveTag(tag)" @key="tag"></MudChip>
+                            }
+                        </MudChipSet>
+
+                        <MudFileUpload T="IBrowserFile"
+                                       Accept=".png, .jpg" 
+                                       FilesChanged="UploadFiles2" 
+                                       MaximumFileCount="100">
+                            <ButtonTemplate 
+                                Context="fileUploadContext">
+                                <MudButton 
+                                    FullWidth="@fullWidth"
+                                    HtmlTag="label"
+                                    Variant="Variant.Filled"
+                                    Color="Color.Primary"
+                                    StartIcon="@Icons.Material.Filled.Camera"
+                                    for="@fileUploadContext">
+                                        Select Image
+                                </MudButton>
+                            </ButtonTemplate>
+                        </MudFileUpload>
+                    </MudCardContent>
+
+                    <MudCardActions>
+                        <MudButton FullWidth="@fullWidth" ButtonType="ButtonType.Submit" Disabled="@_processing" OnClick="ProcessSubmit" Variant="Variant.Filled" Color="Color.Primary">
+                            @if (_processing)
+                            {
+                                <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true" />
+                                <MudText Class="ms-2">Checking</MudText>
+                            }
+                            else
+                            {
+                                <MudText>Submit</MudText>
+                            }
+                        </MudButton>
+                        <MudButton FullWidth="@fullWidth" ButtonType="ButtonType.Reset" OnClick="Close" Variant="Variant.Filled" Color="Color.Primary">
+                           
+                        </MudButton>
+                    </MudCardActions>
+                </MudCard>
+            </MudItem>
+            <MudItem xs="12" sm="5">
+                <MudPaper Class="pa-4">
+                    <MudText Typo="Typo.subtitle2">Validation Summary</MudText>
+                    @if (success)
+                    {
+                        <MudText Color="Color.Success">Success</MudText>
+                    }
+                    else
+                    {
+                        <MudText Color="@Color.Error">
+                            <ValidationSummary />
+                        </MudText>
+                    }
+                </MudPaper>
+            </MudItem>
+            <MudItem xs="12">
+                <MudText Typo="Typo.body2" Align="Align.Center">
+                    Fill out the form correctly to see the success message.
+                </MudText>
+            </MudItem>
+        </MudGrid>
+    </EditForm>
+}else
+{
+    <span>
+        You haven't specified a product, yet.
+        <button class="btn" @onclick="InitProduct">Add a product?</button>
+    </span>
+}
+@code {
+    private ProductDto product = null;
+    private bool editProduct = false;
+    private Dictionary<string, MudBlazor.Color> TagColors = new Dictionary<string, MudBlazor.Color>();
+    private bool success;
+    private string Message = string.Empty;
+    private List<string> Tags { get; set; } = new List<string>();
+    private string CurrentTagInput { get; set; } = string.Empty;
+    IList<IBrowserFile> files = new List<IBrowserFile>();
+    private bool _processing = false;
+    private bool fullWidth = false;
+    private Severity s = Severity.Normal;
+
+    private void OnBreakpointChanged(Breakpoint breakpoint)
+    {
+        fullWidth = (breakpoint == Breakpoint.Xs || breakpoint == Breakpoint.Sm) ? true : false;
+        StateHasChanged();
+    }
+
+    private async Task UploadFiles2(IBrowserFile file)
+    {
+        files.Add(file);
+        await UploadFileToServer(file);
+    }
+
+    private async Task ProcessSubmit()
+    {
+        _processing = true;
+        await HandleValidSubmit(); 
+        await Task.Delay(500);
+        _processing = false;
+    }
+
+    protected override async void OnInitialized()
+    {
+        await CategoryService.GetAllCategoriesAsync();
+        CategoryService.OnChange += StateHasChanged;
+    }
+
+    public void Dispose()
+    {
+        CategoryService.OnChange -= StateHasChanged;
+    }
+
+    private async Task SubmitProduct()
+    {
+        editProduct = false;
+        product = await ProductService.AddOrUpdateProductAsync(product);
+    }
+
+    private void InitProduct()
+    {
+        product = new ProductDto();
+        editProduct = true;
+    }
+    private void Close()
+    {
+        product = null;
+        editProduct = false;
+    }
+
+    private void EditProduct()
+    {
+        editProduct = true;
+    }
+
+        private async Task HandleValidSubmit()
+        {
+
+      
+            // Call the service to add the new product.
+            var result = await ProductService.CreateProductAsync(product);
+
+            if (result.Success)
+            {
+                // Product creation was successful.
+                success = true;
+                Message = "Product created successfully.";
+                s = Severity.Success;
+            }
+            else
+            {
+                // Product creation failed.
+                success = false;
+                Message = $"Product creation failed: {result.Message}";
+                s = Severity.Error;
+            }
+        
+
+        ProductService.Snackbar.Show(); // Show the snackbar message.
+        }
+
+        private void HandleTagInputKeyPress(KeyboardEventArgs e)
+        {
+        if (e.Key == " " || e.Key == ",")
+        {
+            var tagToAdd = CurrentTagInput.Trim().TrimEnd(',');
+            if (!string.IsNullOrWhiteSpace(tagToAdd) && !product.TagNames.Contains(tagToAdd))
+            {
+                product.TagNames.Add(tagToAdd);
+                if (!TagColors.ContainsKey(tagToAdd))
+                {
+                    TagColors[tagToAdd] = Helpers.MudMethods.GetRandomColor(TagColors);
+                }
+
+                CurrentTagInput = string.Empty;
+            }
+        }
+        }
+
+        private void RemoveTag(string tag)
+        {
+        if (product.TagNames.Contains(tag))
+        {
+            product.TagNames.Remove(tag);
+            TagColors.Remove(tag);
+        }
+        }
+
+        private async Task UploadFileToServer(IBrowserFile file)
+        {
+        var maxAllowedSize = 5 * 1024 * 1024; // 5 MB
+        if (file.Size > maxAllowedSize)
+        {
+            // Handle the file size exceeded error.
+            Message = $"File size should not exceed {maxAllowedSize / 1024 / 1024} MB.";
+            s = Severity.Error;
+            ProductService.Snackbar.Show();
+            return;
+        }
+
+        var buffer = new byte[file.Size];
+        await file.OpenReadStream(maxAllowedSize).ReadAsync(buffer);
+
+        var content = new MultipartFormDataContent
+    {
+    { new ByteArrayContent(buffer), "file", file.Name }
+    };
+
+        var response = await Http.PostAsync("api/blob/upload", content);
+        if (response.IsSuccessStatusCode)
+        {
+            var uploadResult = await response.Content.ReadFromJsonAsync<ServiceResponse<BlobUploadResult>>();
+            if (uploadResult != null && uploadResult.Success)
+            {
+                product.ImageURI = uploadResult.Data.FileUrl;
+                Message = "Image uploaded successfully.";
+                s = Severity.Success;
+            }
+            else
+            {
+                Message = $"Failed to upload image: {uploadResult?.Message}";
+                s = Severity.Error;
+            }
+        }
+        else
+        {
+            Message = "Error occurred during the image upload.";
+            s = Severity.Error;
+        }
+
+        ProductService.Snackbar.Show();
+        }
+
+}

@@ -76,34 +76,9 @@
     {
         SiteService.Role = await AuthService.GetUserRole();
         galleryDto = await SiteService.GetGalleryAsync();
-        foreach (var item in galleryDto.GalleryImages)
-        {
-            Console.WriteLine($"image: {item}");
-            _source.Add(item);
-        }
+      
     }
-    private async Task AddAsync()
-    {
-        _source.Add($"Item {_source.Count + 1}");
-        await Task.Delay(1);
-        _carousel.MoveTo(_source.Count - 1);
-    }
-    private async Task SaveAsync()
-    {
-        _source.Add($"Item {_source.Count + 1}");
-        await Task.Delay(1);
-        _carousel.MoveTo(_source.Count - 1);
-    }
-    private async Task DeleteAsync(int index)
-    {
-        if (_source.Any())
-        {
-            _source.RemoveAt(index);
-            await Task.Delay(1);
-            _carousel.MoveTo(System.Math.Max(System.Math.Min(index, _source.Count - 1), 0));
-        }
-
-    }
+   
     private async Task UploadFiles(IBrowserFile file)
     {
         SiteService.files.Add(file);

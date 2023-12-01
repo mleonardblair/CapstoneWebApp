@@ -4,6 +4,7 @@ using EcommerceApp.Server.Services.CartService;
 using EcommerceApp.Shared.Models;
 using Stripe;
 using Stripe.Checkout;
+using static System.Net.WebRequestMethods;
 
 namespace EcommerceApp.Server.Services.PaymentService
 {
@@ -25,7 +26,7 @@ namespace EcommerceApp.Server.Services.PaymentService
 
             // TODO: Change to Live API key when ready to go live
             var stripeApi = _configuration.GetValue<string>(ConfigConstants.StripeTest_SecretKey);
-            StripeConfiguration.ApiKey = stripeApi;
+            StripeConfiguration.ApiKey = "sk_test_51OG1LaBFTEKeFmtcR1FK2VXST0NqAtSORJ0LP9IRmC7fk1R2B9KfEyR3Mou1JkgUjCXHlfbOIPekExxf5lgwGXxS00u3Ua12br";
 
             _cartService = cartService;
             _authService = authService;
@@ -60,10 +61,10 @@ namespace EcommerceApp.Server.Services.PaymentService
             }
 
 
-            var baseUrl = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "DEVELOPMENT"
-                  ? "https://localhost:7194"
-                  : "https://wasmcapstoneapp.azurewebsites.net";
-
+            /* var baseUrl = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "DEVELOPMENT"
+                   ? "https://localhost:7194"
+                   : "https://wasmcapstoneapp.azurewebsites.net";*/
+            var baseUrl = "https://localhost:7194";
             var options = new SessionCreateOptions
             {
                 CustomerEmail = _authService.GetUserEmail(),
@@ -89,7 +90,8 @@ namespace EcommerceApp.Server.Services.PaymentService
         public async Task<ServiceResponse<bool>> FulfillOrderAsync(HttpRequest request)
         {
             var json = await new StreamReader(request.Body).ReadToEndAsync();
-            var webhookSecret = _configuration.GetValue<string>(ConfigConstants.StripeTest_WebhookSecret);
+           // var webhookSecret = _configuration.GetValue<string>(ConfigConstants.StripeTest_WebhookSecret);
+           var webhookSecret = secret;
             try {
                 var stripeEvent = EventUtility.ConstructEvent(
                         json,

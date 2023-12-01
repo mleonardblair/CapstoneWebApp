@@ -5,6 +5,8 @@ using EcommerceApp.Server.Models;
 using EcommerceApp.Shared.DTOs;
 using EcommerceApp.Shared.Models;
 using Azure.Storage.Blobs;
+using Newtonsoft.Json;
+using System.Text.RegularExpressions;
 
 namespace EcommerceApp.Server.Services.ProductService
 {
@@ -863,6 +865,50 @@ namespace EcommerceApp.Server.Services.ProductService
 
             return productDtos;
         }
+        public async Task<ServiceResponse<ProductDto>> AddOrUpdateProductAsync(ProductDto productDto)
+        {
+            var response = new ServiceResponse<ProductDto>();
+            try
+            {
+                // Check if the product already exists
+                var existingProduct = await _context.Products.FindAsync(productDto.Id);
+                var product = _mapper.Map<Product>(productDto);
+                if (existingProduct != null)
+                {
+                    // Update existing product
+                    _context.Entry(existingProduct).CurrentValues.SetValues(product);
+                    await _context.SaveChangesAsync();
+
+                    response.Data = _mapper.Map<ProductDto>(product);
+                }
+                else
+                {
+                    // Add new product
+                    await _context.Products.AddAsync(product);
+                    await _context.SaveChangesAsync();
+
+                    // Update ProductTags if necessary (assuming product tags logic is similar to UserAddress)
+                    foreach (var tagName in productDto.TagNames)
+                    {
+                        var tag = await _context.Tags.FirstOrDefaultAsync(t => t.Name == tagName)
+                                  ?? new Tag { Name = tagName };
+                        await _context.Tags.AddAsync(tag);
+                        await _context.ProductTags.AddAsync(new ProductTag { ProductId = product.Id, TagId = tag.Id });
+                    }
+
+                    response.Data = _mapper.Map<ProductDto>(product);
+                }
+
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                response.Success = false;
+                response.Message = ex.Message;
+            }
+
+            return response;
+        }
 
         /// <summary>
         /// Returns a list of search suggestions based on the search query.
@@ -1230,16 +1276,17 @@ namespace EcommerceApp.Server.Services.ProductService
 
         public Task<ServiceResponse<List<ProductDto>>> GetAdminProducts()
         {
-
             var response = new ServiceResponse<List<ProductDto>>();
             try
             {
+                // Filter out the products that have been marked as deleted
                 var products = _context.Products
+                    .Where(p => !p.Deleted) // Add this line to exclude deleted products
                     .Include(p => p.ProductTags)
                     .ThenInclude(pt => pt.Tag)
                     .ToList();
 
-                if (products == null || !products.Any())
+                if (!products.Any())
                 {
                     response.Success = false;
                     response.Message = "No products found.";
@@ -1259,19 +1306,219 @@ namespace EcommerceApp.Server.Services.ProductService
             return Task.FromResult(response);
         }
 
-        public Task<ServiceResponse<List<ProductDto>>> DeleteProduct(Guid productId)
+        public async Task<Product> GetProductById(Guid Id)
         {
-            throw new NotImplementedException();
+            var product = await _context.Products.FirstOrDefaultAsync(e => e.Id == Id);
+            return product == null ? throw new KeyNotFoundException($"Product with Id {Id} not found.") : product;
+        }
+        public async Task<ServiceResponse<List<ProductDto>>> DeleteProduct(Guid productId)
+        {
+            var response = new ServiceResponse<List<ProductDto>>()
+            {
+                Data = new List<ProductDto>() // Ensure Data is always present
+            };
+            try
+            {
+                Product product = await GetProductById(productId); // Make sure this method exists and fetches the product by id
+                if (product == null)
+                {
+                    response.Data = null;
+                    response.Success = false;
+                    response.Message = "Product not found.";
+                    response.StatusCode = 404; // Not Found
+                    return response;
+                }
+
+                if (product.Deleted)
+                {
+                    response.Data = null;
+                    response.Success = false;
+                    response.Message = "Product already deleted.";
+                    response.StatusCode = 400; // Bad Request
+                    return response;
+                }
+
+                product.Deleted = true; // Soft delete the product by setting the Deleted property to true
+                var result = await _context.SaveChangesAsync();
+
+                if (result <= 0)
+                {
+                    response.Data = null;
+                    response.Success = false;
+                    response.Message = "Failed to delete product.";
+                    response.StatusCode = 400; // Bad Request
+                    return response;
+                }
+
+                response = await GetAdminProducts(); // Refresh the list of products to reflect the deletion
+                response.Success = true;
+                response.Message = "Product deleted successfully.";
+                response.StatusCode = 200; // OK
+                return response;
+            }
+            catch (Exception ex)
+            {
+                // Log the exception details here, including 'ex' information
+
+                response.Success = false;
+                response.Message = "Server error occurred while deleting the product: " + ex.Message;
+                response.StatusCode = 500; // Internal Server Error
+                return response;
+            }
         }
 
-        public Task<ServiceResponse<List<ProductDto>>> UpdateProduct(ProductDto productDto)
+
+        public async Task<ServiceResponse<List<ProductDto>>> UpdateProduct(ProductDto productDto)
         {
-            throw new NotImplementedException();
+            // Validate the product name
+            if (!Regex.IsMatch(productDto.Name, @"^[a-zA-ZéèêëîïôœùûüçÉÈÊËÎÏÔŒÙÛÜÇ ]+$"))
+            {
+                return new ServiceResponse<List<ProductDto>>
+                {
+                    Success = false,
+                    Message = "Invalid product name. Only letters are allowed.",
+                    Data = null,
+                    StatusCode = 400 // Bad Request
+                };
+            }
+
+            // Check for name uniqueness and non-deleted status
+            var isNameUsed = await _context.Products
+                                .AnyAsync(p => p.Name == productDto.Name && p.Id != productDto.Id && !p.Deleted);
+            if (isNameUsed)
+            {
+                return new ServiceResponse<List<ProductDto>>
+                {
+                    Success = false,
+                    Message = "Product name already exists.",
+                    Data = null,
+                    StatusCode = 400 // Bad Request
+                };
+            }
+
+            // Check if the product exists
+            var dbProduct = await _context.Products.FirstOrDefaultAsync(p => p.Id == productDto.Id);
+            if (dbProduct == null)
+            {
+                return new ServiceResponse<List<ProductDto>>
+                {
+                    Success = false,
+                    Message = "Product not found.",
+                    Data = null,
+                    StatusCode = 404 // Not Found
+                };
+            }
+
+            // Update product properties
+            dbProduct.Name = productDto.Name;
+            dbProduct.Description = productDto.Description;
+            dbProduct.Price = productDto.Price;
+            dbProduct.Visible = productDto.Visible;
+            dbProduct.Deleted = productDto.Deleted;
+            dbProduct.CategoryId = productDto.CategoryId;
+            dbProduct.StockQuantity = productDto.StockQuantity;
+            dbProduct.DateModified = DateTime.UtcNow;
+            // Add or update additional properties as needed
+
+            // Handling the images, assuming ProductDto.Images is the source of truth
+            dbProduct.ImagesJson = JsonConvert.SerializeObject(productDto.Images);
+
+            try
+            {
+                await _context.SaveChangesAsync();
+                var updatedProducts = await GetAdminProducts(); // Fetch updated list of products
+                return new ServiceResponse<List<ProductDto>>
+                {
+                    Success = true,
+                    Message = "Product updated successfully.",
+                    Data = updatedProducts.Data,
+                    StatusCode = 200 // OK
+                };
+            }
+            catch (Exception ex)
+            {
+                // Log the exception details here, including 'ex' information
+
+                return new ServiceResponse<List<ProductDto>>
+                {
+                    Success = false,
+                    Message = "An error occurred while updating the product: " + ex.Message,
+                    Data = null,
+                    StatusCode = 500 // Internal Server Error
+                };
+            }
         }
 
-        public Task<ServiceResponse<List<ProductDto>>> AddProduct(ProductDto productDto)
+        public async Task<ServiceResponse<bool>> AddProduct(ProductDto productDto)
         {
-            throw new NotImplementedException();
+            // Validate the product name
+            if (!Regex.IsMatch(productDto.Name, @"^[a-zA-ZéèêëîïôœùûüçÉÈÊËÎÏÔŒÙÛÜÇ ]+$"))
+            {
+                return new ServiceResponse<bool>
+                {
+                    Success = false,
+                    Message = "Invalid product name. Only letters are allowed.",
+                    Data = false,
+                    StatusCode = 400 // Bad Request
+                };
+            }
+
+            // Check for name uniqueness
+            var isNameUsed = await _context.Products
+                                .AnyAsync(p => p.Name == productDto.Name && !p.Deleted);
+
+            if (isNameUsed)
+            {
+                return new ServiceResponse<bool>
+                {
+                    Success = false,
+                    Message = "Product name already exists.",
+                    Data = false,
+                    StatusCode = 400 // Bad Request
+                };
+            }
+
+            var response = new ServiceResponse<bool>
+            {
+                Data = false
+            };
+
+            try
+            {
+                Product newProduct = _mapper.Map<Product>(productDto);
+                newProduct.Editing = newProduct.IsNew = false; // Set defaults for new products
+                _context.Products.Add(newProduct);
+                var result = await _context.SaveChangesAsync();
+
+                if (result <= 0)
+                {
+                    response.Success = false;
+                    response.Message = "Failed to add product.";
+                    response.StatusCode = 400; // Bad Request
+                    return response;
+                }
+                else
+                {
+                    response.Data = true;
+                    response.Success = true;
+                    response.Message = "Product added successfully.";
+                    response.StatusCode = 201; // Created
+                    return response;
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log the exception details here, including 'ex' information
+
+                return new ServiceResponse<bool>
+                {
+                    Success = false,
+                    Message = "An unexpected server error occurred while adding the product: " + ex.Message,
+                    Data = false,
+                    StatusCode = 500 // Internal Server Error
+                };
+            }
         }
+
     }
 }

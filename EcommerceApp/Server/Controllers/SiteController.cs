@@ -106,18 +106,10 @@ namespace EcommerceApp.Server.Controllers
 
 
         [HttpGet("gallery")]
-        public async Task<ActionResult<GalleryDto>> GetGallery()
+        public async Task<ActionResult<ServiceResponse<GalleryDto>>> GetGallery()
         {
-            try
-            {
-                var gallery = await _siteService.GetGalleryDataAsync();
-                return Ok(gallery);
-            }
-            catch (Exception ex)
-            {
-                // Log the exception
-                return StatusCode(500, "An error occurred while fetching the gallery.");
-            }
+            var response = await _siteService.GetGalleryDataAsync();
+            return Ok(response);
         }
     }
 

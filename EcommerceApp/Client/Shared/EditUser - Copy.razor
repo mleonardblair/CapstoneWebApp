@@ -1,0 +1,95 @@
+﻿@page "/admin-dashboard/products/{Id:guid}"
+@using Microsoft.AspNetCore.Components.Forms
+@using System.ComponentModel.DataAnnotations
+@inject HttpClient httpClient
+@inject NavigationManager NavigationManager
+@if (AppUser != null && Id != null)
+{
+<PageTitle>Edit Product Details</PageTitle>
+<MudContainer Class="lg-py-2" Style="padding-top:10rem">
+    <MudMainContent>
+        <MudText Typo="Typo.h3" Style="text-align:center;">Login</MudText>
+        <MudGrid Class="login-grid" Style="display:flex; justify-content:center;align-self:center; padding-top:100px;">
+            <MudItem xs="12" lg="6" xl="6" Style="align-self:center">
+        <MudItem xs="12" sm="7">
+            <MudCard>
+                <MudCardContent>
+                    <EditForm Model="AppUser" OnValidSubmit="HandleSubmit">
+                        <DataAnnotationsValidator />
+
+                        <MudTextField Label="First Name" @bind-Value="AppUser.FirstName" Required="true" />
+
+                        <MudTextField Label="Last Name" @bind-Value="AppUser.LastName" Required="true" />
+
+                        <MudTextField Label="Email" @bind-Value="AppUser.Email" Required="true" />
+
+                        <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="mt-3">Save</MudButton>
+
+                        <ValidationSummary />
+                    </EditForm>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+
+        <MudItem xs="12" sm="5">
+            <MudPaper Class="pa-4 mud-height-full">
+                <MudText Typo="Typo.subtitle2">Validation Summary</MudText>
+                @if (success)
+                {
+                    <MudText Color="Color.Success">Success</MudText>
+                }
+
+                else
+                {
+                    <!-- ValidationSummary removed from here -->
+                }
+            </MudPaper>
+        </MudItem>
+
+        <MudItem xs="12">
+            <MudText Typo="Typo.body2" Align="Align.Center">
+                Fill out the form correctly to see the success message.
+            </MudText>
+        </MudItem>
+                </MudItem>
+            </MudGrid>
+        </MudMainContent>
+    </MudContainer>
+}
+    
+    else
+    {
+        <MudAlert Severity="Severity.Error">User not found</MudAlert>
+    }
+@code {
+    [Parameter] public Guid Id { get; set; }
+
+    private AppUserDto AppUser = null;
+
+    private bool success = false;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        base.OnParametersSetAsync();
+
+        AppUser = (await httpClient.GetFromJsonAsync<ServiceResponse<AppUserDto>>($"api/user/admin/{Id}")).Data;
+        Console.WriteLine(AppUser.Email);
+    }
+
+    private async Task HandleSubmit()
+    {
+        // You can perform any necessary validation here before saving the data
+        if (string.IsNullOrWhiteSpace(AppUser.FirstName) || string.IsNullOrWhiteSpace(AppUser.LastName) || string.IsNullOrWhiteSpace(AppUser.Email))
+        {
+            // Handle validation errors if needed
+            success = false;
+        }
+        else
+        {
+            // Save the data here
+            // You can also add your logic to update the user data on the server
+            // success = await SaveUserDataAsync();
+            success = true;
+        }
+    }
+}

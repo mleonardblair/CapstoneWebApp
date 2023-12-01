@@ -20,6 +20,15 @@ namespace EcommerceApp.Server.Controllers
             _context = context;
         }
 
+        // Get the user by guid id
+        [Authorize]
+        [HttpGet("admin/{Id}")]
+        public async Task<ActionResult<ServiceResponse<AppUserDto>>> GetUserById(Guid Id)
+        {
+
+            return Ok(await _authService.GetUserById(Id));
+
+        }
         [Authorize(Roles = "Admin")]
         [HttpGet("admin")]
         public async Task<ActionResult<ServiceResponse<List<AppUserDto>>>> GetAllUserAdmin()

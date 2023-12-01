@@ -28,8 +28,11 @@ namespace EcommerceApp.Server.Controllers
         /// <param name="page"></param>
         /// <param name="pageSize"></param>
         /// <returns></returns>
-
-
+        [HttpPost("AddOrUpdate")]
+        public async Task<ActionResult<ServiceResponse<List<ProductDto>>>> AddOrUpdate(ProductDto product)
+        {
+            return Ok(await _productService.AddOrUpdateProductAsync(product));
+        }
 
         [HttpGet("category/{categoryId}")]
         public async Task<ActionResult<ServiceResponse<List<Product>>>> GetProductsByCategoryId(Guid categoryId)

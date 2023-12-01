@@ -32,7 +32,16 @@ namespace EcommerceApp.Server.Controllers
 
                 // Determine the content type from the file
                 var contentType = file.ContentType;
-
+                // Here we ensure that if the file is a PNG image, we set the MIME type to 'image/apng'
+                if (file.ContentType.ToLowerInvariant().Contains("png"))
+                {
+                    contentType = "image/apng";
+                }
+                // Set the MIME type for JPEG/JPG images
+                else if (contentType.ToLowerInvariant().EndsWith("jpeg") || contentType.ToLowerInvariant().EndsWith("jpg"))
+                {
+                    contentType = "image/jpeg";
+                }
                 using (var stream = file.OpenReadStream())
                 {
                     // Set the content type for the blob

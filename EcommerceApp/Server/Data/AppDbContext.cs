@@ -82,52 +82,6 @@ namespace EcommerceApp.Server.Data
             modelBuilder.Entity<ProductTag>()
                 .HasKey(pt => new { pt.ProductId, pt.TagId });
 
-            modelBuilder.Entity<Tag>()
-                .HasData(
-                    new Tag
-                    {
-                        Id = Guid.NewGuid(),
-                        Name = "Ornament",
-                        Description = "Outdoor and indoor ornaments that add flair to living spaces and gardens.",
-                    },
-                    new Tag
-                    {
-                        Id = Guid.NewGuid(),
-                        Name = "Garden",
-                        Description = "Items related to garden decorations and maintenance, including plants, tools, and accessories."
-                    },
-                    new Tag
-                    {
-                        Id = Guid.NewGuid(),
-                        Name = "Wreaths",
-                        Description = "Circular arrangements of flowers, leaves, or other materials, often used for decorative purposes or special occasions."
-                    },
-                    new Tag
-                    {
-                        Id = Guid.NewGuid(),
-                        Name = "Macrame",
-                        Description = "A form of textile produced using knotting techniques, often used for wall hangings, plant hangers, and more."
-                    },
-                    new Tag
-                    {
-                        Id = Guid.NewGuid(),
-                        Name = "Calligraphy",
-                        Description = "The art of beautiful handwriting, often used in invitations, letters, and decorative texts."
-                    },
-                    new Tag
-                    {
-                        Id = Guid.NewGuid(),
-                        Name = "Embroidery",
-                        Description = "The craft of decorating fabric using a needle to apply thread or yarn, often used in apparel, home decor, and artworks."
-                    },
-                    new Tag
-                    {
-                        Id = Guid.NewGuid(),
-                        Name = "Decorative",
-                        Description = "Items that serve a decorative purpose, enhancing the aesthetics of a space without serving a practical function."
-                    }
-                );
-
 
             // User Configuration
             modelBuilder.Entity<ApplicationUser>()

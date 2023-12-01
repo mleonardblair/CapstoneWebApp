@@ -1,6 +1,7 @@
 ﻿@page "/"
 @using MudBlazor.Services
 @inject IJSRuntime JSRuntime
+@inject NavigationManager NavigationManager
 <MudBreakpointProvider OnBreakpointChanged="HandleBreakpointChange"></MudBreakpointProvider>
 
 
@@ -17,18 +18,18 @@
                 <img src="/images/ImagePlaceholder.svg" alt="Decorative Image">
             </div>
             <div class="text-container">
-                <h1>Discover Home Decor</h1>
+                 <MudText Typo="Typo.h4">Discover Home Decor</MudText>
                 <p>Find the perfect piece to liven up your home.</p>
-                <div>
-                    <a href="gallery.html" class="cta-button" style="background-color:#EC7063">See Gallery</a>
-                    <a href="shop.html" class="cta-button">Shop</a>
+                <div class="button-container">
+                    <MudButton Class="cta-button" OnClick="GoToGallery" Style="background-color:#EC7063;">See Gallery</MudButton>
+                    <MudButton Class="cta-button" OnClick="GoToShop" Style="background-color:black; color:white;">Shop</MudButton>
                 </div>
             </div>
         </div>
         <!-- Bottom section -->
         <div class="section">
             <div class="text-content">
-                <h2>Liven up your special event</h2>
+                <MudText Typo="Typo.h4">Liven up your special event</MudText>
                 <p>Glamorize your wedding or bridal shower.</p>
             </div>
             <div class="image-content">
@@ -121,5 +122,12 @@
     {
         OnCarouselItemChanged = UpdateProgress; // Assigning UpdateProgress to the callback
     }
-
+    private void GoToShop()
+    {
+        NavigationManager.NavigateTo("/shop");
+    }
+    private void GoToGallery()
+    {
+        NavigationManager.NavigateTo("/gallery");
+    }
 }
