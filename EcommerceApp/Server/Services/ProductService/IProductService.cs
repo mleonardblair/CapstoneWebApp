@@ -36,6 +36,15 @@ namespace EcommerceApp.Server.Services.ProductService
         Task<ServiceResponse<ProductPaginationResponse>> GetProductsByTagId(int page, int pageSize, bool isAscending, Guid tagId, decimal? minPrice, decimal? maxPrice);
 
 
+        // Add admin methods
+        Task<ServiceResponse<List<ProductDto>>> GetAdminProducts();
+        // Delete admin method
+        Task<ServiceResponse<List<ProductDto>>> DeleteProduct(Guid productId);
+        // Update admin method
+        Task<ServiceResponse<List<ProductDto>>> UpdateProduct(ProductDto productDto);
+        // Add admin method
+        Task<ServiceResponse<List<ProductDto>>> AddProduct(ProductDto productDto);
+
 
     }
 }

@@ -65,9 +65,7 @@
                             <button class="btn btn-primary" @onclick="(()=>EditCategory(category))">
                                 <i class="oi oi-pencil"></i>
                             </button>
-                            <button class="btn btn-primary" 
-                            @onmouseover="OnMouseOver"
-                            @onmouseout="OnMouseOut" 
+                            <button class="btn btn-primary"  
                             @onclick="(()=>DeleteCategory(category.Id))">
                                 <i class="oi oi-trash"></i>
                             </button>
@@ -127,6 +125,7 @@
             resultSnackbar?.Show();
             IsAddNewDisabled = false;
             CategoryService.ResetSnackbarMessage();
+            editingCategory.Editing = false;
         }
     }
 
@@ -143,13 +142,5 @@
         resultSnackbar?.Show();
         CategoryService.ResetSnackbarMessage();
     }
-    private void OnMouseOver()
-    {
-        buttonStyle = "background-color: red;"; // Change to red on mouse over
-    }
-
-    private void OnMouseOut()
-    {
-        buttonStyle = "background-color: blue;"; // Revert to default color on mouse out
-    }
+  
 }

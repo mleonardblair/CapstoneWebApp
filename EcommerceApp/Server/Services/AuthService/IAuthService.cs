@@ -15,8 +15,9 @@ namespace EcommerceApp.Server.Services.AuthService
         string GetUserEmail();
         Task<ApplicationUser?> GetApplicationUserByEmail(string email);
         Task GetUsers();
-        Task GetUserById(Guid userId);
 
+        // Gets the user by the id passed in the request body and returns the user's information populating the state on the auth service for the logged in user.
+        Task<ServiceResponse<AppUserDto>> GetUserById(Guid userId);
 
         Task<ServiceResponse<List<AppUserDto>>> GetAllUserAdmin();
         Task<ServiceResponse<AppUserDto>> GetUserByIdAdmin(Guid userId);

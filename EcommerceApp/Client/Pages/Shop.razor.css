@@ -33,26 +33,23 @@
 
 @media (max-width: 599.98px) {
     .sidebar {
-        width: 100%; /* Sidebar takes full width */
-        height: calc(100vh - 64px); /* Height is automatic, based on content */
-        position: relative; /* No longer sticky */
-        overflow-y: visible; /* No longer scrollable */ 
-                             /* always on top*/
+        width: 100%;  Sidebar takes full width 
+        height: calc(100vh - 64px);  Height is automatic, based on content 
+        position: relative;  No longer sticky 
+        overflow-y: visible;  No longer scrollable  
+                              always on top
     }
 
-    .main-content {
-        width: 100%; /* Content takes full width */
-    }
 }
 
 
 @media (max-width: 599.98px) {
-    .sidebar {
-        width: 100%; /* Full width */
-        position: static; /* Reset position */
-        height: auto; /* Height based on content */
-        overflow-y: auto; /* Scrollable if content overflows */
-    }
+    /*.sidebar {
+        width: 100%;*/ /* Full width */
+        /*position: static;*/ /* Reset position */
+        /*height: auto;*/ /* Height based on content */
+        /*overflow-y: auto;*/ /* Scrollable if content overflows */
+    /*}*/
 
     .main-content {
         display: flex; /* Ensure it's displayed */

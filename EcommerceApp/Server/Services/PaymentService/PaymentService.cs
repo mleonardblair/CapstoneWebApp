@@ -1,4 +1,5 @@
-﻿using EcommerceApp.Server.Services.AuthService;
+﻿using EcommerceApp.Server.Helpers;
+using EcommerceApp.Server.Services.AuthService;
 using EcommerceApp.Server.Services.CartService;
 using EcommerceApp.Shared.Models;
 using Stripe;
@@ -11,18 +12,24 @@ namespace EcommerceApp.Server.Services.PaymentService
         private readonly ICartService _cartService;
         private readonly IAuthService _authService;
         private readonly IOrderService _orderService;
-
+        private readonly IConfiguration _configuration;
         const string secret = "whsec_35e588449cd5269a49515f30c909ba2a40999a55bbf7cc01bbf7d15741c97075";
         public PaymentService(ICartService cartService, 
             IAuthService authService, 
-            IOrderService orderService)
+            IOrderService orderService,
+            IConfiguration configuration)
         {
+            _configuration = configuration;
 
-            StripeConfiguration.ApiKey = "sk_test_51OG1LaBFTEKeFmtcR1FK2VXST0NqAtSORJ0LP9IRmC7fk1R2B9KfEyR3Mou1JkgUjCXHlfbOIPekExxf5lgwGXxS00u3Ua12br";
+            // Use configuration to get the correct API key based on environment
+
+            // TODO: Change to Live API key when ready to go live
+            var stripeApi = _configuration.GetValue<string>(ConfigConstants.StripeTest_SecretKey);
+            StripeConfiguration.ApiKey = stripeApi;
+
             _cartService = cartService;
             _authService = authService;
             _orderService = orderService;
-
         }
         public async Task<Session> CreateCheckoutSessionAsync()
         {
@@ -53,7 +60,7 @@ namespace EcommerceApp.Server.Services.PaymentService
             }
 
 
-            var baseUrl = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development"
+            var baseUrl = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "DEVELOPMENT"
                   ? "https://localhost:7194"
                   : "https://wasmcapstoneapp.azurewebsites.net";
 
@@ -82,11 +89,12 @@ namespace EcommerceApp.Server.Services.PaymentService
         public async Task<ServiceResponse<bool>> FulfillOrderAsync(HttpRequest request)
         {
             var json = await new StreamReader(request.Body).ReadToEndAsync();
+            var webhookSecret = _configuration.GetValue<string>(ConfigConstants.StripeTest_WebhookSecret);
             try {
                 var stripeEvent = EventUtility.ConstructEvent(
                         json,
-                        request.Headers["Stripe-Signature"], 
-                        secret
+                        request.Headers["Stripe-Signature"],
+                        webhookSecret
                     );
                 if (stripeEvent.Type == Events.CheckoutSessionCompleted)
                 {

@@ -17,6 +17,12 @@ namespace EcommerceApp.Shared.DTOs
         public string ImageURI { get; set; } = string.Empty;
         public string[] Images { get; set; } = new string[0];
         public bool isFavourite { get; set; } = false;
+        public bool Visible { get; set; } = true;
+        public bool Deleted { get; set; } = false;
+        [NotMapped]
+        public bool Editing { get; set; } = false;
+        [NotMapped]
+        public bool IsNew { get; set; } = false;
         [Required]
         public Guid CategoryId { get; set; }
         [Required]

@@ -19,6 +19,12 @@ namespace EcommerceApp.Server.Models
         public decimal Price { get; set; }
         public string ImageURI { get; set; }
         public string ImagesJson { get; set; } = JsonConvert.SerializeObject(new string[0]);
+        public bool Visible { get; set; } = true;
+        public bool Deleted { get; set; } = false;
+        [NotMapped]
+        public bool Editing { get; set; } = false;
+        [NotMapped]
+        public bool IsNew { get; set; } = false;
 
         [NotMapped]
         public string[] Images

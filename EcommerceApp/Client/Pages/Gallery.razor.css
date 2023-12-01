@@ -1,9 +1,0 @@
-﻿.mud-carousel {
-    transform: rotate(-90deg) !important;
-    transform-origin: center !important;
-}
-
-.carousel-content {
-    transform: rotate(90deg);
-    transform-origin: center;
-}

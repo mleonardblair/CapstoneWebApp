@@ -124,7 +124,6 @@ namespace EcommerceApp.Server.Services.CategoryService
         public async Task<ServiceResponse<bool>> AddCategory(CategoryDto category)
         { // Validate the category name (only letters, no digits or special characters but does take french characters)
             if (!Regex.IsMatch(category.Name, @"^[a-zA-ZéèêëîïôœùûüçÉÈÊËÎÏÔŒÙÛÜÇ ]+$"))
-
             {
                 return new ServiceResponse<bool>
                 {
@@ -254,14 +253,30 @@ namespace EcommerceApp.Server.Services.CategoryService
                 return response;
             }
         }
-
-        public async Task<Category> GetCategoryById(Guid Id)
+        public async Task<ServiceResponse<CategoryDto>> CreateCategoryAsync(CategoryDto categoryDto)
         {
-            var category = await _context.Categories.FirstOrDefaultAsync(e => e.Id == Id);
-            return category == null ? throw new KeyNotFoundException($"Category with Id {Id} not found.") : category;
+            // Map the category to the DTO
+            var category = _mapper.Map<Category>(categoryDto);
+            var response = new ServiceResponse<CategoryDto>();
+
+            await _context.AddAsync(category);
+
+            // Save the category
+            var result = await _context.SaveChangesAsync();
+
+            if (result <= 0)
+            {
+                response.Success = false;
+                response.Message = "Failed to add category.";
+            }
+            else
+            {
+                // if successful Map the Category back to a CategoryDTO
+                var categoryDtoOut = _mapper.Map<CategoryDto>(category);
+                response.Data = categoryDtoOut;
+            }
+            return response;
         }
-
-
         public async Task<ServiceResponse<List<CategoryDto>>> GetAdminCategories()
         {
             var response = new ServiceResponse<List<CategoryDto>>();
@@ -281,7 +296,11 @@ namespace EcommerceApp.Server.Services.CategoryService
             return response;
         }
 
-
+        public async Task<Category> GetCategoryById(Guid Id)
+        {
+            var category = await _context.Categories.FirstOrDefaultAsync(e => e.Id == Id);
+            return category == null ? throw new KeyNotFoundException($"Category with Id {Id} not found.") : category;
+        }
         /// <summary>
         /// When called returns the categories as a list of CategoryDTOs, that are not deleted and are visible.
         /// </summary>
@@ -401,31 +420,7 @@ namespace EcommerceApp.Server.Services.CategoryService
                 return response;
             }
         }
-        public async Task<ServiceResponse<CategoryDto>> CreateCategoryAsync(CategoryDto categoryDto)
-        {
-            // Map the category to the DTO
-            var category = _mapper.Map<Category>(categoryDto);
-            var response = new ServiceResponse<CategoryDto>();
-
-            await _context.AddAsync(category);
-
-            // Save the category
-            var result = await _context.SaveChangesAsync();
-
-            if (result <= 0)
-            {
-                response.Success = false;
-                response.Message = "Failed to add category.";
-            }
-            else
-            {
-                // if successful Map the Category back to a CategoryDTO
-                var categoryDtoOut = _mapper.Map<CategoryDto>(category);
-                response.Data = categoryDtoOut;
-            }
-            return response;
-        }
-
+      
        
     }
 }

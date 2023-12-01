@@ -37,6 +37,10 @@ namespace EcommerceApp.Server.Data
         {
             base.OnModelCreating(modelBuilder);
 
+
+
+
+
             modelBuilder.Entity<Banner>()
                 .HasKey(b => b.Id);
                 
@@ -65,6 +69,8 @@ namespace EcommerceApp.Server.Data
                 .HasMany(g => g.GalleryImages)
                 .WithOne(i => i.Gallery)
                 .HasForeignKey(i => i.GalleryId);
+
+
             modelBuilder.Entity<ApplicationUser>(entity =>
             {
                 entity.HasOne(u => u.ShoppingCart)
@@ -277,6 +283,13 @@ namespace EcommerceApp.Server.Data
                 .WithMany(c => c.Products)
                 .HasForeignKey(p => p.CategoryId);
 
+            modelBuilder.Entity<Product>()
+                .Property(p => p.Visible)
+                .IsRequired();
+
+            modelBuilder.Entity<Product>()
+                .Property(p => p.Deleted)
+                .IsRequired();
             // Order Configuration
             modelBuilder.Entity<Order>()
                 .HasKey(o => o.Id);

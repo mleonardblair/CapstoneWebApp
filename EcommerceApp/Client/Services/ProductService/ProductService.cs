@@ -6,6 +6,8 @@ using EcommerceApp.Shared.DTOs;
 using EcommerceApp.Shared.Models;
 using System.Security.Claims;
 using System.Net.Http.Headers;
+using EcommerceApp.Client.Pages.Admin;
+using EcommerceApp.Client.Shared;
 
 namespace EcommerceApp.Client.Services.ProductService
 {
@@ -29,6 +31,10 @@ namespace EcommerceApp.Client.Services.ProductService
         public decimal? MaxPrice { get; set; } = null;
         public decimal? MinPrice { get; set; } = null;
         public bool IsAscending { get; set; } = true;
+        public List<ProductDto> AdminProducts { get; set; } = new List<ProductDto>();
+        public string SnackMessage { get; set; } = "";
+        public Severity Severity { get; set; } = Severity.Error;
+        public ReusableResultSnackbar Snackbar { get; set; } = new ReusableResultSnackbar();
 
         // This event will be used to notify subscribers that the products have changed
         public event Action ProductsChanged;
@@ -774,8 +780,8 @@ namespace EcommerceApp.Client.Services.ProductService
         }
         public async Task<string> GetDynamicHeading()
         {
-            var heading = new StringBuilder("Catalog");
-
+            var heading = new StringBuilder("");
+         
             if (!string.IsNullOrWhiteSpace(LastSearchQuery))
             {
                 heading.Clear().Append($"Search Results for '{LastSearchQuery}'");
@@ -788,7 +794,10 @@ namespace EcommerceApp.Client.Services.ProductService
             {
                 heading.Clear().Append($"Tag: {SelectedTagName}");
             }
-
+            if (heading.Length == 0)
+            {
+                heading.Append("Catalog");
+            }
             if (MinPrice.HasValue || MaxPrice.HasValue)
             {
                 heading.Append($" (Price: {MinPrice?.ToString("C") ?? "Any"} - {MaxPrice?.ToString("C") ?? "Any"})");
@@ -798,5 +807,159 @@ namespace EcommerceApp.Client.Services.ProductService
 
             return heading.ToString();
         }
+
+        public async Task GetAdminProducts()
+        {
+            var response = await _http.GetFromJsonAsync<ServiceResponse<List<ProductDto>>>("api/products/admin");
+            if (response != null && response.Data != null)
+            {
+                AdminProducts = response.Data;
+            }
+            ProductsChanged?.Invoke();
+        }
+
+
+
+        public async Task<ServiceResponse<bool>> AddProduct(ProductDto productDto)
+        {
+            var response = await _http.PostAsJsonAsync("api/products/admin", productDto);
+            var result = await response.Content.ReadFromJsonAsync<ServiceResponse<bool>>();
+            if (result != null && result.Success == false)
+            {
+                // If we hit a server validation, warn basically for invalid input.
+                ServiceResponse<bool> products = new()
+                {
+                    Data = false,
+                    Success = false,
+                    Message = result.Message,
+                    StatusCode = result.StatusCode
+                };
+                Severity = Severity.Warning;
+                SnackMessage = result.Message;
+                await GetAdminProducts();
+                return products;
+            }
+            if (result != null && result.Success == true)
+            {
+                ServiceResponse<bool> products = new()
+                {
+                    Data = false,
+                    Success = false,
+                    Message = result.Message,
+                    StatusCode = result.StatusCode
+                };
+                Severity = Severity.Success;
+                SnackMessage = result.Message;
+                await GetAdminProducts();
+
+                return products;
+            }
+            else
+            {
+                ServiceResponse<bool> categories = new() { Data = false, Success = false, Message = result.Message, StatusCode = result.StatusCode };
+                Severity = Severity.Error;
+                SnackMessage = result.Message;
+                await GetAdminProducts();
+                return categories;
+            }
+        }
+
+        /// <summary>
+        ///  When called this method will update the category on the server. It will also update the local categories. 
+        /// </summary>
+        /// <param name="categoryDto"></param>
+        /// <returns></returns>
+        public async Task<ServiceResponse<List<ProductDto>>> UpdateProduct(ProductDto productDto)
+        {
+            var response = await _http.PutAsJsonAsync("api/products/admin", productDto);
+            var result = await response.Content.ReadFromJsonAsync<ServiceResponse<List<ProductDto>>>();
+            if (result != null && result.Success == true)
+            {
+                ServiceResponse<List<ProductDto>> products = new()
+                {
+                    Data = null,
+                    Success = false,
+                    Message = result.Message,
+                    StatusCode = result.StatusCode
+                };
+                Severity = Severity.Success;
+                SnackMessage = result.Message;
+                await GetAdminProducts();
+
+                return products;
+            }
+            else
+            {
+                ServiceResponse<List<ProductDto>> products = new() {Success = false, Message = result.Message, StatusCode = result.StatusCode };
+                Severity = Severity.Error;
+                SnackMessage = result.Message;
+                await GetAdminProducts();
+                return products;
+            }
+
+
+        }
+
+        public async Task<ServiceResponse<List<ProductDto>>> DeleteProduct(Guid productId)
+        {
+            var response = await _http.DeleteAsync($"api/products/admin/{productId}");
+            var result = await response.Content.ReadFromJsonAsync<ServiceResponse<List<ProductDto>>>();
+            if (result != null && result.Success == true)
+            {
+  
+                ServiceResponse<List<ProductDto>> products = new()
+                {
+                    Data = result.Data,
+                    Success = result.Success,
+                    Message = result.Message,
+                    StatusCode = result.StatusCode
+                };
+                Severity = Severity.Success;
+                SnackMessage = result.Message;
+                await GetAdminProducts();
+
+                return products;
+            }
+            else // the operation failed.
+            {
+                ServiceResponse<List<ProductDto>> products = new()
+                {
+                    Data = result.Data,
+                    Success = result.Success,
+                    Message = result.Message,
+                    StatusCode = result.StatusCode
+                };
+                Severity = Severity.Warning;
+                SnackMessage = result.Message;
+                await GetAdminProducts();
+
+                return products;
+            }
+
+
+        }
+
+
+        // Method to create a new product DTO for adding
+        public ProductDto CreateNewProduct() 
+        { 
+            var newProduct = new ProductDto
+            {
+                IsNew = true,
+                Editing = true
+            };
+            AdminProducts.Add(newProduct);
+            ProductsChanged?.Invoke();
+            return newProduct;
+        }
+
+        // Method to reset the snackbar message
+        public void ResetSnackbarMessage()
+        {
+            SnackMessage = "";
+            Severity = Severity.Success; // Reset to a default severity
+        }
+
+    
     }
 }

@@ -19,6 +19,10 @@ namespace EcommerceApp.Server.Controllers
             var session = await _paymentService.CreateCheckoutSessionAsync();
             return Ok(session.Url);
         }
+
+        /**
+         * This is a webhook endpoint that Stripe will call when the payment is complete.
+         */
         [HttpPost]
         public async Task<ActionResult<ServiceResponse<bool>>> FulfillOrderAsync()
         {

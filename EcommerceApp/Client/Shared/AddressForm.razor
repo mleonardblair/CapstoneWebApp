@@ -36,35 +36,59 @@ else
             <label for="city">City</label>
             <InputText id="city" @bind-Value="address.City" class="form-control" />
         </div>
-        <div class="mb-3">
+       @* <div class="mb-3">
             <label for="province">Province</label>
             <InputText id="province" @bind-Value="address.Province" class="form-control" />
+        </div>*@
+        <div class="mb-3">
+            <label for="province">Province</label>
+            <InputSelect id="province" @bind-Value="address.Province" class="form-control">
+                @foreach (var province in provinces)
+                {
+                    <option value="@province">@province</option>
+                }
+            </InputSelect>
         </div>
         <div class="mb-3">
             <label for="postalcode">Postal Code</label>
             <InputText id="postalcode" @bind-Value="address.PostalCode" class="form-control" />
         </div>
         <div class="mb-3">
-            <label for="country">Country</label>
-            <InputText id="country" @bind-Value="address.Country" class="form-control" />
+            <label for="country">@countryLabel</label>
+            <input id="country" value="Canada" class="form-control" readonly />
         </div>
+
+
+
         <button type="submit" class="btn btn-primary">Save</button>
     </EditForm>
 }
-<h3>AddressForm</h3>
 
 @code {
+    string countryLabel = string.Empty;
     List<AddressDto> addresses = new List<AddressDto>();
     AddressDto address = null;
     bool editAddress = false;
-
-    protected async override Task OnInitializedAsync()
+    List<string> provinces = new List<string>
     {
-        addresses = await AddressService.GetAddressesAsync();
-    }
+        "Alberta",
+        "British Columbia",
+        "Manitoba",
+        "New Brunswick",
+        "Newfoundland and Labrador",
+        "Northwest Territories",
+        "Nova Scotia",
+        "Nunavut",
+        "Ontario",
+        "Prince Edward Island",
+        "Quebec",
+        "Saskatchewan",
+        "Yukon"
+    };
 
     private async Task SubmitAddress()
     {
+        address.Country = "Canada";
         editAddress = false;
         address = await AddressService.AddOrUpdateAddressAsync(address);
     }
@@ -74,6 +98,7 @@ else
     {
         address = new AddressDto();
         editAddress = true;
+        address.Country = "Canada";
     }
 
     /// <summary>

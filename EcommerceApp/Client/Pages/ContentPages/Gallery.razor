@@ -1,0 +1,144 @@
+﻿@using EcommerceApp.Shared.DTOs.PageDtos;
+@using System.Net.Http.Headers;
+@inject HttpClient Http
+@inject ISiteService SiteService
+@inject IAuthService AuthService
+@inject NavigationManager NavigationManager
+@attribute [Route(RouteConstants.Gallery)]
+<PageTitle>Gallery</PageTitle>
+<MudContainer Class="" Style="height: 100vh;">
+    <!-- Updated container height -->
+    <MudMainContent Style="height: 100vh;">
+ 
+        <MudText Typo="Typo.h5" Style="text-align: center;">Gallery</MudText>
+        <MudGrid Class="login-grid" Style="justify-content: center; align-items: center; height: 60%;">
+            <!-- Updated styles for centering -->
+            <MudItem xs="12" lg="6" xl="6" Style="align-self: center; height: inherit;">
+                <!-- Updated item height -->
+                <MudCarousel Class="mud-carousel"
+                             ShowArrows="true"
+                             ShowBullets="true"
+                             EnableSwipeGesture="true"
+                             AutoCycle="@_autocycle"
+                             TData="string"
+                             Style="height: 40vh;"
+                                 ItemsSource="galleryDto?.GalleryImages">
+                    <!-- Ensure carousel takes full viewport height -->
+                    @if (galleryDto != null)
+                    {
+                        @foreach (var imageUrl in galleryDto.GalleryImages)
+                        {
+                            <MudCarouselItem Style="height: 100%; display: flex; justify-content: center; align-items: center;">
+                                <!-- Flex styles to center content -->
+                                <img src="https://ecommerceblobstorage.blob.core.windows.net/sitecontent/wreath5.jpg" alt="Gallery Image" style="height: 100%; width: 100%; object-fit: contain;" /> 
+                            </MudCarouselItem>
+                        }
+                    }
+                    else
+                    {
+                        <MudProgressCircular Color="Color.Primary" Size="Size.Large" Indeterminate="true" />
+                    }
+                </MudCarousel>
+                @if (SiteService.Role == "Admin")
+                {
+                    <MudSwitch @bind-Checked="@_autocycle" Color="Color.Primary">Auto Cycle (Default: 5 secs)</MudSwitch>
+                    <MudText Typo="Typo.h6">Upload New Photo</MudText>
+
+                    <MudFileUpload T="IBrowserFile" Accept=".png, .jpg" FilesChanged="UploadFiles" MaximumFileCount="100">
+                        <ButtonTemplate Context="fileUploadContext">
+                            <MudButton
+                                   HtmlTag="label"
+                                   Variant="Variant.Filled"
+                                   Color="Color.Primary"
+                                   StartIcon="@Icons.Material.Filled.CloudUpload"
+                                       for="@fileUploadContext">
+                                Select Image
+                            </MudButton>
+                        </ButtonTemplate>
+                    </MudFileUpload>
+                   
+                }
+            </MudItem>
+
+        </MudGrid>
+     
+    </MudMainContent>
+</MudContainer>
+
+@code {
+    private int selectedIndex = 1;
+    private MudCarousel<string> _carousel = new MudCarousel<string>();
+    private bool isAdmin = false;
+    private GalleryDto galleryDto = null;
+    private bool _autocycle = true;
+    private IList<string> _source = new List<string>() { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
+    protected override async Task OnInitializedAsync()
+    {
+        SiteService.Role = await AuthService.GetUserRole();
+        galleryDto = await SiteService.GetGalleryAsync();
+        foreach (var item in galleryDto.GalleryImages)
+        {
+            Console.WriteLine($"image: {item}");
+            _source.Add(item);
+        }
+    }
+    private async Task AddAsync()
+    {
+        _source.Add($"Item {_source.Count + 1}");
+        await Task.Delay(1);
+        _carousel.MoveTo(_source.Count - 1);
+    }
+    private async Task SaveAsync()
+    {
+        _source.Add($"Item {_source.Count + 1}");
+        await Task.Delay(1);
+        _carousel.MoveTo(_source.Count - 1);
+    }
+    private async Task DeleteAsync(int index)
+    {
+        if (_source.Any())
+        {
+            _source.RemoveAt(index);
+            await Task.Delay(1);
+            _carousel.MoveTo(System.Math.Max(System.Math.Min(index, _source.Count - 1), 0));
+        }
+
+    }
+    private async Task UploadFiles(IBrowserFile file)
+    {
+        SiteService.files.Add(file);
+        await UploadFileToServer(file);
+    }
+
+    // Inside your UploadFileToServer method
+    private async Task UploadFileToServer(IBrowserFile file)
+    {
+        var buffer = new byte[file.Size];
+        await file.OpenReadStream(5120000).ReadAsync(buffer);
+
+        var content = new MultipartFormDataContent();
+        content.Headers.ContentDisposition = new ContentDispositionHeaderValue("form-data");
+        content.Add(new ByteArrayContent(buffer), "file", file.Name);
+
+        var response = await Http.PostAsync("api/site/sitecontent", content);
+        if (response.IsSuccessStatusCode)
+        {
+            // Deserialize the response to ServiceResponse<BlobUploadResult> object
+            var serviceResponse = await response.Content.ReadFromJsonAsync<ServiceResponse<BlobUploadResult>>();
+
+            if (serviceResponse != null && serviceResponse.Success)
+            {
+                galleryDto.GalleryImages.Add(serviceResponse.Data.FileUrl);
+                Console.WriteLine("All went well. " + serviceResponse.Data.FileUrl);
+            }
+            else
+            {
+                Console.WriteLine($"Something went wrong: {serviceResponse.Message}");
+            }
+        }
+        else
+        {
+            Console.WriteLine("It went bad. Contact site administrator.");
+        }
+    }
+}

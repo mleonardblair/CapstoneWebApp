@@ -7,6 +7,7 @@ global using EcommerceApp.Server.Services.AuthService;
 global using EcommerceApp.Server.Services.AddressService;
 global using EcommerceApp.Server.Services.TagService;
 global using EcommerceApp.Server.Services.ProductTagService;
+global using EcommerceApp.Server.Services.SiteService;
 global using EcommerceApp.Server.Services.CategoryService;
 global using EcommerceApp.Server.Services.ProductService;
 global using EcommerceApp.Server.Data;
@@ -37,7 +38,6 @@ builder.Services.AddRazorPages();
 builder.Services.AddAutoMapper(typeof(MappingProfile).Assembly);
 
 builder.Services.AddEndpointsApiExplorer();
-
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IAddressService, AddressService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
@@ -48,6 +48,7 @@ builder.Services.AddScoped<IProductTagService, ProductTagService>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
 builder.Services.AddScoped<ICartService, CartService>();
 builder.Services.AddScoped<IFavouriteService, FavouriteService>();
+builder.Services.AddScoped<ISiteService, SiteService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 // Add HttpContextAccessor
 builder.Services.AddHttpContextAccessor();

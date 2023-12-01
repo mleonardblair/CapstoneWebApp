@@ -1,4 +1,5 @@
-﻿using EcommerceApp.Shared.DTOs;
+﻿using EcommerceApp.Client.Shared;
+using EcommerceApp.Shared.DTOs;
 using EcommerceApp.Shared.Models;
 
 namespace EcommerceApp.Client.Services.ProductService
@@ -21,6 +22,10 @@ namespace EcommerceApp.Client.Services.ProductService
         decimal? MaxPrice { get; set; }
         decimal? MinPrice { get; set; }
         bool IsAscending { get; set; }
+        List<ProductDto> AdminProducts { get; set; }
+        string SnackMessage { get; set; }
+        ReusableResultSnackbar Snackbar { get; set; }
+        Severity Severity { get; set; }
         Task<string> GetDynamicHeading();
         Task SetSelectedCategory(Guid? categoryId);
         Task SetSelectedTag(Guid? tagId);
@@ -51,5 +56,13 @@ namespace EcommerceApp.Client.Services.ProductService
         Task<ServiceResponse<ProductDto>> CreateProductAsync(ProductDto product);
         Task<ServiceResponse<ProductDto>> UpdateProductByIdAsync(ProductDto product);
         Task<ServiceResponse<bool>> DeleteProductByIdAsync(Guid productId);
+
+
+        Task<ServiceResponse<bool>> AddProduct(ProductDto productDto);
+        Task<ServiceResponse<List<ProductDto>>> UpdateProduct(ProductDto productDto);
+        Task<ServiceResponse<List<ProductDto>>> DeleteProduct(Guid productId);
+        ProductDto CreateNewProduct();
+        void ResetSnackbarMessage();
+        Task GetAdminProducts();
     }
 }

@@ -57,26 +57,6 @@
   }
 }
 
-@keyframes slideOutToTop {
-  from {
-    transform: translateY(0);
-    opacity: 1;
-  }
-  to {
-    transform: translateY(-100%);
-    opacity: 0;
-  }
-}
-
-/* Class to be added to the item entering the view */
-.slide-in-up {
-  animation: slideInFromBottom 0.5s forwards;
-}
-
-/* Class to be added to the item exiting the view */
-.slide-out-up {
-  animation: slideOutToTop 0.5s forwards;
-}
 
 mud-toolbar .mud-toolbar-appbar {
     display: flex;
@@ -97,10 +77,7 @@ footer.footer {
 .transition-drawer.mud-drawer-content {
     transition: transform 0.3s ease-in-out;
 }
-.mud-main-content{
-    padding-top:0px;
-   
-}
+
 .mud-button-group-root {
     display: flex;
     justify-content:space-between;
@@ -143,39 +120,9 @@ footer.footer {
     /* The height should be the same as the carousel width before rotation */
     /*height: calc(100vh - 64px);*/
 /*}*/
-@keyframes slideInFromBottom {
-    from {
-        transform: translateY(100%);
-        opacity: 0;
-    }
 
-    to {
-        transform: translateY(0);
-        opacity: 1;
-    }
-}
 
-@keyframes slideOutToTop {
-    from {
-        transform: translateY(0);
-        opacity: 1;
-    }
 
-    to {
-        transform: translateY(-100%);
-        opacity: 0;
-    }
-}
-
-/* Class to be added to the item entering the view */
-.slide-in-up {
-    animation: slideInFromBottom 0.5s forwards;
-}
-
-/* Class to be added to the item exiting the view */
-.slide-out-up {
-    animation: slideOutToTop 0.5s forwards;
-}
 
 .gallery-page.mud-progress-linear-bar {
     background-color: darkorange; /* Use the specific shade of orange you prefer */
@@ -264,10 +211,7 @@ footer.footer {
 }
 /* AppbarHeight for tablets (small devices) */
 @media (min-width: 600px) {
-    .mud-container.home-container-padding {
-        padding-right: 0px !important;
-        padding-left: 0px !important;
-    }
+
 
     .mud-toolbar {
         padding: 0 8px;
@@ -298,10 +242,7 @@ footer.footer {
     .mud-appbar {
         height: 64px; /* adjust this value as needed */
     }
-    .mud-container.home-container-padding {
-        padding-right: 0px !important;
-        padding-left: 0px !important;
-    }
+
 }
 
 /* AppbarHeight for large desktop (large devices) */
@@ -309,17 +250,6 @@ footer.footer {
     .mud-appbar {
         height: 64px; /* adjust this value as needed */
     }
-    .mud-container.home-container-padding {
-        padding-right: 0px !important;
-        padding-left: 0px !important;
-    }
-    .mud-container-maxwidth-lg.home-container-padding {
-        max-width:100%;
-        padding:0px;
-    }
 
-    .home-container-padding{
-        max-width:100%;
-    }
 }
 

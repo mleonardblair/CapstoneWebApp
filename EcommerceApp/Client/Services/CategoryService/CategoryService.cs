@@ -74,7 +74,10 @@ namespace EcommerceApp.Client.Services.CategoryService
             return result;
         }
 
-
+        public Task GetCategoryById(Guid categoryId)
+        {
+            throw new NotImplementedException();
+        }
         public async Task GetAdminCategories()
         {
            var response = await _http.GetFromJsonAsync<ServiceResponse<List<CategoryDto>>>("api/categories/admin");
@@ -87,16 +90,13 @@ namespace EcommerceApp.Client.Services.CategoryService
             OnChange?.Invoke();
         }
 
-        public Task GetCategoryById(Guid categoryId)
-        {
-            throw new NotImplementedException();
-        }
+ 
 
         public async Task<ServiceResponse<bool>> AddCategory(CategoryDto categoryDto)
         {
             var response = await _http.PostAsJsonAsync("api/categories/admin", categoryDto);
-            var result = await response.Content.ReadFromJsonAsync<ServiceResponse<List<CategoryDto>>>();
-            if(result.StatusCode == 404)
+            var result = await response.Content.ReadFromJsonAsync<ServiceResponse<bool>>();
+            if(result != null && result.Success == false)
             {
                 // If we hit a server validation, warn basically for invalid input.
                   ServiceResponse<bool> categories = new()

@@ -17,6 +17,9 @@ namespace EcommerceApp.Client.Services.AuthService
         public string SnackMessage { get; set; }
         public Severity Severity { get; set; }
         public List<AppUserDto> AuthAdminUsers { get; set; }
+        AppUserDto AuthUser { get; set; }
+        Task GetUser(Guid id);
+        Task GetUserEmail();
         Task GetAllUserAdmin();
         Task<ServiceResponse<string>> RegisterUser(UserRegister registerRequest);
         Task<ServiceResponse<string>> LoginUser(UserLogin loginRequest);

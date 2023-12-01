@@ -1228,6 +1228,50 @@ namespace EcommerceApp.Server.Services.ProductService
             return response;
         }
 
-    
+        public Task<ServiceResponse<List<ProductDto>>> GetAdminProducts()
+        {
+
+            var response = new ServiceResponse<List<ProductDto>>();
+            try
+            {
+                var products = _context.Products
+                    .Include(p => p.ProductTags)
+                    .ThenInclude(pt => pt.Tag)
+                    .ToList();
+
+                if (products == null || !products.Any())
+                {
+                    response.Success = false;
+                    response.Message = "No products found.";
+                }
+                else
+                {
+                    var productDtos = _mapper.Map<List<ProductDto>>(products);
+                    response.Data = productDtos;
+                    response.Message = "Products retrieved successfully.";
+                }
+            }
+            catch (Exception ex)
+            {
+                response.Success = false;
+                response.Message = $"An error occurred: {ex.Message}, StackTrace: {ex.StackTrace}, InnerException: {ex.InnerException?.Message}";
+            }
+            return Task.FromResult(response);
+        }
+
+        public Task<ServiceResponse<List<ProductDto>>> DeleteProduct(Guid productId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<ServiceResponse<List<ProductDto>>> UpdateProduct(ProductDto productDto)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<ServiceResponse<List<ProductDto>>> AddProduct(ProductDto productDto)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

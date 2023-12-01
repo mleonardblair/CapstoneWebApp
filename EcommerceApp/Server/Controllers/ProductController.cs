@@ -254,56 +254,33 @@ namespace EcommerceApp.Server.Controllers
                 return Ok(await _productService.GetAllProductsAsync());
             }
         }
+        [HttpGet("admin"), Authorize(Roles = "Admin")]
+        public async Task<ActionResult<ServiceResponse<List<ProductDto>>>> GetAdminProducts()
+        {
+            var result = await _productService.GetAdminProducts();
+            return Ok(result);
+        }
 
+        [HttpDelete("admin/{productId}"), Authorize(Roles = "Admin")]
+        public async Task<ActionResult<ServiceResponse<List<ProductDto>>>> DeleteProduct(Guid productId)
+        {
+            var result = await _productService.DeleteProduct(productId);
+            return Ok(result);
+        }
 
+        [HttpPost("admin"), Authorize(Roles = "Admin")]
+        public async Task<ActionResult<ServiceResponse<bool>>> AddProduct(ProductDto product)
+        {
+            var result = await _productService.AddProduct(product);
+            return Ok(result);
+        }
 
-        /*        [HttpGet("page={page}&pageSize={pageSize}&isAscending={isAscending}&minPrice={minPrice}&maxPrice={maxPrice}")]
-                public async Task<ActionResult<ServiceResponse<ProductPaginationResponse>>> GetAllProductsAsync(int page, int pageSize, bool isAscending, decimal minPrice, decimal maxPrice, Guid categoryId)
-                {
-                  var response = await _productService.GetAllProductsAsync(page, pageSize, isAscending, minPrice, maxPrice, categoryId);
-                    return Ok(response);
-                }
-
-
-                [HttpGet("page={page}&pageSize={pageSize}&minPrice={minPrice}&maxPrice={maxPrice}")]
-                public async Task<ActionResult<ServiceResponse<ProductPaginationResponse>>> GetAllProductsAsync(int page, int pageSize, decimal minPrice, decimal maxPrice, Guid categoryId)
-                {
-                    var response = await _productService.GetAllProductsAsync(page, pageSize,  minPrice, maxPrice, categoryId);
-                    return Ok(response);
-                }
-
-
-                [HttpGet("category/{categoryId}/page={page}&pageSize={pageSize}&isAscending={isAscending}")]
-                public async Task<ActionResult<ServiceResponse<ProductPaginationResponse>>> GetAllProductsAsync(int page, int pageSize, bool isAscending, Guid categoryId)
-                {
-                    var response = await _productService.GetAllProductsAsync(page, pageSize, isAscending, categoryId);
-                    return Ok(response);
-                }
-                [HttpGet("page={page}&pageSize={pageSize}")]
-                public async Task<ActionResult<ServiceResponse<ProductPaginationResponse>>> GetAllProductsAsync(int page, int pageSize)
-                {
-                    var response = await _productService.GetAllProductsAsync(page, pageSize);
-                    return Ok(response);
-                }
-                [HttpGet("page={page}&pageSize={pageSize}&isAscending={isAscending}")]
-                public async Task<ActionResult<ServiceResponse<ProductPaginationResponse>>> GetAllProductsAsync(int page, int pageSize, bool isAscending)
-                {
-                    var response = await _productService.GetAllProductsAsync(page, pageSize, isAscending);
-                    return Ok(response);
-                }
-                /// <summary>
-                /// Overloaded route for pagination + category filtering.
-                /// </summary>
-                /// <param name="page"></param>
-                /// <param name="pageSize"></param>
-                /// <param name="categoryId"></param>
-                /// <returns></returns>
-                [HttpGet("category/{categoryId}/page={page}&pageSize={pageSize}")]
-                public async Task<ActionResult<ServiceResponse<ProductPaginationResponse>>> GetAllProductsAsync(int page, int pageSize, Guid categoryId)
-                {
-                    var response = await _productService.GetAllProductsAsync(page, pageSize, categoryId);
-                    return Ok(response);
-                }*/
+        [HttpPut("admin"), Authorize(Roles = "Admin")]
+        public async Task<ActionResult<ServiceResponse<List<ProductDto>>>> UpdateProduct(ProductDto product)
+        {
+            var result = await _productService.UpdateProduct(product);
+            return Ok(result);
+        }
     }
 }
 

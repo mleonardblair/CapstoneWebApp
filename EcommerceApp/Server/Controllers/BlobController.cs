@@ -18,44 +18,7 @@ namespace EcommerceApp.Server.Controllers
             _blobServiceClient = blobServiceClient;
             _configuration = configuration;
         }
-        [HttpPost]
-        public async Task<BlobUploadResult> UploadBlobSiteContent(IFormFile file)
-        {
-            var result = new BlobUploadResult();
-            try
-            {
-                var siteContentContainer = _configuration.GetSection("AzureBlobStorage:SiteModelAssetsContainer").Value;
-                var blobContainerClient = _blobServiceClient.GetBlobContainerClient(siteContentContainer);
-                var blobClient = blobContainerClient.GetBlobClient(file.FileName);
 
-                // Determine the content type from the file
-                var contentType = file.ContentType;
-
-                using (var stream = file.OpenReadStream())
-                {
-                    // Set the content type for the blob
-                    var blobHttpHeader = new Azure.Storage.Blobs.Models.BlobHttpHeaders
-                    {
-                        ContentType = contentType
-                    };
-
-                    await blobClient.UploadAsync(stream, new Azure.Storage.Blobs.Models.BlobUploadOptions
-                    {
-                        HttpHeaders = blobHttpHeader
-                    });
-                }
-
-                result.FileUrl = blobClient.Uri.AbsoluteUri;
-                result.IsUploaded = true;
-            }
-            catch (Exception ex)
-            {
-                result.IsUploaded = false;
-                // Log the exception to your logging framework
-                Console.WriteLine($"Exception: {ex.Message}");
-            }
-            return result;
-        }
 
         [HttpPost]
         public async Task<BlobUploadResult> UploadToBlob(IFormFile file)
@@ -119,27 +82,7 @@ namespace EcommerceApp.Server.Controllers
         }
 
 
-        [HttpPost("sitecontent")]
-        public async Task<ActionResult<ServiceResponse<BlobUploadResult>>> UploadAsset(IFormFile file)
-        {
-            var response = new ServiceResponse<BlobUploadResult>();
-            // Upload the file to Azure Blob Storage.
-            BlobUploadResult result = await UploadToBlob(file);
-            if (result != null)
-            {
-                response.Success = true;
-                response.Message = "File uploaded successfully!";
-                response.Data = result;
-                // Return the Azure Blob Storage URL and Success Code.
-                return Ok(response);
-            }
-            else
-            {
-                response.Success = false;
-                response.Message = "File upload failed!";
-            }
-            return BadRequest("An error occurred while uploading the file.");
-        }
+      
 
     }
     public class BlobUploadResult

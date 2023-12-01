@@ -22,6 +22,24 @@ namespace EcommerceApp.Server.Controllers
         /// </summary>
         /// <param name="request"></param>
         /// <returns></returns>
+        /// 
+
+
+        [HttpGet("{id}")]
+        public async Task<ActionResult<ServiceResponse<AppUserDto>>> GetUser(Guid id)
+        {
+            var response = await _authService.GetUserById(id);
+            if(response != null)
+            {
+                return Ok(response);
+            }
+            else
+            {
+                return BadRequest(response);
+            }
+          
+        }
+
         [HttpPost("register")]
         public async Task<ActionResult<ServiceResponse<string>>> Register(UserRegister request)
         {

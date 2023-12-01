@@ -442,9 +442,27 @@ namespace EcommerceApp.Server.Services.AuthService
             throw new NotImplementedException();
         }
 
-        public Task GetUserById(Guid userId)
+        public async Task<ServiceResponse<AppUserDto>> GetUserById(Guid userId)
         {
-            throw new NotImplementedException();
+            var response = new ServiceResponse<AppUserDto>();
+            var user = await _context.ApplicationUsers.FirstOrDefaultAsync(i => i.Id == userId);
+            if (user == null)
+            {
+                response.Success = false;
+                response.Message = "User not found.";
+                response.StatusCode = 404;
+            }
+            else
+            {
+                var convertedUser = _mapper.Map<AppUserDto>(user);
+                response.Data = convertedUser;
+                response.Message = "User found.";
+                response.Success = true;
+                response.StatusCode = 200;
+            }
+            return response;
         }
+
+  
     }
 }

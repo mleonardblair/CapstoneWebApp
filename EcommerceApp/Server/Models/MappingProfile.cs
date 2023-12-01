@@ -5,24 +5,25 @@ using EcommerceApp.Shared;
 using EcommerceApp.Shared.DTOs;
 using EcommerceApp.Shared.Models;
 using Newtonsoft.Json;
+using EcommerceApp.Server.Models.PageModels;
+using EcommerceApp.Shared.DTOs.PageDtos;
 
 public class MappingProfile : Profile
 {
-    private readonly IAuthService _authService;
 
-    public MappingProfile(IAuthService authService)
+    public MappingProfile()
     {
-        _authService = authService;
+
         // Product
         CreateMap<Product, ProductDto>()
-            .ForMember(dest => dest.Images, opt => opt.MapFrom(src => src.Images ?? new string[0]))
-            .ForMember(dest => dest.isFavourite, opt => opt.MapFrom((src, dest, destMember, context) =>
+            .ForMember(dest => dest.Images, opt => opt.MapFrom(src => src.Images ?? new string[0]));
+          /*  .ForMember(dest => dest.isFavourite, opt => opt.MapFrom((src, dest, destMember, context) =>
              {
                  // Get the current user's ID
                  var currentUserId = _authService.GetUserId();
                  // Check if the current product is favorited by this user
                  return src.Favourites.Any(f => f.ApplicationUserId == currentUserId);
-             }));
+             }));*/
         CreateMap<ProductDto, Product>()
             .ForMember(dest => dest.ImagesJson, opt => opt.MapFrom(src => src.Images == null ? "[]" : JsonConvert.SerializeObject(src.Images)))
             .ForMember(dest => dest.Images, opt => opt.Ignore());
@@ -73,7 +74,28 @@ public class MappingProfile : Profile
         // ProductTags
         CreateMap<ProductTag, ProductTagDto>();
         CreateMap<ProductTagDto, ProductTag>();
-        _authService = authService;
+
+
+        /** SITE CONTENT MAPS*/
+        // Gallery
+        CreateMap<Gallery, GalleryDto>();
+        CreateMap<GalleryDto, Gallery>();
+
+        // FAQ
+        CreateMap<FAQ, FAQDto>();
+        CreateMap<FAQDto, FAQ>();
+
+        // Banner
+        CreateMap<Banner, BannerDto>();
+        CreateMap<BannerDto, Banner>();
+
+        // ContactUs
+        CreateMap<ContactUs, ContactUsDto>();
+        CreateMap<ContactUsDto, ContactUs>();
+
+        // AboutUs
+        CreateMap<AboutUs, AboutUsDto>();
+        CreateMap<AboutUsDto, AboutUs>();
     }
 
 }

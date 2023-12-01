@@ -15,6 +15,7 @@ namespace EcommerceApp.Client.Services.AuthService
         public string SnackMessage { get; set; } = "THIS SHOULD NOT BE NULL SET IT TO SOMETHING";
         public Severity Severity { get; set; } = Severity.Error;
         public List<AppUserDto> AuthAdminUsers { get; set; }
+        public AppUserDto AuthUser { get; set; }
 
         public event Action OnChange;
 
@@ -22,6 +23,8 @@ namespace EcommerceApp.Client.Services.AuthService
         {
             _httpClient = httpClient;
             _authStateProvider = authStateProvider;
+            AuthUser = new AppUserDto();
+            
         }
         public async Task GetAllUserAdmin()
         {
@@ -217,6 +220,27 @@ namespace EcommerceApp.Client.Services.AuthService
             }
         }
 
-      
+        public async Task GetUser(Guid id)
+        {
+            var result = await _httpClient.GetFromJsonAsync<ServiceResponse<AppUserDto>>($"api/auth/{id}");
+
+            if (result != null && result?.Data != null)
+            {
+                Console.WriteLine($"User: {result.Data.FirstName} {result.Data.LastName}");
+                AuthUser.FirstName = result.Data.FirstName;
+                AuthUser.LastName = result.Data.LastName;
+                AuthUser.Email = result.Data.Email;
+                AuthUser.Id = result.Data.Id;
+            }
+        }
+
+
+        public Task GetUserEmail()
+        {
+            throw new NotImplementedException();
+        }
+
+     
     }
+
 }
