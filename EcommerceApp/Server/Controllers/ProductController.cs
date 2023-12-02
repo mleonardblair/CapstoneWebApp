@@ -287,8 +287,8 @@ namespace EcommerceApp.Server.Controllers
             return Ok(result);
         }
 
-        [HttpPut("admin"), Authorize(Roles = "Admin")]
-        public async Task<ActionResult<ServiceResponse<List<ProductDto>>>> UpdateProduct(ProductDto product)
+        [HttpPut("admin/{productId}"), Authorize(Roles = "Admin")]
+        public async Task<ActionResult<ServiceResponse<bool>>> UpdateProduct(ProductDto product)
         {
             var result = await _productService.UpdateProduct(product);
             return Ok(result);

@@ -64,7 +64,7 @@ namespace EcommerceApp.Server.Services.PaymentService
             /* var baseUrl = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "DEVELOPMENT"
                    ? "https://localhost:7194"
                    : "https://wasmcapstoneapp.azurewebsites.net";*/
-            var baseUrl = "https://localhost:7194";
+            var baseUrl = "https://wasmcapstoneapp.azurewebsites.net";
             var options = new SessionCreateOptions
             {
                 CustomerEmail = _authService.GetUserEmail(),

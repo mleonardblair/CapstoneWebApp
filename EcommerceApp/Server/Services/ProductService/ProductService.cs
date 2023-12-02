@@ -1386,16 +1386,16 @@ namespace EcommerceApp.Server.Services.ProductService
         }
 
 
-        public async Task<ServiceResponse<List<ProductDto>>> UpdateProduct(ProductDto productDto)
+        public async Task<ServiceResponse<bool>> UpdateProduct(ProductDto productDto)
         {
             // Validate the product name
             if (!Regex.IsMatch(productDto.Name, @"^[a-zA-ZéèêëîïôœùûüçÉÈÊËÎÏÔŒÙÛÜÇ ]+$"))
             {
-                return new ServiceResponse<List<ProductDto>>
+                return new ServiceResponse<bool>
                 {
                     Success = false,
                     Message = "Invalid product name. Only letters are allowed.",
-                    Data = null,
+                    Data = false,
                     StatusCode = 400 // Bad Request
                 };
             }
@@ -1409,17 +1409,17 @@ namespace EcommerceApp.Server.Services.ProductService
                                 .AnyAsync(p => p.Name == productDto.Name && p.Id != productDto.Id && !p.Deleted);
             if (isNameUsed)
             {
-                return new ServiceResponse<List<ProductDto>>
+                return new ServiceResponse<bool>
                 {
                     Success = false,
                     Message = "Product name already exists.",
-                    Data = null,
+                    Data = false,
                     StatusCode = 400 // Bad Request
                 };
             }
 
             // Check if the product exists
-            var dbProduct = await _context.Products.FirstOrDefaultAsync(p => p.Id == productDto.Id);
+            var dbProduct = new Product();/*await _context.Products.FirstOrDefaultAsync(p => p.Id == productDto.Id);
             if (dbProduct == null)
             {
                 return new ServiceResponse<List<ProductDto>>
@@ -1429,9 +1429,10 @@ namespace EcommerceApp.Server.Services.ProductService
                     Data = null,
                     StatusCode = 404 // Not Found
                 };
-            }
+            }*/
 
             // Update product properties
+            dbProduct.Id = productDto.Id;
             dbProduct.Name = productDto.Name;
             dbProduct.Description = productDto.Description;
             dbProduct.Price = productDto.Price;
@@ -1443,17 +1444,17 @@ namespace EcommerceApp.Server.Services.ProductService
             // Add or update additional properties as needed
 
             // Handling the images, assuming ProductDto.Images is the source of truth
-            dbProduct.ImagesJson = JsonConvert.SerializeObject(productDto.Images);
-
+            //dbProduct.ImagesJson = JsonConvert.SerializeObject(productDto.Images);
+            _context.Products.Update(dbProduct);
             try
             {
                 await _context.SaveChangesAsync();
-                var updatedProducts = await GetAdminProducts(); // Fetch updated list of products
-                return new ServiceResponse<List<ProductDto>>
+             
+                return new ServiceResponse<bool>
                 {
                     Success = true,
                     Message = "Product updated successfully.",
-                    Data = updatedProducts.Data,
+                    Data = true,
                     StatusCode = 200 // OK
                 };
             }
@@ -1461,11 +1462,11 @@ namespace EcommerceApp.Server.Services.ProductService
             {
                 // Log the exception details here, including 'ex' information
 
-                return new ServiceResponse<List<ProductDto>>
+                return new ServiceResponse<bool>
                 {
                     Success = false,
                     Message = "An error occurred while updating the product: " + ex.Message,
-                    Data = null,
+                    Data = false,
                     StatusCode = 500 // Internal Server Error
                 };
             }

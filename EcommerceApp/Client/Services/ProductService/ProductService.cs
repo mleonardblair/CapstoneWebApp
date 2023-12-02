@@ -884,32 +884,31 @@ namespace EcommerceApp.Client.Services.ProductService
         /// </summary>
         /// <param name="categoryDto"></param>
         /// <returns></returns>
-        public async Task<ServiceResponse<List<ProductDto>>> UpdateProduct(ProductDto productDto)
+        public async Task<ServiceResponse<bool>> UpdateProduct(ProductDto productDto)
         {
             var response = await _http.PutAsJsonAsync("api/products/admin", productDto);
             var result = await response.Content.ReadFromJsonAsync<ServiceResponse<List<ProductDto>>>();
             if (result != null && result.Success == true)
             {
-                ServiceResponse<List<ProductDto>> products = new()
+                ServiceResponse<bool> product = new()
                 {
-                    Data = null,
-                    Success = false,
+                    Data = true,
+                    Success = true,
                     Message = result.Message,
                     StatusCode = result.StatusCode
                 };
                 Severity = Severity.Success;
                 SnackMessage = result.Message;
                 await GetAdminProducts();
-
-                return products;
+                return product;
             }
             else
             {
-                ServiceResponse<List<ProductDto>> products = new() {Success = false, Message = result.Message, StatusCode = result.StatusCode };
+                ServiceResponse<bool> product = new() {Success = false, Message = result.Message, StatusCode = result.StatusCode };
                 Severity = Severity.Error;
                 SnackMessage = result.Message;
                 await GetAdminProducts();
-                return products;
+                return product;
             }
 
 
