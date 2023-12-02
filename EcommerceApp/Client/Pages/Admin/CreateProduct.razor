@@ -274,6 +274,7 @@
             ProductService.Severity = Severity.Error;
         }
         ProductService.SnackMessage = result.Message;
+        NavigationManager.NavigateTo("/admin-dashboard/products");
         ProductService.Snackbar.Show();
         ProductService.ResetSnackbarMessage();
     }
