@@ -26,6 +26,18 @@ namespace EcommerceApp.Client.Services.ReportService
             _authStateProvider = authStateProvider;
             _navigationManager = navigationManager;
         }
+
+        public async Task<ServiceResponse<List<ReportDto>>> FilterReportsByTimePeriod(DateTime startDate, DateTime endDate)
+        {
+            var response = await _httpClient.GetFromJsonAsync<ServiceResponse<List<ReportDto>>>($"api/reports/filterByTimePeriod?startDate={startDate}&endDate={endDate}");
+            return response;
+        }
+
+        public async Task<ServiceResponse<List<ReportDto>>> FilterReportsByRegion(string region)
+        {
+            var response = await _httpClient.GetFromJsonAsync<ServiceResponse<List<ReportDto>>>($"api/reports/filterByRegion?region={region}");
+            return response;
+        }
         public async Task<ServiceResponse<FinanceSummaryResponse>> GetFinancialSummary()
         {
             var response = await _httpClient.GetFromJsonAsync<ServiceResponse<FinanceSummaryResponse>>
@@ -40,6 +52,24 @@ namespace EcommerceApp.Client.Services.ReportService
                 Data = null,
                 Success = true
             };
+        }
+
+        public async Task<ServiceResponse<List<OrderDetailsResponse>>> GetRecentSalesAsync()
+        {
+            var response = await _httpClient.GetFromJsonAsync<ServiceResponse<List<OrderDetailsResponse>>>("api/reports/GetRecentSales");
+            return response;
+        }
+
+        public async Task<ServiceResponse<List<OrderDetailsResponse>>> GetMostSuccessfulProductsAsync()
+        {
+            var response = await _httpClient.GetFromJsonAsync<ServiceResponse<List<OrderDetailsResponse>>>("api/reports/GetMostSuccessfulProducts");
+            return response;
+        }
+
+        public async Task<ServiceResponse<List<OrderDetailsResponse>>> GetTotalSalesAsync()
+        {
+            var response = await _httpClient.GetFromJsonAsync<ServiceResponse<List<OrderDetailsResponse>>>("api/reports/GetTotalSales");
+            return response;
         }
     }
 }

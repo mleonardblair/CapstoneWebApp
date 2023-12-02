@@ -16,6 +16,9 @@ namespace EcommerceApp.Shared.DTOs
         public decimal TotalRevenue { get; set; }
         public decimal TotalTax { get; set; }
         public decimal TotalDiscount { get; set; }
+        public string Region { get; set; } // New property for region
+        public string UserName { get; set; } // New property for user name
     }
+
 
 }

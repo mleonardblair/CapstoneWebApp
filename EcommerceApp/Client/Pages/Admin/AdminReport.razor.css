@@ -1,0 +1,15 @@
+﻿.finance-report-container .row {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.sales-summary, .gross-profit-summary {
+    flex: 1;
+}
+
+/* Adjust the breakpoint and width as necessary */
+@media (max-width: 768px) {
+    .sales-summary, .gross-profit-summary {
+        flex-basis: 100%;
+    }
+}

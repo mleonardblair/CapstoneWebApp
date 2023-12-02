@@ -1,23 +1,20 @@
 ﻿@page "/admin-dashboard/reports"
 @inject IReportService ReportService
-@inject IJSRuntime JSRuntime
 @implements IDisposable
-
+@attribute [Authorize(Roles = "Admin")]
 @using EcommerceApp.Shared.DTOs.Report;
 
 <h3>Reports and Filters Admin</h3>
 
 <div class="filter-section">
-    <button>Recent Sales</button>
-    <button>Most Successful Products</button>
-    <button>Total Gross & Net Sales</button>
+    <button @onclick="LoadRecentSalesAsync">Recent Sales</button>
+    <button @onclick="LoadMostSuccessfulProductsAsync">Most Successful Products</button>
+    <button @onclick="LoadTotalSalesAsync">Total Gross & Net Sales</button>
 
-    <select @onchange="UpdateTimePeriod">
-        <option value="">Select Time Period</option>
-        <option value="Last Week">Last Week</option>
-        <option value="Last Month">Last Month</option>
-        <!-- ... other time periods ... -->
-    </select>
+
+    <MudDatePicker Label="Start Date" @bind-Date="startDate" />
+    <MudDatePicker Label="End Date" @bind-Date="endDate" />
+@*     <MudButton OnClick="@UpdateTimePeriod">Update Time Period</MudButton> *@
 
     <select @onchange="UpdateRegion">
         <option value="">Select Province</option>
@@ -29,30 +26,52 @@
 
 @if (ReportService.FinanceSummary != null)
 {
-    <div class="finance-report-container">
-        <div class="sales-summary">
-            <h4>Sales</h4>
-            <table>
-                <tr><td>Gross Sales</td><td>@ReportService.FinanceSummary.Sales.GrossSales.ToString("C")</td></tr>
-                <tr><td>Discounts</td><td>@ReportService.FinanceSummary.Sales.Discounts.ToString("C")</td></tr>
-                <tr><td>Returns</td><td>@ReportService.FinanceSummary.Sales.Returns.ToString("C")</td></tr>
-                <tr><td>Net Sales</td><td>@ReportService.FinanceSummary.Sales.NetSales.ToString("C")</td></tr>
-                <tr><td>Shipping</td><td>@ReportService.FinanceSummary.Sales.Shipping.ToString("C")</td></tr>
-                <tr><td>Taxes</td><td>@ReportService.FinanceSummary.Sales.Taxes.ToString("C")</td></tr>
-                <tr><td>Total Sales</td><td>@ReportService.FinanceSummary.Sales.TotalSales.ToString("C")</td></tr>
-            </table>
-        </div>
+   <div class="finance-report-container">
+        <div class="row">
+        @if (ReportService.FinanceSummary?.Sales == null)
+        {
+            <div class="text-center col-md-6">
+                <MudProgressCircular Color="Color.Primary" Size="Size.Large" Indeterminate="true" />
+            </div>
+        }
+        else
+        {
 
-        <div class="gross-profit-summary">
-            <h4>Gross Profit</h4>
-            <table>
-                <tr><td>Net Sales</td><td>@ReportService.FinanceSummary.GrossProfit.NetSales.ToString("C")</td></tr>
-                <tr><td>Net Sales without cost recorded</td><td>@ReportService.FinanceSummary.GrossProfit.NetSalesWithoutCostRecorded.ToString("C")</td></tr>
-                <tr><td>Net sales with cost recorded</td><td>@ReportService.FinanceSummary.GrossProfit.NetSalesWithCostRecorded.ToString("C")</td></tr>
-                <tr><td>Cost of goods sold</td><td>@ReportService.FinanceSummary.GrossProfit.CostOfGoodsSold.ToString("C")</td></tr>
-                <tr><td>Gross profits</td><td>@ReportService.FinanceSummary.GrossProfit.GrossProfits.ToString("C")</td></tr>
-            </table>
-        </div>
+            <div class="sales-summary col-md-6">
+                <h4>Sales</h4>
+                <table>
+                    <tr><td>Gross Sales</td><td>@ReportService.FinanceSummary.Sales.GrossSales.ToString("C")</td></tr>
+                    <tr><td>Discounts</td><td>@ReportService.FinanceSummary.Sales.Discounts.ToString("C")</td></tr>
+                    <tr><td>Returns</td><td>@ReportService.FinanceSummary.Sales.Returns.ToString("C")</td></tr>
+                    <tr><td>Net Sales</td><td>@ReportService.FinanceSummary.Sales.NetSales.ToString("C")</td></tr>
+                    <tr><td>Shipping</td><td>@ReportService.FinanceSummary.Sales.Shipping.ToString("C")</td></tr>
+                    <tr><td>Taxes</td><td>@ReportService.FinanceSummary.Sales.Taxes.ToString("C")</td></tr>
+                    <tr><td>Total Sales</td><td>@ReportService.FinanceSummary.Sales.TotalSales.ToString("C")</td></tr>
+                </table>
+            </div>
+        }
+        
+        @if (ReportService.FinanceSummary?.GrossProfit == null)
+        {
+                         <div class="text-center col-md-6">
+
+                <MudProgressCircular Color="Color.Primary" Size="Size.Large" Indeterminate="true" />
+            </div>
+        }
+        else
+        {
+            <div class="gross-profit-summary col-md-6">
+                <h4>Gross Profit</h4>
+                <table>
+                    <tr><td>Net Sales</td><td>@ReportService.FinanceSummary.GrossProfit.NetSales.ToString("C")</td></tr>
+                    <tr><td>Net Sales without cost recorded</td><td>@ReportService.FinanceSummary.GrossProfit.NetSalesWithoutCostRecorded.ToString("C")</td></tr>
+                    <tr><td>Net sales with cost recorded</td><td>@ReportService.FinanceSummary.GrossProfit.NetSalesWithCostRecorded.ToString("C")</td></tr>
+                    <tr><td>Cost of goods sold</td><td>@ReportService.FinanceSummary.GrossProfit.CostOfGoodsSold.ToString("C")</td></tr>
+                    <tr><td>Gross profits</td><td>@ReportService.FinanceSummary.GrossProfit.GrossProfits.ToString("C")</td></tr>
+                </table>
+            </div>
+    }
+    </div>
     </div>
 }
 else
@@ -62,7 +81,8 @@ else
 
 @code {
 
-
+    private DateTime? startDate;
+    private DateTime? endDate;
     protected override async Task OnInitializedAsync()
     {
         await ReportService.GetFinancialSummary();
@@ -73,28 +93,120 @@ else
     {
         ReportService.ReportChanged -= StateHasChanged;
     }
+
     private async Task UpdateRegion(ChangeEventArgs e)
     {
-        // Logic to update report based on region   
-        // For example, filter the reportData based on the selected region
-    }
+        var selectedRegion = e.Value?.ToString();
 
-    private async Task UpdateTimePeriod(ChangeEventArgs e)
-    {
-        // Logic to update report based on time period
-        // For example, filter the reportData based on the selected time period
-    }
-
-    private async Task<List<ReportDto>> FetchInitialReportDataAsync()
-    {
-        // Fetch your initial report data here
-        // For now, returning mock data
-        return new List<ReportDto>
+        if (!string.IsNullOrEmpty(selectedRegion))
         {
-         
-        };
+            // Assuming a method in ReportService that filters data based on the region
+            await ReportService.FilterReportsByRegion(selectedRegion);
+            StateHasChanged(); // Refresh the UI with the new data
+        }
+        else
+        {
+            // Optionally, handle the case where no region is selected (e.g., reset to default view)
+        }
     }
 
 
+
+    private (DateTime, DateTime) ConvertTimePeriodToDates(string timePeriod)
+    {
+        var endDate = DateTime.Now;
+        var startDate = timePeriod switch
+        {
+            "Last Week" => endDate.AddDays(-7),
+            "Last Month" => endDate.AddMonths(-1),
+            // Add more cases as necessary
+            _ => endDate
+        };
+        return (startDate, endDate);
+    }
+
+    private List<OrderDetailsResponse> totalSales = new List<OrderDetailsResponse>();
+    private bool isTotalSalesLoading = false;
+
+    private async Task LoadTotalSalesAsync()
+    {
+        isTotalSalesLoading = true;
+        try
+        {
+            var response = await ReportService.GetTotalSalesAsync();
+            if (response.Success)
+            {
+                totalSales = response.Data;
+            }
+            else
+            {
+                // Handle the error scenario
+            }
+        }
+        catch (Exception ex)
+        {
+            // Handle exceptions
+        }
+        finally
+        {
+            isTotalSalesLoading = false;
+        }
+    }
+
+    private List<OrderDetailsResponse> mostSuccessfulProducts = new List<OrderDetailsResponse>();
+    private bool isMostSuccessfulProductsLoading = false;
+
+    private async Task LoadMostSuccessfulProductsAsync()
+    {
+        isMostSuccessfulProductsLoading = true;
+        try
+        {
+            var response = await ReportService.GetMostSuccessfulProductsAsync();
+            if (response.Success)
+            {
+                mostSuccessfulProducts = response.Data;
+            }
+            else
+            {
+                // Handle the error scenario
+            }
+        }
+        catch (Exception ex)
+        {
+            // Handle exceptions
+        }
+        finally
+        {
+            isMostSuccessfulProductsLoading = false;
+        }
+    }
+
+    private List<OrderDetailsResponse> recentSales = new List<OrderDetailsResponse>();
+    private bool isRecentSalesLoading = false;
+
+    private async Task LoadRecentSalesAsync()
+    {
+        isRecentSalesLoading = true;
+        try
+        {
+            var response = await ReportService.GetRecentSalesAsync();
+            if (response.Success)
+            {
+                recentSales = response.Data;
+            }
+            else
+            {
+                // Handle the error scenario, maybe set an error message
+            }
+        }
+        catch (Exception ex)
+        {
+            // Handle exceptions
+        }
+        finally
+        {
+            isRecentSalesLoading = false;
+        }
+    }
 
 }

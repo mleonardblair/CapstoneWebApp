@@ -60,7 +60,6 @@
         lists = OrderService.AdminOrders; // Assuming AdminOrders is of type List<OrderDetailsResponse>
         isLoading = false; // Loading complete
         Console.WriteLine("Orders loaded.");
-        OrderService.OnChange += StateHasChanged;
 
         _selectedItems = lists.ToHashSet();
         _filterItems = lists.ToHashSet();
@@ -68,6 +67,8 @@
             {
                 FilterFunction = x => _filterItems.Contains(x)
             };
+
+        OrderService.OnChange += StateHasChanged;
     }
 
     public void Dispose() => OrderService.OnChange -= StateHasChanged;

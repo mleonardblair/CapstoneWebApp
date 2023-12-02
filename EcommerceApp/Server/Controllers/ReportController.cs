@@ -1,4 +1,5 @@
-﻿using EcommerceApp.Shared.DTOs.Report;
+﻿using EcommerceApp.Shared.DTOs;
+using EcommerceApp.Shared.DTOs.Report;
 using EcommerceApp.Shared.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -24,5 +25,14 @@ namespace EcommerceApp.Server.Controllers
             var response = await _reportService.GetFinancialSummary();
             return Ok(response);
         }
+
+     
+/*
+        [HttpGet("filterByRegion")]
+        public async Task<ActionResult<ServiceResponse<List<ReportDto>>>> FilterReportsByRegion(string region)
+        {
+            var response = await _reportService.FilterReportsByRegion(region);
+            return Ok(response);
+        }*/
     }
 }

@@ -9,9 +9,9 @@ namespace EcommerceApp.Server.Services.ReportService
 {
     public interface IReportService
     {
-        Task<ServiceResponse<List<Order>>> GetRecentSalesAsync();
-        Task<ServiceResponse<List<Order>>> GetMostSuccessfulProductsAsync();
-        Task<ServiceResponse<List<Order>>> GetTotalSalesAsync();
+        Task<ServiceResponse<List<OrderDetailsResponse>>> GetRecentSalesAsync();
+        Task<ServiceResponse<List<OrderDetailsResponse>>> GetMostSuccessfulProductsAsync();
+        Task<ServiceResponse<List<OrderDetailsResponse>>> GetTotalSalesAsync();
         Task<ServiceResponse<FinanceSummaryResponse>> GetFinancialSummary();
     }
 }

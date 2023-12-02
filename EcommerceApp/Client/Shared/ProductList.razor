@@ -10,7 +10,9 @@
     <ReusableResultSnackbar @ref="resultSnackbar"
                             Message="@message"
                             Severity="@s" />
-    <MudText Typo="Typo.h5">@ProductService.GetDynamicHeading()</MudText><MudButton OnClick="HandleClearFilterSortSearch">Clear</MudButton>
+        <MudText Typo="Typo.h5">@ProductService.GetDynamicHeading()</MudText>
+
+        <MudButton OnClick="HandleClearFilterSortSearch">Clear</MudButton>
     <MudText Typo="Typo.h6" Align="Align.Left" Style="display:flex; flex-grow:1;">@ProductService.Message</MudText>
     <div class="container-center">
         <MudProgressCircular Color="Color.Primary" Size="Size.Large" Indeterminate="true" />
@@ -18,7 +20,7 @@
 }
 else if(ProductService.Products.Count > 0)
 {
-
+        <MudButton OnClick="HandleClearFilterSortSearch">Clear</MudButton>
     <ul class="list-unstyled">
         @foreach (var product in ProductService.Products)
         {
@@ -72,7 +74,7 @@ else if(ProductService.Products.Count > 0)
 
 }else
 {    // If 0 products returns from a search, for instance
-    
+        <MudButton OnClick="HandleClearFilterSortSearch">Clear</MudButton>
     <div style="height:100%; ">
     <MudText Typo="Typo.h4" Align="Align.Center">@ProductService.Message</MudText>
     <MudImage Src="/images/empty-bench-empty-productlist.png" Style="max-width:1"/>
