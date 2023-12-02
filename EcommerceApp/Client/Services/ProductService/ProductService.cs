@@ -43,12 +43,12 @@ namespace EcommerceApp.Client.Services.ProductService
             ServiceResponse<ProductDto> result = new();
 
             var productResponse = await _http.PostAsJsonAsync("api/products/create", product);
-            if (productResponse.IsSuccessStatusCode)
+            var newProduct = await productResponse.Content.ReadFromJsonAsync<ServiceResponse<ProductDto>>();
+            if (newProduct.Success)
             {
-                var newProduct = await productResponse.Content.ReadFromJsonAsync<ProductDto>();
                 result.Success = true;
                 result.Message = "Product successfully added.";
-                result.Data = newProduct;
+                result.Data = newProduct.Data;
             }
             else
             {
@@ -975,6 +975,10 @@ namespace EcommerceApp.Client.Services.ProductService
             Severity = Severity.Success; // Reset to a default severity
         }
 
-    
+        public Task<ServiceResponse<ProductDto>> GetAdminProductById(Guid productId)
+        {
+            var response = _http.GetFromJsonAsync<ServiceResponse<ProductDto>>($"api/products/admin/{productId}");
+           return response;
+        }
     }
 }

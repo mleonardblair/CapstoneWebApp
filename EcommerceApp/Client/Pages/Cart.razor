@@ -91,17 +91,18 @@
             </MudPaper>
         @if (isAuthenticated)
         {
-            <div>
-                <MudPaper Style="display:flex; flex-direction:column; align-items:center; justify-content:flex-start; padding: 2rem; min-height: 50vh; width:20%; max-width:300px; margin: 2rem auto; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                    <MudText Typo="Typo.h6">Delivery Address</MudText>
-                    <AddressForm />
-                </MudPaper>
-            </div>
-        }
-        <div class="display: flex; align-items:center; justify-content:center">
-            <MudButton Color="Color.Success" Variant="Variant.Outlined" OnClick="@( () =>Placeorder())">Checkout</MudButton>
+                    <MudPaper>
+                        <MudText Typo="Typo.h6">Delivery Address</MudText>
+                        <AddressForm />
+                        <MudButton Color="Color.Success" Variant="Variant.Outlined" OnClick="@( () =>Placeorder())">Checkout</MudButton>
+                    </MudPaper>
+                }else
+                {
+                    <MudButton Color="Color.Success" Variant="Variant.Outlined" OnClick="@( () =>Placeorder())">Checkout</MudButton>
+                }
+             
         </div>
-    </div>
+   
     }
     </MudContainer>
 </MudMainContent>

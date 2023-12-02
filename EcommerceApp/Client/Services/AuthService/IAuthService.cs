@@ -1,4 +1,5 @@
-﻿using EcommerceApp.Server.Models;
+﻿using EcommerceApp.Client.Shared;
+using EcommerceApp.Server.Models;
 using EcommerceApp.Shared.DTOs;
 using EcommerceApp.Shared.Models;
 using System.Threading.Tasks;
@@ -16,9 +17,10 @@ namespace EcommerceApp.Client.Services.AuthService
         public string Message { get; set; }
         public string SnackMessage { get; set; }
         public Severity Severity { get; set; }
+        ReusableResultSnackbar Snackbar { get; set; }
         public List<AppUserDto> AuthAdminUsers { get; set; }
         AppUserDto AuthUser { get; set; }
-        Task GetUser(Guid id);
+        Task GetUser(Guid? id);
         Task GetUserEmail();
         Task GetAllUserAdmin();
         Task<ServiceResponse<string>> RegisterUser(UserRegister registerRequest);

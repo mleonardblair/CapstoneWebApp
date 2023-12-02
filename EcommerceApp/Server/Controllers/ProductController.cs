@@ -263,6 +263,15 @@ namespace EcommerceApp.Server.Controllers
             var result = await _productService.GetAdminProducts();
             return Ok(result);
         }
+        // Get product by id 
+        [HttpGet("admin/{productId}"), Authorize(Roles = "Admin")]
+        public async Task<ActionResult<ServiceResponse<ProductDto>>> GetAdminProductById(Guid productId)
+        {
+            var result = await _productService.GetAdminProductById(productId);
+            return Ok(result);
+        }
+
+        
 
         [HttpDelete("admin/{productId}"), Authorize(Roles = "Admin")]
         public async Task<ActionResult<ServiceResponse<List<ProductDto>>>> DeleteProduct(Guid productId)

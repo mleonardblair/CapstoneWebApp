@@ -47,6 +47,7 @@ namespace EcommerceApp.Server.Services.ProductService
         {
             var response = new ServiceResponse<ProductDto>();
             var product = await _context.Products!
+                 .Where(p => !p.Deleted)
                 .Include(p => p.ProductTags)
                 .ThenInclude(pt => pt.Tag)
                 .FirstOrDefaultAsync(e => e.Id == productId);
@@ -68,6 +69,8 @@ namespace EcommerceApp.Server.Services.ProductService
 
             try
             {
+              
+
                 // Map the product DTO to a Product entity
                 var product = _mapper.Map<Product>(productDto);
 
@@ -217,6 +220,7 @@ namespace EcommerceApp.Server.Services.ProductService
             try
             {
                 var products = await _context.Products!
+                     .Where(p => !p.Deleted) 
                    .Include(p => p.ProductTags)
                    .Where(p=>p.CategoryId == categoryId)
                    .ToListAsync();
@@ -244,7 +248,7 @@ namespace EcommerceApp.Server.Services.ProductService
             var response = new ServiceResponse<List<ProductDto>>();
             try
             {
-                var products = await _context.Products!
+                var products = await _context.Products!.Where(p => !p.Deleted)
                    .Include(p => p.ProductTags)
                    .ToListAsync();
 
@@ -281,7 +285,7 @@ namespace EcommerceApp.Server.Services.ProductService
                 int totalProducts = await _context.Products.CountAsync();
                 var totalPages = (int)Math.Ceiling(totalProducts / (double)pageSize);
 
-                var products = await _context.Products
+                var products = await _context.Products.Where(p => !p.Deleted)
                     .Skip((page - 1) * pageSize)
                     .Take(pageSize)
                     .Include(p => p.ProductTags)
@@ -316,10 +320,10 @@ namespace EcommerceApp.Server.Services.ProductService
             var response = new ServiceResponse<ProductPaginationResponse>();
             try
             {
-                int totalProducts = await _context.Products.CountAsync();
+                int totalProducts = await _context.Products.Where(p => !p.Deleted).CountAsync();
                 var totalPages = (int)Math.Ceiling(totalProducts / (double)pageSize);
                 // Sorting products based on the product name in ascending or descending order
-                var productsQuery = _context.Products.AsQueryable();
+                var productsQuery = _context.Products.Where(p => !p.Deleted).AsQueryable();
 
 
                 productsQuery = isAscending ? productsQuery.OrderBy(p => p.Name) : productsQuery.OrderByDescending(p => p.Name);
@@ -368,7 +372,7 @@ namespace EcommerceApp.Server.Services.ProductService
             {
 
                 // Filter the products by category first
-                var query = _context.Products.AsQueryable();
+                var query = _context.Products.Where(p => !p.Deleted).AsQueryable();
                 if (categoryId != Guid.Empty)
                 {
                     query = query.Where(p => p.CategoryId == categoryId);
@@ -423,7 +427,7 @@ namespace EcommerceApp.Server.Services.ProductService
             try
             {
                 // Filter the products by category first
-                var query = _context.Products.AsQueryable();
+                var query = _context.Products.Where(p => !p.Deleted).AsQueryable();
                 if (categoryId != Guid.Empty)
                 {
                     query = query.Where(p => p.CategoryId == categoryId);
@@ -485,7 +489,7 @@ namespace EcommerceApp.Server.Services.ProductService
         {
             var response = new ServiceResponse<ProductPaginationResponse>();
             // Filter the products by category first
-            var query = _context.Products.AsQueryable();
+            var query = _context.Products.Where(p => !p.Deleted).AsQueryable();
             if (tagId != Guid.Empty)
             {
                 // Query products by tag
@@ -543,10 +547,19 @@ namespace EcommerceApp.Server.Services.ProductService
             }
             try
             {
-                _context.Products!.Remove(product);
-                await _context.SaveChangesAsync();
-                response.Data = true;
-                response.Message = "Product deleted successfully";
+                if (product.Deleted)
+                {
+                    response.Success = false;
+                    response.Message = "Product already deleted";
+                    return response;
+                }else
+                {
+                    _context.Products!.Remove(product);
+                    await _context.SaveChangesAsync();
+                    response.Data = true;
+                    response.Message = "Product deleted successfully";
+                }
+
             }
             catch (Exception e)
             {
@@ -561,7 +574,7 @@ namespace EcommerceApp.Server.Services.ProductService
             var response = new ServiceResponse<ProductDto>();
             try
             {
-                var existingProduct = await _context.Products!.Include(p => p.ProductTags)
+                var existingProduct = await _context.Products!.Where(p => !p.Deleted)!.Include(p => p.ProductTags)
                                                              .FirstOrDefaultAsync(p => p.Id == productId);
                 if (existingProduct == null)
                 {
@@ -626,6 +639,7 @@ namespace EcommerceApp.Server.Services.ProductService
             try
             {
                 var products = await _context.Products!
+                    .Where(p => !p.Deleted)
                     .Where(p => p.CategoryId == categoryId)
                     .Include(pt => pt.ProductTags)
                     .ThenInclude(pt => pt.Tag)
@@ -678,6 +692,7 @@ namespace EcommerceApp.Server.Services.ProductService
             // al number of pages for the search results pagination
             // and will be used to find the products for the requested page number
             var products = await _context.Products
+                .Where(p => !p.Deleted)
                                 .Include(p => p.ProductTags)
                                 .ThenInclude(pt => pt.Tag)
                                 .Where(p => p.Name.ToLower().Contains(searchQuery.ToLower())
@@ -715,6 +730,7 @@ namespace EcommerceApp.Server.Services.ProductService
             // total number of pages for the search results pagination
             // and will be used to find the products for the requested page number
             var query = _context.Products
+                .Where(p => !p.Deleted)
                 .Include(p => p.ProductTags)
                 .ThenInclude(pt => pt.Tag)
                 .Where(p => p.Name.ToLower().Contains(searchQuery.ToLower())
@@ -758,7 +774,7 @@ namespace EcommerceApp.Server.Services.ProductService
         public async Task<ServiceResponse<ProductPaginationResponse>> SearchProducts(string searchQuery, int page, bool isAscending)
         {
             var pageResults = 2f;
-            var query = _context.Products
+            var query = _context.Products.Where(p => !p.Deleted)
                                 .Include(p => p.ProductTags)
                                 .ThenInclude(pt => pt.Tag)
                                 .Where(p => p.Name.ToLower().Contains(searchQuery.ToLower())
@@ -796,6 +812,7 @@ namespace EcommerceApp.Server.Services.ProductService
         {
             var pageResults = 2f;
             var query = _context.Products
+                .Where(p => !p.Deleted)
                 .Include(p => p.ProductTags)
                 .ThenInclude(pt => pt.Tag)
                 .Where(p => p.Name.ToLower().Contains(searchQuery.ToLower())
@@ -855,6 +872,7 @@ namespace EcommerceApp.Server.Services.ProductService
         private async Task<List<ProductDto>> FindProductsBySearchQuery(string searchQuery)
         {
             var products = await _context.Products
+                .Where(p => !p.Deleted)
                                 .Where(p => p.Name.ToLower().Contains(searchQuery.ToLower())
                                             || p.Description.ToLower().Contains(searchQuery.ToLower())
                                             || p.Category.Name.ToLower().Contains(searchQuery.ToLower())
@@ -974,7 +992,7 @@ namespace EcommerceApp.Server.Services.ProductService
         {
             var response = new ServiceResponse<ProductPaginationResponse>();
             // Filter the products by tag first
-            var query = _context.Products.AsQueryable();
+            var query = _context.Products.Where(p => !p.Deleted).AsQueryable();
             if (tagId != Guid.Empty)
             {
                 // Query products by tag
@@ -1018,7 +1036,7 @@ namespace EcommerceApp.Server.Services.ProductService
             try
             {
                 // Filter the products by category first
-                var query = _context.Products.AsQueryable();
+                var query = _context.Products.Where(p => !p.Deleted).AsQueryable();
                 if (categoryId != Guid.Empty)
                 {
                     query = query.Where(p => p.CategoryId == categoryId);
@@ -1098,7 +1116,7 @@ namespace EcommerceApp.Server.Services.ProductService
 
             try
             {
-                var query = _context.Products.AsQueryable();
+                var query = _context.Products.Where(p => !p.Deleted).AsQueryable();
 
                 if (categoryId.HasValue && categoryId.Value != Guid.Empty)
                 {
@@ -1156,7 +1174,7 @@ namespace EcommerceApp.Server.Services.ProductService
             try
             {
                 // Filter the products by tag first
-                var query = _context.Products.AsQueryable();
+                var query = _context.Products.Where(p => !p.Deleted).AsQueryable();
                 if (tagId != Guid.Empty)
                 {
                     // Query products by tag
@@ -1218,7 +1236,7 @@ namespace EcommerceApp.Server.Services.ProductService
             try
             {
                 // Filter the products by tag first
-                var query = _context.Products.AsQueryable();
+                var query = _context.Products.Where(p => !p.Deleted).AsQueryable();
                 if (tagId != Guid.Empty)
                 {
                     // Query products by tag
@@ -1381,8 +1399,12 @@ namespace EcommerceApp.Server.Services.ProductService
                     StatusCode = 400 // Bad Request
                 };
             }
+            // get the id of the product so that we know we can update the name of the product with the same id
+            // get the id of the product based on the dto id
+            var productId = await _context.Products.Where(p => p.Id == productDto.Id).Select(p => p.Id).FirstOrDefaultAsync();
 
-            // Check for name uniqueness and non-deleted status
+
+            // Check for name uniqueness and non-deleted status but only 
             var isNameUsed = await _context.Products
                                 .AnyAsync(p => p.Name == productDto.Name && p.Id != productDto.Id && !p.Deleted);
             if (isNameUsed)
@@ -1520,5 +1542,39 @@ namespace EcommerceApp.Server.Services.ProductService
             }
         }
 
+        public Task<ServiceResponse<ProductDto>> GetAdminProductById(Guid productId)
+        {
+            var response = new ServiceResponse<ProductDto>();
+            try
+            {
+                var product = _context.Products
+                    .Include(p => p.ProductTags)
+                    .ThenInclude(pt => pt.Tag)
+                    .FirstOrDefault(p => p.Id == productId);
+
+                if (product == null)
+                {
+                    response.Success = false;
+                    response.Message = "Product not found.";
+                    response.StatusCode = 404; // Not Found
+                    return Task.FromResult(response);
+                }
+
+                var productDto = _mapper.Map<ProductDto>(product);
+                response.Data = productDto;
+                response.Message = "Product retrieved successfully.";
+                response.StatusCode = 200; // OK
+                return Task.FromResult(response);
+            }
+            catch (Exception ex)
+            {
+                // Log the exception details here, including 'ex' information
+
+                response.Success = false;
+                response.Message = "An unexpected server error occurred while retrieving the product: " + ex.Message;
+                response.StatusCode = 500; // Internal Server Error
+                return Task.FromResult(response);
+            }   
+        }
     }
 }

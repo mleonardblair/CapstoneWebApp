@@ -89,7 +89,12 @@ namespace EcommerceApp.Server.Controllers
         public async Task<ActionResult<ServiceResponse<bool>>> UpdateUser( AppUserDto userDto)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var response = await _authService.UpdateUser(userId, userDto.Email, userDto.FirstName, userDto.LastName);
+            AppUserDto appUserDto = new AppUserDto();
+            appUserDto.Email = userDto.Email;
+            appUserDto.FirstName = userDto.FirstName;
+            appUserDto.LastName = userDto.LastName;
+            appUserDto.Id = Guid.Parse(userId);
+            var response = await _authService.UpdateUser(appUserDto);
 
             if (!response.Success)
             {

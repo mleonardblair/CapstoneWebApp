@@ -3,69 +3,39 @@
 @using System.ComponentModel.DataAnnotations
 @inject HttpClient httpClient
 @inject NavigationManager NavigationManager
-@if (AppUser != null && Id != null)
-{
-<PageTitle>Edit User Details</PageTitle>
-<MudContainer Class="lg-py-2" Style="padding-top:10rem">
-    <MudMainContent>
-        <MudText Typo="Typo.h3" Style="text-align:center;">Login</MudText>
-        <MudGrid Class="login-grid" Style="display:flex; justify-content:center;align-self:center; padding-top:100px;">
-            <MudItem xs="12" lg="6" xl="6" Style="align-self:center">
-        <MudItem xs="12" sm="7">
-            <MudCard>
-                <MudCardContent>
-                    <EditForm Model="AppUser" OnValidSubmit="HandleSubmit">
-                        <DataAnnotationsValidator />
 
-                        <MudTextField Label="First Name" @bind-Value="AppUser.FirstName" Required="true" />
+    @if (AppUser != null && Id != null)
+    {
+        <PageTitle>Edit User Details</PageTitle>
+        <MudContainer Class="lg-py-2" Style="height: 100vh; display: flex; align-items: center; justify-content: center;">
+            <MudPaper Elevation="1" Class="p-4" Style="max-width: 500px; width: 100%;">
+                <MudText Typo="Typo.h3" GutterBottom="true" Align="Align.Center">Edit User Details</MudText>
+                <EditForm Model="AppUser" OnValidSubmit="HandleSubmit">
+                    <DataAnnotationsValidator />
 
-                        <MudTextField Label="Last Name" @bind-Value="AppUser.LastName" Required="true" />
-
-                        <MudTextField Label="Email" @bind-Value="AppUser.Email" Required="true" />
-                        // should be a select list of roles
-
-                        <MudSelect Label="Select Role" @bind-Value="AppUser.Role" T="string">
-                            <MudSelectItem Disabled="true" Value="Guid.Empty">Select Roles</MudSelectItem>
-                                        @foreach (var role in new string[] { "Admin", "Customer" })
-                                        {
-                                <MudSelectItem Value="@role">@role</MudSelectItem>
-                            }
-                        </MudSelect>
-
-                        <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="mt-3">Save</MudButton>
-
-                        <ValidationSummary />
+                    <MudTextField Label="First Name" @bind-Value="AppUser.FirstName" FullWidth Required />
+                    <MudTextField Label="Last Name" @bind-Value="AppUser.LastName" FullWidth Required />
+                    <MudTextField Label="Email" @bind-Value="AppUser.Email" FullWidth Required />
+                    <MudSelect Label="Select Role" @bind-Value="AppUser.Role" FullWidth>
+                    <MudSelectItem Value="string.Empty" Disabled>Select Roles</MudSelectItem>
+                    @foreach (var role in new string[] { "Admin", "Customer" })
+                        {
+                            <MudSelectItem Value="@role">@role</MudSelectItem>
+                        }
+                    </MudSelect>
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="mt-3" FullWidth ButtonType="ButtonType.Submit">Save</MudButton>
+                    <ValidationSummary />
                     </EditForm>
-                </MudCardContent>
-            </MudCard>
-        </MudItem>
-
-        <MudItem xs="12" sm="5">
-            <MudPaper Class="pa-4 mud-height-full">
-                <MudText Typo="Typo.subtitle2">Validation Summary</MudText>
-                @if (success)
+                    @if (success)
                 {
                     <MudText Color="Color.Success">Success</MudText>
                 }
-
-                else
-                {
-                    <!-- ValidationSummary removed from here -->
-                }
+                <MudText Typo="Typo.body2" Align="Align.Center" Class="mt-3">
+                    Fill out the form correctly to see the success message.
+                </MudText>
             </MudPaper>
-        </MudItem>
-
-        <MudItem xs="12">
-            <MudText Typo="Typo.body2" Align="Align.Center">
-                Fill out the form correctly to see the success message.
-            </MudText>
-        </MudItem>
-                </MudItem>
-            </MudGrid>
-        </MudMainContent>
-    </MudContainer>
-}
-    
+        </MudContainer>
+    }
     else
     {
         <MudAlert Severity="Severity.Error">User not found</MudAlert>

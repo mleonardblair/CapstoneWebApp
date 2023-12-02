@@ -38,11 +38,11 @@ namespace EcommerceApp.Client.Services.CartService
             {
                 // Add to shopping cart on the server if logged in.
                 var response = await _httpClient.PostAsJsonAsync("api/cart/add", cartItemDto);
-                Console.WriteLine("User is authenticated");
+            //    Console.WriteLine("User is authenticated");
             }
             else
             {
-                Console.WriteLine("User is NOT authenticated");
+           //     Console.WriteLine("User is NOT authenticated");
                 var cart = await _localStorage.GetItemAsync<List<CartItemDto>>("cart");
                 if (cart == null)
                 {
@@ -90,10 +90,10 @@ namespace EcommerceApp.Client.Services.CartService
             {
                 // Remove the cart item from the server if logged in.
                 var response = await _httpClient.DeleteAsync($"api/cart/remove/{productId}");
-                Console.WriteLine("Remove cart item from server.");
+            //    Console.WriteLine("Remove cart item from server.");
             } else
             {
-                Console.WriteLine("User is NOT authenticated");
+             //   Console.WriteLine("User is NOT authenticated");
             }
             var cart = await _localStorage.GetItemAsync<List<CartItemDto>>("cart");
             if (cart == null)
@@ -119,10 +119,10 @@ namespace EcommerceApp.Client.Services.CartService
             {
                 // Update the quantity of the cart item on the server if logged in.
                 var response = await _httpClient.PutAsJsonAsync("api/cart/update-quantity", product);
-                Console.WriteLine("Update cart item quantity.");
+              //  Console.WriteLine("Update cart item quantity.");
             } else
             {
-                Console.WriteLine("User is NOT authenticated");
+              //  Console.WriteLine("User is NOT authenticated");
             }
             var cart = await _localStorage.GetItemAsync<List<CartItemDto>>("cart");
             if (cart == null)
@@ -167,7 +167,6 @@ namespace EcommerceApp.Client.Services.CartService
                 // For authenticated users, fetch the count from the server.
                 // create a new shopping cart on the server if it doesn't exist for the current user.
                 var response = await CreateNewShoppingCart();
-                Console.WriteLine($" Shopping Cart Id: {response.Data}");
                 var result = await _httpClient.GetFromJsonAsync<ServiceResponse<int>>("api/cart/count");
                 var count = result.Data;
                 await _localStorage.SetItemAsync<int>("cartItemsCount", count);
@@ -206,11 +205,11 @@ namespace EcommerceApp.Client.Services.CartService
             {
                 // Update the quantity of the cart item on the server if logged in.
                 var response = await _httpClient.PutAsJsonAsync("api/cart/update-quantity", cartItemDto);
-                Console.WriteLine("Update cart item quantity.");
+               // Console.WriteLine("Update cart item quantity.");
             }
             else
             {
-                Console.WriteLine("User is NOT authenticated");
+              //  Console.WriteLine("User is NOT authenticated");
                 // Update the quantity of the cart item in the local storage
                 var cart = await _localStorage.GetItemAsync<List<CartItemDto>>("cart");
                 if (cart == null)

@@ -2,9 +2,7 @@
 @inject ITagService TagService;
 @inject IProductService ProductService;
 @inject NavigationManager NavigationManager;
-<MudDrawer>
 
-</MudDrawer>
 <MudPaper Class="mx-2" Elevation="0" Style="height:100%">
     @if (CategoryService.Categories == null)
     {
@@ -29,7 +27,7 @@
                 <MudDivider Class="my-2" />
                 @foreach (var category in CategoryService.Categories)
                 {
-                    <MudText Class="py-3 text-center text-md-start" Typo="Typo.body1" @onclick="() => NavigateToCategory(category.Id)">@category.Name</MudText>
+                    <MudText Class="py-3 text-center text-md-center" Style="text-decoration:underline;cursor:pointer;" Typo="Typo.body1" @onclick="() => NavigateToCategory(category.Id)">@category.Name</MudText>
                 }
             </MudNavMenu>
         </MudPaper>

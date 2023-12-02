@@ -83,12 +83,12 @@
             }
             else
             {
-                Console.WriteLine("Failed to update user: " + await response.Content.ReadAsStringAsync()); // Log the error message
+             //   Console.WriteLine("Failed to update user: " + await response.Content.ReadAsStringAsync()); // Log the error message
             }
         }
         catch (Exception ex)
         {
-            Console.WriteLine("Exception when trying to save user: " + ex.Message); // Log exception
+           // Console.WriteLine("Exception when trying to save user: " + ex.Message); // Log exception
         }
     }
 
@@ -126,10 +126,10 @@
     protected override async Task OnInitializedAsync()
     {
         isLoading = true; // Start loading
-        Console.WriteLine("Loading users...");
+        //Console.WriteLine("Loading users...");
         await AuthService.GetAllUserAdmin();
         isLoading = false; // Loading complete
-        Console.WriteLine("Users loaded.");
+      //  Console.WriteLine("Users loaded.");
         CategoryService.OnChange += StateHasChanged;
         appUsers = (await httpClient.GetFromJsonAsync<ServiceResponse<List<AppUserDto>>>("api/user/admin")).Data;
     }

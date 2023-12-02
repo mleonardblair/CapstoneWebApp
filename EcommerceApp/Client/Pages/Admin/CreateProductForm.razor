@@ -191,18 +191,18 @@
             if (serviceResponse!= null && serviceResponse.Success)
             {
                 Product.ImageURI = serviceResponse.Data.FileUrl;
-                Message = "Image Loaded Successfully";
+                ProductService.SnackMessage = "Image Loaded Successfully";
                 s = Severity.Success;
             }
             else
             {
-                Message = $"Something went wrong: {serviceResponse.Message}";
+                ProductService.SnackMessage = $"Something went wrong: {serviceResponse.Message}";
                 s = Severity.Error;
             }
         }
         else
         {
-            Message = "It went bad. Contact site administrator.";
+            ProductService.SnackMessage = "It went bad. Contact site administrator.";
             s = Severity.Success;
         }
         ProductService.Snackbar.Show();
@@ -229,7 +229,7 @@
             if (!string.IsNullOrWhiteSpace(tagToAdd) && !Product.TagNames.Contains(tagToAdd))
             {
                 Product.TagNames.Add(tagToAdd);
-   
+
                 // Assign a color if it's a new tag
                 if (!TagColors.ContainsKey(tagToAdd))
                 {
@@ -259,16 +259,16 @@
         // You can use ProductService to save the Product object to your database or perform any other necessary actions.
         // For example:
         var result = await ProductService.CreateProductAsync(Product);
-
         if (result.Success)
         {
-            // Product creation was successful
-            success = true;
+            ProductService.Severity = Severity.Success;
         }
         else
         {
-            // Product creation failed
-            success = false;
+            ProductService.Severity = Severity.Error;
         }
+        ProductService.SnackMessage = result.Message;
+        ProductService.Snackbar.Show();
+        ProductService.ResetSnackbarMessage();
     }
 }

@@ -10,6 +10,7 @@
         public const string AboutUs = "/about-us";
         public const string Gallery = "/gallery";
         public const string ContactUs = "/contact-us";
+        public const string FAQ = "/faq";
 
         // Shop Page
         public const string ShopSortedByCategory = "/shop/category/{CategoryId:guid}";

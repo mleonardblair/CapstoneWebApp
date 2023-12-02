@@ -58,7 +58,8 @@ namespace EcommerceApp.Client.Services.ProductService
         Task<ServiceResponse<ProductDto>> UpdateProductByIdAsync(ProductDto product);
         Task<ServiceResponse<bool>> DeleteProductByIdAsync(Guid productId);
 
-
+        // Get product by id
+        Task<ServiceResponse<ProductDto>> GetAdminProductById(Guid productId);
         Task<ServiceResponse<bool>> AddProduct(ProductDto productDto);
         Task<ServiceResponse<List<ProductDto>>> UpdateProduct(ProductDto productDto);
         Task<ServiceResponse<List<ProductDto>>> DeleteProduct(Guid productId);

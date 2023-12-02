@@ -134,8 +134,10 @@ namespace EcommerceApp.Server.Services.CategoryService
                 };
             }
 
-
+            //  // get the id of the user who has an email that is the same as the email passed in appUser
             // Check for name uniqueness
+
+
             var isNameUsed = await _context.Categories
                             .AnyAsync(c => c.Name == category.Name && c.Id != category.Id && !c.Deleted);
 
@@ -373,6 +375,23 @@ namespace EcommerceApp.Server.Services.CategoryService
             }
             return response;
         }
+        public async Task<ServiceResponse<Dictionary<Guid, string>>> GetCategoryNamesAsync()
+        {
+            var response = new ServiceResponse<Dictionary<Guid, string>>();
+            try
+            {
+                var categories = await _context.Categories.Where(p => !p.Deleted).ToDictionaryAsync(c => c.Id, c => c.Name);
+                response.Data = categories;
+                response.Success = true;
+                response.Message = "Categories retrieved successfully.";
+            }
+            catch (Exception ex)
+            {
+                response.Success = false;
+                response.Message = ex.Message;
+            }
+            return response;
+        }
 
         public async Task<ServiceResponse<CategoryDto>> UpdateCategoryByIdAsync(Guid categoryId, [FromBody] CategoryDto categoryToUpdate)
         {
@@ -420,7 +439,36 @@ namespace EcommerceApp.Server.Services.CategoryService
                 return response;
             }
         }
-      
-       
+
+        /// <summary>
+        /// The method will return the category name associated with the category id.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        /// <exception cref="NotImplementedException"></exception>
+        public async Task<ServiceResponse<string>> GetCategoryNameByIdAsync(Guid id)
+        {
+            var response = new ServiceResponse<string>();
+
+            // Await the asynchronous operation to get the category
+            var category = await _context.Categories.FirstOrDefaultAsync(c => c.Id == id);
+            // Check if the category is null
+            if (category == null)
+            {
+                response.Success = false;
+                response.Message = "Category not found.";
+                response.StatusCode = 404; // Not Found
+            }
+            else
+            {
+                response.Success = true;
+                response.Message = "Category found.";
+                response.StatusCode = 200; // OK
+                response.Data = category.Name; // Directly access the Name property
+            }
+
+            return response;
+        }
+
     }
 }

@@ -102,6 +102,15 @@
     private ReusableResultSnackbar? resultSnackbar;
     protected override async Task OnInitializedAsync()
     {
+        var userId = await GetUserIdAsync();
+        // Use userId as needed, for example:
+        if (userId.HasValue)
+        {
+            await AuthService.GetUser(userId);
+            user.FirstName = AuthService.AuthUser.FirstName;
+            user.LastName = AuthService.AuthUser.LastName;
+        }
+       
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         var email = authState.User.FindFirst(ClaimTypes.Email)?.Value;
         if (!string.IsNullOrEmpty(email))
@@ -110,18 +119,29 @@
         }
         // It's also a good idea to load the first and last name if available
         // This assumes that you have the claims for first name and last name set up
-        user.FirstName = authState.User.FindFirst(ClaimTypes.GivenName)?.Value;
-        user.LastName = authState.User.FindFirst(ClaimTypes.Surname)?.Value;
 
         await base.OnInitializedAsync();
     }
     private async Task ChangeUserInfo()
     {
-        var result = await AuthService.UpdateUser(user);
-        message = result.Message;
-        s = result.Success ? Severity.Success : Severity.Warning;
-        StateHasChanged(); // Request UI update
-        ShowSnackbar();
+        // do validation on the user object for first name last name and email.
+        if(string.IsNullOrWhiteSpace(user.FirstName) || string.IsNullOrWhiteSpace(user.LastName) || string.IsNullOrWhiteSpace(user.Email))
+        {
+            message = "Please fill out all fields";
+            s = Severity.Warning;
+            StateHasChanged(); // Request UI update
+            ShowSnackbar();
+            return;
+        }
+        else
+        {
+            var result = await AuthService.UpdateUser(user);
+            message = result.Message;
+            s = result.Success ? Severity.Success : Severity.Warning;
+            StateHasChanged(); // Request UI update
+            ShowSnackbar();
+        }
+    
     }
 
     private async Task ChangePassword()
@@ -138,5 +158,21 @@
     {
         resultSnackbar?.Show();
     }
-   
+    private async Task<Guid?> GetUserIdAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity?.IsAuthenticated == true)
+        {
+            var userIdClaim = user.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim != null && Guid.TryParse(userIdClaim.Value, out Guid userId))
+            {
+            //    Console.WriteLine($" User Id: {userId}");
+                return userId;
+            }
+        }
+
+        return null; // User is not authenticated or the claim is not a valid Guid
+    }
 }

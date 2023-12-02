@@ -15,7 +15,8 @@ namespace EcommerceApp.Client.Services.CategoryService
 
         // This event will be used to notify subscribers that the categories have changed
         public event Action OnChange;
-
+        Task<ServiceResponse<Dictionary<Guid, string>>> GetCategoryNamesAsync();
+        Task<ServiceResponse<string>> GetCategoryName(Guid id);
         Task GetAllCategoriesAsync();
         Task<ServiceResponse<CategoryDto>> GetCategoryByIdAsync(Guid productId);
         Task GetAdminCategories();

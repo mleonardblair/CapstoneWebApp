@@ -81,41 +81,39 @@
     private Transition transitionType = Transition.Custom; // Transition type of the carousel
 
 
-    // This method used later to navigate through the carousel from JavaScript
-    [JSInvokable("NextItem")]
-    public void NextItem()
-    {
-        Console.WriteLine("DEBUG: NextItem called.");
-        if (currentIndex < totalItems - 1)
-        {
-            currentIndex++;
-            UpdateProgress(currentIndex);
-        }
-    }
-    [JSInvokable("PrevItem")]
-    public void PrevItem()
-    {
-        Console.WriteLine("DEBUG: PrevItem called.");
-        if (currentIndex > 0)
-        {
-            currentIndex--;
-            UpdateProgress(currentIndex);
-        }
-    }
+    //// this method used later to navigate through the carousel from javascript
+    //[jsinvokable("nextitem")]
+    //public void nextitem()
+    //{
+    //    if (currentindex < totalitems - 1)
+    //    {
+    //        currentindex++;
+    //        updateprogress(currentindex);
+    //    }
+    //}
+    //[jsinvokable("previtem")]
+    //public void previtem()
+    //{
+    //    if (currentindex > 0)
+    //    {
+    //        currentindex--;
+    //        updateprogress(currentindex);
+    //    }
+    //}
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-        {
-            await JSRuntime.InvokeVoidAsync("scrollInterop.registerScrollEvent", DotNetObjectReference.Create(this));
-        }
-    }
+    //protected override async task onafterrenderasync(bool firstrender)
+    //{
+    //    if (firstrender)
+    //    {
+    //        await jsruntime.invokevoidasync("scrollinterop.registerscrollevent", dotnetobjectreference.create(this));
+    //    }
+    //}
     // Controls the progress bar value and updates the progress bar to indicate the user's transversal of the carousel.
     private void UpdateProgress(int index)
     {
-        Console.WriteLine($"DEBUG: UpdateProgress: Index Changed: {index}"); // Debug statement
+        //Console.WriteLine($"DEBUG: UpdateProgress: Index Changed: {index}"); // Debug statement
         progressValue = (index / (double)(totalItems - 1)) * progressStep;
-        Console.WriteLine($"New Progress Value: {progressValue}"); // Debug statement
+        //Console.WriteLine($"New Progress Value: {progressValue}"); // Debug statement
         StateHasChanged();
     }
     protected override void OnInitialized()

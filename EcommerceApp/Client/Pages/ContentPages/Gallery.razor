@@ -104,16 +104,16 @@
             if (serviceResponse != null && serviceResponse.Success)
             {
                 galleryDto.GalleryImages.Add(serviceResponse.Data.FileUrl);
-                Console.WriteLine("All went well. " + serviceResponse.Data.FileUrl);
+             //   Console.WriteLine("All went well. " + serviceResponse.Data.FileUrl);
             }
             else
             {
-                Console.WriteLine($"Something went wrong: {serviceResponse.Message}");
+              //  Console.WriteLine($"Something went wrong: {serviceResponse.Message}");
             }
         }
         else
         {
-            Console.WriteLine("It went bad. Contact site administrator.");
+          //  Console.WriteLine("It went bad. Contact site administrator.");
         }
     }
 }

@@ -1,200 +1,182 @@
 ﻿@page "/admin-dashboard/products"
 @inject IProductService ProductService
 @inject ICategoryService CategoryService
+@inject IAuthService AuthService
 @attribute [Authorize(Roles = "Admin")]
-@implements IDisposable
+@using System.Net.Http.Json
+@inject HttpClient httpClient
+@inject IDialogService DialogService
+@inject NavigationManager NavigationManager
 
+@* Do some loading nstuff here*@
+
+@if (isLoading)
+{<MudContainer Class="lg-py-2" Style="padding-top:10rem">
+    <MudMainContent>
+        <MudText Typo="Typo.h6" Style="text-align:center;">Loading Products</MudText>
+        <MudGrid Class="login-grid" Style="display:flex; justify-content:center;align-self:center; padding-top:100px;">
+            <MudItem xs="12" lg="6" xl="6" Style="align-self:center">
+                     <MudProgressCircular Color="Color.Default" Indeterminate="true" />
+
+                </MudItem>
+            </MudGrid>
+        </MudMainContent>
+    </MudContainer>
+}
+else{
 <MudContainer>
     <MudMainContent>
+        <MudDataGrid T="ProductDto" MultiSelection="true" Items="@products" SortMode="SortMode.Multiple" Filterable="true" QuickFilter="@_quickFilter"
+                     Hideable="true">
+            <ToolBarContent>
+                <MudText Typo="Typo.h6">Products</MudText> 
+                <MudSpacer />
+                <MudTextField @bind-Value="_searchString" Placeholder="Search" Adornment="Adornment.Start" Immediate="true"
+                              AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+                    <MudButton Variant="Variant.Outlined" OnClick="CreateNew">Create New Product</MudButton>
+            </ToolBarContent>
+            <Columns>
+                <SelectColumn T="ProductDto" />
+                <PropertyColumn Property="x => x.Name" Title="Name" />
+                <PropertyColumn Property="x => x.Price" Title="Price" />
+                <PropertyColumn Property="x => x.Description" Title="Description" />
+                <PropertyColumn Property="x => x.StockQuantity" Title="Stock Quantity" />
+                <PropertyColumn Property="x => GetCategoryName(x.CategoryId)" Title="Category" />
+                <TemplateColumn Title="Thumbnail">
+                    <CellTemplate>
+                        <MudImage Src="@context.Item.ImageURI" Style="max-height:100px; max-width:100px; object-fit:contain; margin-right: 16px;" />
+                        <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Edit"
+                                       OnClick="@(() => BeginEdit(context.Item))" />
+                    </CellTemplate>
+                </TemplateColumn>
 
-        <MudText Style="padding:30px" Typo="Typo.h6">Product Listings</MudText>
+            </Columns>
+            <PagerContent>
+                <MudDataGridPager T="ProductDto" />
+            </PagerContent>
+        </MudDataGrid>
 
-        <div class="header">
-            <div class="col">Name</div>
-            <div class="col">Description</div>
-            <div class="col">Price</div>
-            <div class="col">Visible</div>
-            <div class="col"></div>
-            <div class="col"></div>
+        <div class="d-flex flex-wrap mt-4">
+            <MudSwitch @bind-Checked="@_sortNameByLength" Color="Color.Primary">Sort Name Column By Length</MudSwitch>
         </div>
-        @if (isLoading)
-        {
-            <div class="d-flex align-items-center justify-content-center">
-                <MudProgressCircular Color="Color.Primary" Size="Size.Large" Indeterminate="true" />
-            </div>
-        }
-        else
-        {
-            <ProductForm/>
-            @foreach (var product in ProductService.AdminProducts)
-            {
-                @if (product.Editing)
-                {
-                    Console.WriteLine($"Editing product: {product.Name}");
-                    <EditForm Model="editingProduct" OnSubmit="UpdateProduct">
-                        <div class="row">
-                            <div class="col" style="display:block;">
-                                <img src="@product.ImageURI" alt="Thumbnail" class="product-thumbnail" style="display:block;max-height:500px;max-width:500px;"> <!-- This is where the image will be displayed -->
-                            </div>
-                            <div class="col">
-                                <InputText 
-                                    @bind-Value="editingProduct.Name" 
-                                    class="form-control" />
-                            </div>
-                            <div class="col">
-                                <InputText 
-                                    @bind-Value="editingProduct.Description" 
-                                    class="form-control" />
-                            </div>
-                            <div class="col">
-                                <MudTextField Label="Price"
-                                  HelperText="Enter price"
-                                  Class="mt-3"
-                                  @bind-Value="editingProduct.Price" For="@(() => editingProduct.Price)"
-                                  />
-                            </div>
-                            <div class="col col-visible">
-                                <InputCheckbox @bind-Value="editingProduct.Visible" class="big-checkbox" />
-                            </div>
-
-                            <div class="col">
-                                <button type="submit" class="btn btn-primary">
-                                    <i class="oi oi-cloud-upload"></i>
-                                </button>
-                                <button class="btn btn-primary" @onclick="(()=>CancelEditing())">
-                                    <i class="oi oi-circle-x"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </EditForm>
-
-                }else {
-                    <div class="row">
-                        <div class="col">
-                            @product.Name
-                        </div>
-                        <div class="col">
-                            @product.Description
-                        </div>
-                           <div class="col">
-                            @product.Price
-                        </div>
-                        <div class="col col-visible">
-                            <span>@(product.Visible ? "✔️" : "")</span>"
-                        </div>
-                        <div class="col" style="text-align:right;">
-                            <button class="btn btn-primary" @onclick="(()=>EditProduct(product))">
-                                <i class="oi oi-pencil"></i>
-                            </button>
-                            <button class="btn btn-primary" @onclick="(()=>DeleteProduct(product.Id))">
-                                <i class="oi oi-trash"></i>
-                            </button>
-                        </div>
-                    </div>
-                }
-   
-            }
-        }
-        <button class="btn btn-primary" @onclick="(()=>CreateNewProduct())">
-            <i class="oi oi-plus"></i> Add new product
-        </button>
 
     </MudMainContent>
 </MudContainer>
+}
 @code {
-    ProductDto? editingProduct = null;
-    private Dictionary<string, MudBlazor.Color> TagColors = new Dictionary<string, MudBlazor.Color>();
-    private bool isLoading = true; // New flag to track loading state
-    protected override async Task OnInitializedAsync()
+    private bool isLoading = true;
+    private IEnumerable<ProductDto> products = new List<ProductDto>();
+    private Dictionary<Guid, string> categoryNames = new Dictionary<Guid, string>();
+    private string _searchString;
+    private bool _readOnly;
+    private bool _sortNameByLength;
+    private List<string> _events = new();
+    private Guid? editingRowId = null;
+    private bool _editTriggerRowClick;
+    private bool _isCellEditMode;
+    private ProductDto currentEditProduct;
+
+    private async Task BeginEdit(ProductDto product)
     {
-        await CategoryService.GetAllCategoriesAsync();
-        await ProductService.GetAllProductsAsync();
-        isLoading = true; // Start loading
-        await ProductService.GetAdminProducts();
-        isLoading = false; // Loading complete
-        ProductService.ProductsChanged += StateHasChanged;
-    }
-
-    public void Dispose()
-    {
-        ProductService.ProductsChanged -= StateHasChanged;
-    }
-
-    private void CreateNewProduct()
-    {
-        Console.WriteLine("Creating a new product.");
-        editingProduct = ProductService.CreateNewProduct();
-    }
-
-
-    private void EditProduct(ProductDto product)
-    {
-        Console.WriteLine($"Editing category: {product.Name}");
-
-        // If another category is being edited, cancel that edit.
-        if (editingProduct != null)
-        {
-            editingProduct.Editing = false;
-        }
-
-        // Toggle the editing mode for the current category.
-        product.Editing = !product.Editing;
-        editingProduct = product.Editing ? product : null;
-
+        Guid Id = product.Id;
+        NavigationManager.NavigateTo($"/admin-dashboard/products/{Id}");
         StateHasChanged();
     }
 
-
-
-    private async Task UpdateProduct()
+    private Func<ProductDto, object> _sortBy => x =>
     {
-        if (editingProduct != null)
+        if (_sortNameByLength)
+            return x.Name.Length;
+        else
+            return x.Price;
+    };
+    private async void CreateNew()
+    {
+        NavigationManager.NavigateTo($"/admin-dashboard/products/create"); 
+    }
+    private async Task SaveEdit(ProductDto updatedProduct)
+    {
+        try
         {
-            Console.WriteLine($"Updating product: {editingProduct.Name}");
-            if (editingProduct.IsNew)
+            var response = await httpClient.PutAsJsonAsync($"api/product/admin/{updatedProduct.Id}", updatedProduct);
+            if (response.IsSuccessStatusCode)
             {
-                await ProductService.AddProduct(editingProduct);
-                Console.WriteLine("Added new product.");
+                products = (await httpClient.GetFromJsonAsync<ServiceResponse<List<ProductDto>>>("api/product")).Data;
+                CloseDialog();
             }
             else
             {
-                await ProductService.UpdateProduct(editingProduct);
-                Console.WriteLine("Updated existing product.");
+                Console.WriteLine("Failed to update product: " + await response.Content.ReadAsStringAsync());
             }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Exception when trying to save product: " + ex.Message);
+        }
+    }
 
-            // Set the Editing property to false to exit the editing mode.
-            editingProduct.Editing = false;
+    private void CloseDialog()
+    {
+        currentEditProduct = null;
+    }
 
-            // Reset the editing category to clear the form fields.
-            editingProduct = new ProductDto();
+    private Func<ProductDto, bool> _quickFilter => x =>
+    {
+        if (string.IsNullOrWhiteSpace(_searchString))
+            return true;
 
-            // Optionally, refresh the categories list to show the updated data.
-            await ProductService.GetAdminProducts();
+        if ($"{x.Name} {x.Price} {x.Description} {x.StockQuantity} {GetCategoryName(x.CategoryId)}".Contains(_searchString))
+            return true;
 
-            Console.WriteLine("Finished editing product.");
-            StateHasChanged();
+        return false;
+    };
+
+    void StartedEditingItem(ProductDto item)
+    {
+        _events.Insert(0, $"Event = StartedEditingItem, Data = {System.Text.Json.JsonSerializer.Serialize(item)}");
+    }
+
+    void CanceledEditingItem(ProductDto item)
+    {
+        _events.Insert(0, $"Event = CanceledEditingItem, Data = {System.Text.Json.JsonSerializer.Serialize(item)}");
+    }
+
+    void CommittedItemChanges(ProductDto item)
+    {
+        _events.Insert(0, $"Event = CommittedItemChanges, Data = {System.Text.Json.JsonSerializer.Serialize(item)}");
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        isLoading = true;
+        await ProductService.GetAdminProducts();
+        await LoadCategoryNames(); // Ensure this method is called to populate the dictionary
+        isLoading = false;
+        products = (await httpClient.GetFromJsonAsync<ServiceResponse<List<ProductDto>>>("api/products/admin")).Data;
+        CategoryService.OnChange += StateHasChanged;
+    }
+    // Method to populate categoryNames dictionary from your service or API
+    private async Task LoadCategoryNames()
+    {
+        var response = await CategoryService.GetCategoryNamesAsync();
+        if (response != null && response.Success)
+        {
+            categoryNames = response.Data; // Assuming 'Data' holds the Dictionary
         }
         else
         {
-            Console.WriteLine("UpdateProduct called but editingProduct is null.");
+            // Handle the error or fallback scenario
+            Console.WriteLine("Failed to load category names");
         }
     }
-
-
-
-
-    private async Task CancelEditing()
+    private string GetCategoryName(Guid categoryId)
     {
-        Console.WriteLine("Cancelling edit.");
-        editingProduct = new ProductDto();
-        await ProductService.GetAdminProducts();
+        if (categoryNames.TryGetValue(categoryId, out var name))
+        {
+            return name;
+        }
+        return "Unknown";
     }
 
-    private async Task DeleteProduct(Guid id)
-    {
-        Console.WriteLine($"Deleting product with ID: {id}");
-        await ProductService.DeleteProduct(id);
-
-    }
 
 }

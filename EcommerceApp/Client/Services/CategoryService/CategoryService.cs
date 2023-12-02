@@ -1,4 +1,5 @@
-﻿using System.Net.Http.Json;
+﻿using System.Net.Http;
+using System.Net.Http.Json;
 using EcommerceApp.Client.Pages.Admin;
 using EcommerceApp.Shared.DTOs;
 using EcommerceApp.Shared.Models;
@@ -21,7 +22,17 @@ namespace EcommerceApp.Client.Services.CategoryService
         {
             _http = http;
         }
+        public async Task<ServiceResponse<Dictionary<Guid, string>>> GetCategoryNamesAsync()
+        {
+            var response = await _http.GetFromJsonAsync<ServiceResponse<Dictionary<Guid, string>>>("api/categories/names");
+            return response;
+        }
 
+        public async Task<ServiceResponse<string>> GetCategoryName(Guid id)
+        {
+            var result = await _http.GetFromJsonAsync<ServiceResponse<string>>("api/categories/name");
+            return result;
+        }
         public async Task GetAllCategoriesAsync()
         {
             try

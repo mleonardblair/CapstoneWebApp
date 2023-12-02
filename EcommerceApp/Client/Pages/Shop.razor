@@ -12,8 +12,8 @@
 @using System.Security.Claims;
 @*<MudText Typo="Typo.h3">Shop</MudText>*@
 
-<MudMainContent>
-    <MudContainer>
+<MudMainContent Class="shop-pest">
+    <MudContainer Class="shop-pest">
         <div class="page">
             <MudScrollToTop>
                 <MudFab Color="Color.Tertiary" Icon="@Icons.Material.Filled.ArrowCircleUp" />
@@ -76,7 +76,7 @@
     private async Task HandleFavoriteToggle(Guid productId)
     {
         // Logic to toggle favorite status
-        Console.WriteLine($" Product {productId}");
+        //Console.WriteLine($" Product {productId}");
         await ToggleFavorite(productId);
     }
     private async Task ToggleFavorite(Guid productId)
@@ -94,7 +94,7 @@
                 {
                     var favourite = favs.FirstOrDefault(f => f.ProductId == productId);
                     await FavouriteService.DeleteFavouriteAsync(favourite.FavouriteId);
-                    Console.WriteLine($"Deleted favourite : " + favourite.ProductName);
+                 //   Console.WriteLine($"Deleted favourite : " + favourite.ProductName);
                 }
                 else
                 {
@@ -107,10 +107,10 @@
                     try{                       
                         await FavouriteService.AddFavouriteAsync(favourite);
                         var favourited = favs.FirstOrDefault(f => f.ProductId == productId);
-                        Console.WriteLine($"Added favourite : " + favourite.ProductName);
+                      //  Console.WriteLine($"Added favourite : " + favourite.ProductName);
                     }catch(Exception e)
                     {
-                        Console.WriteLine(e.Message);
+                     //   Console.WriteLine(e.Message);
                     }
 
                 }
@@ -216,7 +216,7 @@
             var userIdClaim = user.FindFirst(ClaimTypes.NameIdentifier);
             if (userIdClaim != null && Guid.TryParse(userIdClaim.Value, out Guid userId))
             {
-                Console.WriteLine($" User Id: {userId}");
+               // Console.WriteLine($" User Id: {userId}");
                 return userId;
             }
         }

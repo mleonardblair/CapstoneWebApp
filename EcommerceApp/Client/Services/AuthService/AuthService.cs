@@ -1,4 +1,5 @@
-﻿using EcommerceApp.Server.Models;
+﻿using EcommerceApp.Client.Shared;
+using EcommerceApp.Server.Models;
 using EcommerceApp.Shared.DTOs;
 using EcommerceApp.Shared.Models;
 using System.Net.Http.Json;
@@ -13,6 +14,7 @@ namespace EcommerceApp.Client.Services.AuthService
 
         public string Message { get; set; } = "Loading...";
         public string SnackMessage { get; set; } = "THIS SHOULD NOT BE NULL SET IT TO SOMETHING";
+        public ReusableResultSnackbar Snackbar { get; set; } = new();
         public Severity Severity { get; set; } = Severity.Error;
         public List<AppUserDto> AuthAdminUsers { get; set; }
         public AppUserDto AuthUser { get; set; }
@@ -121,22 +123,15 @@ namespace EcommerceApp.Client.Services.AuthService
         /// </remarks>
         public async Task<ServiceResponse<bool>> UpdateUser(AppUserDto appUserDto)
         {
-            var response = await _httpClient.PutAsJsonAsync("api/user/admin", appUserDto);
+            var response = await _httpClient.PutAsJsonAsync("api/auth/update", appUserDto);
             var result = await response.Content.ReadFromJsonAsync<ServiceResponse<bool>>();
             if (result != null && result.Success == true)
             {
-                ServiceResponse<bool> users = new()
-                {
-                    Data = false,
-                    Success = false,
-                    Message = result.Message,
-                    StatusCode = result.StatusCode
-                };
                 Severity = Severity.Success;
                 SnackMessage = result.Message;
+                
+                return result;
                 await GetAllUserAdmin();
-
-                return users;
             }
             else
             {
@@ -220,13 +215,13 @@ namespace EcommerceApp.Client.Services.AuthService
             }
         }
 
-        public async Task GetUser(Guid id)
+        public async Task GetUser(Guid? id)
         {
             var result = await _httpClient.GetFromJsonAsync<ServiceResponse<AppUserDto>>($"api/auth/{id}");
 
             if (result != null && result?.Data != null)
             {
-                Console.WriteLine($"User: {result.Data.FirstName} {result.Data.LastName}");
+             //   Console.WriteLine($"User: {result.Data.FirstName} {result.Data.LastName}");
                 AuthUser.FirstName = result.Data.FirstName;
                 AuthUser.LastName = result.Data.LastName;
                 AuthUser.Email = result.Data.Email;

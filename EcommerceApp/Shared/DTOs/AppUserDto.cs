@@ -18,7 +18,6 @@ namespace EcommerceApp.Shared.DTOs
         [Required]
         public DateTime DateCreated { get; set; } = DateTime.UtcNow;
         public DateTime DateModified { get; set; }
-        [Required(ErrorMessage = "A valid role is required."), MaxLength(10), EmailAddress]
         public string Role { get; set; } = "Customer"; // default role
 
     }

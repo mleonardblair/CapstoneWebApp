@@ -1,0 +1,26 @@
+﻿@inject HttpClient Http
+@inject ISiteService SiteService
+@inject IAuthService AuthService
+@inject NavigationManager NavigationManager
+@attribute [Route(RouteConstants.FAQ)]
+<PageTitle>Gallery</PageTitle>
+<MudContainer Class="" Style="height: 100vh;">
+    <!-- Updated container height -->
+    <MudMainContent Style="height: 100vh;">
+
+<MudText Typo="Typo.h5" Style="text-align: center;">FAQ</MudText>
+            <MudText Typo="Typo.h6" Style="text-align: center;">Frequently Asked Questions</MudText>
+<MudText Typo="Typo.h6" Style="text-align: center;">Q: How do I place an order?</MudText>
+    <MudText Typo="Typo.h6" Style="text-align: center;">A: You can place an order by clicking on the "Shop" link in the navigation bar. From there, you can browse our products and add them to your cart. Once you are ready to checkout, click on the cart icon in the navigation bar and click "Checkout".</MudText>
+<MudText Typo="Typo.h6" Style="text-align: center;">Q: How do I pay for my order?</MudText>
+    <MudText Typo="Typo.h6" Style="text-align: center;">A: You can pay for your order using a credit card. We accept Visa, Mastercard, American Express, and Discover.</MudText>
+<MudText Typo="Typo.h6" Style="text-align: center;">Q: How do I know if my order was placed successfully?</MudText>
+    <MudText Typo="Typo.h6" Style="text-align: center;">A: You will receive an confirmation screen once your order has been placed.</MudText>
+
+
+
+    </MudMainContent>
+</MudContainer>
+@code {
+
+}

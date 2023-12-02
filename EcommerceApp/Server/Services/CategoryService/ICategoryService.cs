@@ -6,6 +6,7 @@ namespace EcommerceApp.Server.Services.CategoryService
 {
     public interface ICategoryService
     {
+        Task<ServiceResponse<Dictionary<Guid, string>>> GetCategoryNamesAsync();
         Task<ServiceResponse<List<CategoryDto>>> GetAllCategoriesAsync();
         Task<ServiceResponse<CategoryDto>> GetCategoryByIdAsync(Guid Id);
         Task<ServiceResponse<CategoryDto>> PostCategoryByIdAsync(CategoryDto categoryDto);
@@ -21,5 +22,7 @@ namespace EcommerceApp.Server.Services.CategoryService
         Task<ServiceResponse<bool>> AddCategory(CategoryDto category);
         Task<ServiceResponse<List<CategoryDto>>> UpdateCategory(CategoryDto category);
         Task<ServiceResponse<List<CategoryDto>>> DeleteCategory(Guid categoryId);
+        // get category name by id
+        Task<ServiceResponse<string>> GetCategoryNameByIdAsync(Guid id);
     }
 }

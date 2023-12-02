@@ -5,7 +5,9 @@ html, body {
     background-color: #F7F7F7;
     height: auto;
 }
-
+div.mud-main-content{
+    padding-top:0px;
+}
 h1:focus {
     outline: none;
 }

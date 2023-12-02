@@ -46,6 +46,7 @@ namespace EcommerceApp.Server.Services.ProductService
         // Add admin method
         Task<ServiceResponse<bool>> AddProduct(ProductDto productDto);
 
-
+        // Get product by id
+        Task<ServiceResponse<ProductDto>> GetAdminProductById(Guid productId);
     }
 }

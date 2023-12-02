@@ -1,0 +1,126 @@
+﻿@page "/admin-dashboard/products/{Id:guid}"
+@using Microsoft.AspNetCore.Components.Forms
+@using EcommerceApp.Shared.DTOs
+@inject ICategoryService CategoryService
+@inject IProductService ProductService
+@inject HttpClient httpClient
+@inject NavigationManager NavigationManager
+
+@if (Product != null && Id != null)
+{
+    <PageTitle>Edit Product Details</PageTitle>
+    <MudContainer Class="lg-py-2" Style="padding-top:10rem">
+        <MudMainContent>
+            <MudText Typo="Typo.h3" Style="text-align:center;">Edit Product</MudText>
+            <MudGrid Class="edit-grid" Style="display:flex; justify-content:center;align-self:center; padding-top:100px;">
+                <MudItem xs="12" lg="6" xl="6" Style="align-self:center">
+                    <MudCard>
+                        <MudCardContent>
+                            <EditForm Model="Product" OnValidSubmit="HandleSubmit">
+                                <DataAnnotationsValidator />
+
+                                <MudTextField Label="Name" @bind-Value="Product.Name" Required="true" />
+
+                                <MudTextField Label="Description" @bind-Value="Product.Description" Required="true" Multiline="true" />
+
+                                <MudTextField Label="Price" @bind-Value="Product.Price" Required="true" />
+
+                                <MudTextField Label="Image URI" @bind-Value="Product.ImageURI" Required="true" />
+
+                                <MudTextField Label="Stock Quantity" @bind-Value="Product.StockQuantity" Required="true" />
+
+                                <MudSelect Label="Category" @bind-Value="Product.CategoryId" T="Guid">
+                                    @foreach (var category in categoryNames)
+                                    {
+                                        <MudSelectItem Value="@category.Key">@category.Value</MudSelectItem>
+                                    }
+                                </MudSelect>
+
+
+                                <MudCheckBox Label="Visible" @bind-Checked="Product.Visible" />
+
+                                <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="mt-3">Save</MudButton>
+
+                                <ValidationSummary />
+                            </EditForm>
+                        </MudCardContent>
+                    </MudCard>
+                </MudItem>
+
+                <!-- Other UI elements can go here -->
+
+            </MudGrid>
+        </MudMainContent>
+    </MudContainer>
+}
+else
+{
+    <MudAlert Severity="Severity.Error">Product not found</MudAlert>
+}
+@code {
+    [Parameter] public Guid Id { get; set; }
+    private Dictionary<Guid, string> categoryNames = new Dictionary<Guid, string>();
+    private ProductDto Product = null;
+
+    private bool success = false;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await LoadCategoryNames(); // Ensure this method is called to populate the dictionary
+        Product = (await httpClient.GetFromJsonAsync<ServiceResponse<ProductDto>>($"api/products/admin/{Id}")).Data;
+        base.OnParametersSetAsync();
+
+        // Other initialization code
+    }
+
+    private async Task HandleSubmit()
+    {
+        // Validation and update logic goes here
+        //  perform any necessary validation here before saving the data
+        if (string.IsNullOrWhiteSpace(Product.Name) || string.IsNullOrWhiteSpace(Product.Description))
+        {
+            // Handle validation errors if needed
+            success = false;
+        }
+        else
+        {
+            // Save the data here
+            // also add your logic to update the user data on the server
+            // success = await SaveUserDataAsync();
+            success = true;
+            // update user in the database
+            try
+            {
+                var response = await httpClient.PutAsJsonAsync($"api/products/admin/{Product.Id}", Product);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Exception when trying to save user: " + ex.Message); // Log exception
+            }
+
+        }
+    }
+
+    private async Task LoadCategoryNames()
+    {
+        var response = await CategoryService.GetCategoryNamesAsync();
+        if (response != null && response.Success)
+        {
+            categoryNames = response.Data; // Assuming 'Data' holds the Dictionary
+        }
+        else
+        {
+            // Handle the error or fallback scenario
+            Console.WriteLine("Failed to load category names");
+        }
+    }
+    private string GetCategoryName(Guid categoryId)
+    {
+        if (categoryNames.TryGetValue(categoryId, out var name))
+        {
+            return name;
+        }
+        return "Unknown";
+    }
+
+}

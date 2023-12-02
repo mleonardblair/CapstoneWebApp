@@ -15,6 +15,18 @@ namespace EcommerceApp.Server.Controllers
         {
             _categoryService = categoryService;
         }
+        // get category name by id
+        [HttpGet("name")]
+        public async Task<ActionResult<ServiceResponse<string>>> GetCategoryNameByIdAsync(Guid id)
+        {
+            var response = await _categoryService.GetCategoryNameByIdAsync(id);
+            return StatusCode(response.StatusCode, response);
+        }
+        [HttpGet("names")]
+        public async Task<ActionResult<ServiceResponse<Dictionary<Guid, string>>>> GetCategoryNames()
+        {
+            return await _categoryService.GetCategoryNamesAsync();
+        }
 
         [HttpDelete("{categoryId}")]
         public async Task<ActionResult<ServiceResponse<bool>>> DeleteCategoryByIdAsync(Guid categoryId)

@@ -7,6 +7,7 @@ namespace EcommerceApp.Shared.DTOs
 {
     public class ProductDto
     {
+        [Key]
         public Guid Id { get; set; } = Guid.NewGuid();
         [Required(ErrorMessage = "A name is required."), MaxLength(50)]
         public string Name { get; set; } = string.Empty;

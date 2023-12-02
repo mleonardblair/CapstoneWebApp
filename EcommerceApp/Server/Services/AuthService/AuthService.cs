@@ -276,8 +276,14 @@ namespace EcommerceApp.Server.Services.AuthService
                     };
                 }
                 // Check for email uniqueness only on non-deleted users as if deleted they wont be visible so we dont want confusion with the user names being taken they cant see.
-                var isEmailUsed = await _context.ApplicationUsers
-                                .AnyAsync(c => c.Email == appUser.Email);
+               
+                // get the id of the user who has an email that is the same as the email passed in appUser
+                var userId = await _context.ApplicationUsers
+                                .Where(c => c.Email == appUser.Email)
+                                .Select(c => c.Id)
+                                .FirstOrDefaultAsync();
+            // if the user id is not the same as the id passed in appUser then the email is already taken
+                var isEmailUsed = userId != appUser.Id && userId != Guid.Empty;
                 if (isEmailUsed)
                 {
                     return new ServiceResponse<bool>
@@ -288,21 +294,7 @@ namespace EcommerceApp.Server.Services.AuthService
                         StatusCode = 400 // Bad Request
                     };
                 }
-                var isNameUsed = await _context.ApplicationUsers
-                                    .AnyAsync(c => c.FirstName == appUser.FirstName ||
-                                    c.LastName == appUser.LastName);
-
-                if (isNameUsed)
-                {
-                    return new ServiceResponse<bool>
-                    {
-                        Success = false,
-                        Message = "User name already exists.",
-                        Data = false,
-                        StatusCode = 400 // Bad Request
-                    };
-                }
-
+             
                 // Check if the user already exists
                 var dbUser = await _context.ApplicationUsers.FirstOrDefaultAsync(c => c.Id == appUser.Id);
                 if (dbUser == null)
@@ -324,7 +316,8 @@ namespace EcommerceApp.Server.Services.AuthService
                 dbUser.Role = appUser.Role;
                 dbUser.Email = appUser.Email;
                 
-
+             // update the user in the database acording to the user we have 
+             _context.ApplicationUsers.Update(dbUser);
                 try
                 {
                     await _context.SaveChangesAsync();

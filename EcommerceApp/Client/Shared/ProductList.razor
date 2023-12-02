@@ -4,13 +4,13 @@
 @inject IFavouriteService FavouriteService
 @inject NavigationManager NavigationManager
 @implements IDisposable 
-<MudContainer Style="flex-direction:unset;">
+<MudContainer Class="pest" Style="flex-direction:unset; padding-top:0; ">
+<PageTitle>Shop - </PageTitle>
+@if (ProductService.Products == null){
     <ReusableResultSnackbar @ref="resultSnackbar"
                             Message="@message"
                             Severity="@s" />
     <MudText Typo="Typo.h5">@ProductService.GetDynamicHeading()</MudText><MudButton OnClick="HandleClearFilterSortSearch">Clear</MudButton>
-@if (ProductService.Products == null )
-{
     <MudText Typo="Typo.h6" Align="Align.Left" Style="display:flex; flex-grow:1;">@ProductService.Message</MudText>
     <div class="container-center">
         <MudProgressCircular Color="Color.Primary" Size="Size.Large" Indeterminate="true" />
@@ -23,7 +23,7 @@ else if(ProductService.Products.Count > 0)
         @foreach (var product in ProductService.Products)
         {
             var imageSrc = product.ImageURI ?? "/images/img_placeholder.jpg";
-            Console.WriteLine(imageSrc);
+         //   Console.WriteLine(imageSrc);
             <li class="media my-3 gx-3" style="padding-top:20px;min-height:200px;">
                 <hr style= "border-top-color:black; border: 2px;"/>
                 <div class="media-img-wrapper me-3">
@@ -60,7 +60,7 @@ else if(ProductService.Products.Count > 0)
             <hr/>
         }
     </ul>
-    <div class="d-flex flex-column align-center" style="bottom:0;">
+    <div class="d-flex flex-column align-center" style="bottom:0; justify-content:center;align-items:center;text-align:center">
         <MudPagination Size="Size.Medium"
             Variant="Variant.Text"
             Color="Color.Primary"
@@ -73,12 +73,9 @@ else if(ProductService.Products.Count > 0)
 }else
 {    // If 0 products returns from a search, for instance
     
-    <div style="height:100%; width:auto; margin:auto;">
-    <MudText Typo="Typo.h4" Align="Align.Center" Style="display:flex; flex-grow:1;">@ProductService.Message</MudText>
-    <MudPaper Style="height:auto;">
-
-    </MudPaper>
-    <MudImage Src="/images/empty-bench-empty-productlist.png" />
+    <div style="height:100%; ">
+    <MudText Typo="Typo.h4" Align="Align.Center">@ProductService.Message</MudText>
+    <MudImage Src="/images/empty-bench-empty-productlist.png" Style="max-width:1"/>
     </div>
 }
 </MudContainer>
