@@ -14,7 +14,7 @@ namespace EcommerceApp.Server.Services.PaymentService
         private readonly IAuthService _authService;
         private readonly IOrderService _orderService;
         private readonly IConfiguration _configuration;
-        const string secret = "whsec_35e588449cd5269a49515f30c909ba2a40999a55bbf7cc01bbf7d15741c97075";
+        const string secret = "whsec_n4T0DvXnmtPIeFjy6KXG0xmmvH5AbwTQ";
         public PaymentService(ICartService cartService, 
             IAuthService authService, 
             IOrderService orderService,
