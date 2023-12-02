@@ -88,6 +88,8 @@ else if(ProductService.Products.Count > 0)
 </MudContainer>
 @code {
     private ClaimsPrincipal User;
+    private bool productsLoaded = false; // Flag to indicate if products are loaded
+
     [Parameter] 
     public EventCallback<Guid> OnFavoriteToggle { get; set; }
     [Parameter] 
@@ -121,21 +123,44 @@ else if(ProductService.Products.Count > 0)
     {
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         User = authState.User;
-        ProductService.ProductsChanged += StateHasChanged;
+        ProductService.ProductsChanged += OnProductsChanged;
 
-        var userId = await GetUserIdAsync();
-        if (userId.HasValue)
-        {
-            var userFavorites = await FavouriteService.GetFavouritesByUserId(userId.Value);
-            if (userFavorites.Success && userFavorites.Data != null)
-            {
-                UpdateProductFavoriteStatus(userFavorites.Data);
-            }
-        }
-
+        await LoadProductsAsync();
         await base.OnInitializedAsync();
     }
 
+    // if productschanged is called, then we need to update the favorite status of the products in the list in a new method so that the updateproductfavoritestatus doesnt get called when the products havent loaded yet. 
+    private async Task LoadProductsAsync()
+    {
+
+        productsLoaded = true;
+        await UpdateFavoritesIfNeeded();
+    }
+
+    private async Task UpdateFavoritesIfNeeded()
+    {
+        if (productsLoaded)
+        {
+            var userId = await GetUserIdAsync();
+            if (userId.HasValue)
+            {
+                if(ProductService.Products.Any() && ProductService.Products.Count != 0)
+                {
+                    var userFavorites = await FavouriteService.GetFavouritesByUserId(userId.Value);
+                    if (userFavorites.Success && userFavorites.Data != null)
+                    {
+                        UpdateProductFavoriteStatus(userFavorites.Data);
+                    }
+                }
+            }
+        }
+    }
+
+    private async void OnProductsChanged()
+    {
+        StateHasChanged();
+        await UpdateFavoritesIfNeeded();
+    }
     private void UpdateProductFavoriteStatus(List<FavouriteProductResponse> userFavorites)
     {
         foreach (var product in ProductService.Products)
