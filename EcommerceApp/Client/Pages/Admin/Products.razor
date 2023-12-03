@@ -47,6 +47,8 @@ else{
                         <MudImage Src="@context.Item.ImageURI" Style="max-height:100px; max-width:100px; object-fit:contain; margin-right: 16px;" />
                         <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Edit"
                                        OnClick="@(() => BeginEdit(context.Item))" />
+                            <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Delete"
+                                           OnClick="@(() => BeginDelete(context.Item))" />
                     </CellTemplate>
                 </TemplateColumn>
 
@@ -82,7 +84,21 @@ else{
         NavigationManager.NavigateTo($"/admin-dashboard/products/{Id}");
         StateHasChanged();
     }
-
+    private async Task BeginDelete(ProductDto product)
+    {
+        // delete product
+        var response = await httpClient.DeleteAsync($"api/product/admin/{product.Id}");
+        if (response.IsSuccessStatusCode)
+        {
+            products = (await httpClient.GetFromJsonAsync<ServiceResponse<List<ProductDto>>>("api/product")).Data;
+            CloseDialog();
+        }
+        else
+        {
+            Console.WriteLine("Failed to delete product: " + await response.Content.ReadAsStringAsync());
+        }
+        StateHasChanged();
+    }
     private Func<ProductDto, object> _sortBy => x =>
     {
         if (_sortNameByLength)

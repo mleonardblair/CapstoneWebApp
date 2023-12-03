@@ -1,6 +1,7 @@
 ﻿@using System.Security.Claims
 @using System.Text;
 @inject IProductService ProductService
+@inject AuthenticationStateProvider AuthenticationStateProvider
 @inject IFavouriteService FavouriteService
 @inject NavigationManager NavigationManager
 @implements IDisposable 
@@ -38,6 +39,9 @@ else if(ProductService.Products.Count > 0)
                         <h4 class="mb-0">@product.Name</h4>
                     </a>
                     <p>@product.Description</p>
+
+
+                        @if (!User.IsInRole("Admin")){
                     <div style="align-items:flex-end;  justify-content:flex-end; display:flex;">
                             @if(product.isFavourite)
                             {
@@ -54,6 +58,7 @@ else if(ProductService.Products.Count > 0)
                                    OnClick="@(() => HandleFavoriteClick(product.Id))" />
                             }
                     </div>
+                    }
                     <h5 class="price" style="padding:0px; margin:0px;">
                         $@product.Price
                     </h5>
@@ -82,6 +87,7 @@ else if(ProductService.Products.Count > 0)
 }
 </MudContainer>
 @code {
+    private ClaimsPrincipal User;
     [Parameter] 
     public EventCallback<Guid> OnFavoriteToggle { get; set; }
     [Parameter] 
@@ -93,6 +99,12 @@ else if(ProductService.Products.Count > 0)
             await OnClearClick.InvokeAsync();
         }
     }
+
+    /// <summary>
+    /// When the user clicks the favorite button, this method is called.
+    /// </summary>
+    /// <param name="productId"></param>
+    /// <returns></returns>
     private async Task HandleFavoriteClick(Guid productId)
     {
         if (OnFavoriteToggle.HasDelegate)
@@ -101,17 +113,53 @@ else if(ProductService.Products.Count > 0)
         }
     }
 
-    protected override async Task OnInitializedAsync()
-    {
-        // Subscribe to the ProductsChanged event to re-render the component when the event is raised by the ProductService class. This is necessary because the ProductService class is a singleton and the Products property is only set once when the application starts.
-        ProductService.ProductsChanged += StateHasChanged;
-    }
-   
     public void Dispose()
     {
         ProductService.ProductsChanged -= StateHasChanged;
     }
-  
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        User = authState.User;
+        ProductService.ProductsChanged += StateHasChanged;
+
+        var userId = await GetUserIdAsync();
+        if (userId.HasValue)
+        {
+            var userFavorites = await FavouriteService.GetFavouritesByUserId(userId.Value);
+            if (userFavorites.Success && userFavorites.Data != null)
+            {
+                UpdateProductFavoriteStatus(userFavorites.Data);
+            }
+        }
+
+        await base.OnInitializedAsync();
+    }
+
+    private void UpdateProductFavoriteStatus(List<FavouriteProductResponse> userFavorites)
+    {
+        foreach (var product in ProductService.Products)
+        {
+            product.isFavourite = userFavorites.Any(fav => fav.ProductId == product.Id);
+        }
+    }
+
+    private async Task<Guid?> GetUserIdAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity?.IsAuthenticated == true)
+        {
+            var userIdClaim = user.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim != null && Guid.TryParse(userIdClaim.Value, out Guid userId))
+            {
+                return userId;
+            }
+        }
+        return null; // User is not authenticated or the claim is not a valid Guid
+    }
+
     // Only change page if its not the current page to avoid infinite loop.
     private void HandlePageChanged(int newPage)
     {

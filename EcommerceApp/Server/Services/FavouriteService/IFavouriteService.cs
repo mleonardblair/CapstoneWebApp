@@ -12,6 +12,8 @@ namespace EcommerceApp.Server.Services.FavouriteService
         Task<ServiceResponse<List<FavouriteProductResponse>>> GetAllFavouritesAsync();
         Task<ServiceResponse<FavouriteProductResponse>> UpdateFavouriteAsync(FavouriteDto favourite);
         Task<ServiceResponse<bool>> DeleteFavouriteAsync(Guid id);
+
+        Task<ServiceResponse<bool>> IsProductFavoritedByUser(Guid productId, Guid userId);
     }
 }
 

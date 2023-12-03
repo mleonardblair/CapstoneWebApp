@@ -39,7 +39,7 @@
                                  Xs="12" Sm="12" Md="5" Lg="5" Xl="5"  />
                         <ReusableCardDisplay IconPath="/images/acctmgmt/pay-svgrepocom2.svg" 
                                  Title="My Orders" 
-                                 OnClick="GoToPayments"
+                                 OnClick="GoToOrders"
                                  Xs="12" Sm="12" Md="5" Lg="5" Xl="5"  />
                     </MudGrid>
                 </MudContainer>
@@ -71,7 +71,7 @@
     private string UserName { get; set; }
     private void GoToProfile() => NavigationManager.NavigateTo("/account-dashboard/profile");
     private void GoToOrders() => NavigationManager.NavigateTo("/account-dashboard/orders");
-    private void GoToFavourites() => NavigationManager.NavigateTo("/account-dashboard/favorites");
+    private void GoToFavourites() => NavigationManager.NavigateTo("/account-dashboard/favourites");
     private void GoToPayments() => NavigationManager.NavigateTo("/account-dashboard/payments");
 
     // You can add additional methods for navigation or other actions for each card

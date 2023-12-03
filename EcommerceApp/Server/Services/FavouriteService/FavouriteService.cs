@@ -83,13 +83,16 @@ namespace EcommerceApp.Server.Services.FavouriteService
         }
 
 
-        public async Task<ServiceResponse<bool>> DeleteFavouriteAsync(Guid productId)
+        public async Task<ServiceResponse<bool>> DeleteFavouriteAsync(Guid favouriteId)
         {
             var response = new ServiceResponse<bool>();
-            var userId =  _authService.GetUserId(); // get the current logged in user. will always work due to authentication check on client.
-            // check to see if the product id exists in the favourites table for the current user
-            var favourite = await _context.Favourites.FirstOrDefaultAsync(f => f.ProductId == productId && f.ApplicationUserId == userId);
+            var userId = _authService.GetUserId(); // Get the current logged-in user.
 
+            // Directly find the favourite matching both favouriteId and userId
+            var favourite = await _context.Favourites
+                                          .FirstOrDefaultAsync(f => f.Id == favouriteId && f.ApplicationUserId == userId);
+
+            // Check if the favourite was found
             if (favourite == null)
             {
                 return new ServiceResponse<bool>
@@ -106,23 +109,63 @@ namespace EcommerceApp.Server.Services.FavouriteService
                 {
                     _context.Favourites.Remove(favourite);
                     await _context.SaveChangesAsync();
+
                     return new ServiceResponse<bool>
                     {
                         Data = true,
                         Success = true,
                         Message = "Favourite deleted successfully.",
                         StatusCode = 200
-
                     };
                 }
                 catch (Exception ex)
                 {
-                    response.Success = false;
-                    response.Message = ex.Message;
+                    return new ServiceResponse<bool>
+                    {
+                        Data = false,
+                        Success = false,
+                        Message = ex.Message,
+                        StatusCode = 500 // Internal Server Error
+                    };
                 }
             }
+        }
 
-            return response;
+
+        public async Task<ServiceResponse<bool>> IsProductFavoritedByUser(Guid productId, Guid userId)
+        {
+            var response = new ServiceResponse<bool>();
+            try
+            {
+                // Check if the product is already favourited by the user
+                var favourite = await _context.Favourites.FirstOrDefaultAsync(f => f.ProductId == productId && f.ApplicationUserId == userId);
+
+                // If the favourite exists, return true
+                if (favourite != null)
+                {
+                    response.Data = true;
+                    response.Success = true;
+                    response.Message = "Product is favourited by user.";
+                    response.StatusCode = 200;
+                    return response;
+                }
+                else
+                {
+                    response.Data = false;
+                    response.Success = true;
+                    response.Message = "Product is not favourited by user.";
+                    response.StatusCode = 200;
+                    return response;
+                }
+            }
+            catch (Exception ex)
+            {
+                response.Data = false;
+                response.Success = false;
+                response.Message = ex.Message;
+                response.StatusCode = 500;
+                return response;
+            }
         }
 
 

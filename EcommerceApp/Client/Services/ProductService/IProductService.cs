@@ -62,7 +62,7 @@ namespace EcommerceApp.Client.Services.ProductService
         Task<ServiceResponse<ProductDto>> GetAdminProductById(Guid productId);
         Task<ServiceResponse<bool>> AddProduct(ProductDto productDto);
         Task<ServiceResponse<bool>> UpdateProduct(ProductDto productDto);
-        Task<ServiceResponse<List<ProductDto>>> DeleteProduct(Guid productId);
+        Task<ServiceResponse<bool>> DeleteProduct(Guid productId);
         ProductDto CreateNewProduct();
         void ResetSnackbarMessage();
         Task GetAdminProducts();

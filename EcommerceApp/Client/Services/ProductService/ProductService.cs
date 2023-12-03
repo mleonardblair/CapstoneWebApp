@@ -914,40 +914,27 @@ namespace EcommerceApp.Client.Services.ProductService
 
         }
 
-        public async Task<ServiceResponse<List<ProductDto>>> DeleteProduct(Guid productId)
+        public async Task<ServiceResponse<bool>> DeleteProduct(Guid productId)
         {
             var response = await _http.DeleteAsync($"api/products/admin/{productId}");
-            var result = await response.Content.ReadFromJsonAsync<ServiceResponse<List<ProductDto>>>();
+            var result = await response.Content.ReadFromJsonAsync<ServiceResponse<bool>>();
             if (result != null && result.Success == true)
             {
   
-                ServiceResponse<List<ProductDto>> products = new()
-                {
-                    Data = result.Data,
-                    Success = result.Success,
-                    Message = result.Message,
-                    StatusCode = result.StatusCode
-                };
+              
                 Severity = Severity.Success;
                 SnackMessage = result.Message;
                 await GetAdminProducts();
-
-                return products;
+                return result;
             }
             else // the operation failed.
             {
-                ServiceResponse<List<ProductDto>> products = new()
-                {
-                    Data = result.Data,
-                    Success = result.Success,
-                    Message = result.Message,
-                    StatusCode = result.StatusCode
-                };
+           
                 Severity = Severity.Warning;
                 SnackMessage = result.Message;
                 await GetAdminProducts();
 
-                return products;
+                return result;
             }
 
 

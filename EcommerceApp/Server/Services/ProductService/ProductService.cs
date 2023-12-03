@@ -1329,27 +1329,27 @@ namespace EcommerceApp.Server.Services.ProductService
             var product = await _context.Products.FirstOrDefaultAsync(e => e.Id == Id);
             return product == null ? throw new KeyNotFoundException($"Product with Id {Id} not found.") : product;
         }
-        public async Task<ServiceResponse<List<ProductDto>>> DeleteProduct(Guid productId)
+        public async Task<ServiceResponse<bool>> DeleteProduct(Guid productId)
         {
-            var response = new ServiceResponse<List<ProductDto>>()
+            var response = new ServiceResponse<bool>()
             {
-                Data = new List<ProductDto>() // Ensure Data is always present
+                Data = false // Ensure Data is always present
             };
             try
             {
                 Product product = await GetProductById(productId); // Make sure this method exists and fetches the product by id
                 if (product == null)
                 {
-                    response.Data = null;
+                    response.Data = false;
                     response.Success = false;
                     response.Message = "Product not found.";
                     response.StatusCode = 404; // Not Found
-                    return response;
+                    return response; ;
                 }
 
                 if (product.Deleted)
                 {
-                    response.Data = null;
+                    response.Data = false;
                     response.Success = false;
                     response.Message = "Product already deleted.";
                     response.StatusCode = 400; // Bad Request
@@ -1361,14 +1361,14 @@ namespace EcommerceApp.Server.Services.ProductService
 
                 if (result <= 0)
                 {
-                    response.Data = null;
+                    response.Data = false;
                     response.Success = false;
                     response.Message = "Failed to delete product.";
                     response.StatusCode = 400; // Bad Request
                     return response;
                 }
 
-                response = await GetAdminProducts(); // Refresh the list of products to reflect the deletion
+         
                 response.Success = true;
                 response.Message = "Product deleted successfully.";
                 response.StatusCode = 200; // OK
@@ -1418,21 +1418,20 @@ namespace EcommerceApp.Server.Services.ProductService
                 };
             }
 
-            // Check if the product exists
-            var dbProduct = new Product();/*await _context.Products.FirstOrDefaultAsync(p => p.Id == productDto.Id);
+            // Fetch the existing product from the database
+            var dbProduct = await _context.Products.FirstOrDefaultAsync(p => p.Id == productDto.Id);
             if (dbProduct == null)
             {
-                return new ServiceResponse<List<ProductDto>>
+                return new ServiceResponse<bool>
                 {
                     Success = false,
                     Message = "Product not found.",
-                    Data = null,
+                    Data = false,
                     StatusCode = 404 // Not Found
                 };
-            }*/
+            }
 
             // Update product properties
-            dbProduct.Id = productDto.Id;
             dbProduct.Name = productDto.Name;
             dbProduct.Description = productDto.Description;
             dbProduct.Price = productDto.Price;
@@ -1443,13 +1442,10 @@ namespace EcommerceApp.Server.Services.ProductService
             dbProduct.DateModified = DateTime.UtcNow;
             // Add or update additional properties as needed
 
-            // Handling the images, assuming ProductDto.Images is the source of truth
-            //dbProduct.ImagesJson = JsonConvert.SerializeObject(productDto.Images);
-            _context.Products.Update(dbProduct);
+            // Save changes
             try
             {
                 await _context.SaveChangesAsync();
-             
                 return new ServiceResponse<bool>
                 {
                     Success = true,
@@ -1460,7 +1456,7 @@ namespace EcommerceApp.Server.Services.ProductService
             }
             catch (Exception ex)
             {
-                // Log the exception details here, including 'ex' information
+                // Log the exception details here
 
                 return new ServiceResponse<bool>
                 {
@@ -1471,7 +1467,6 @@ namespace EcommerceApp.Server.Services.ProductService
                 };
             }
         }
-
         public async Task<ServiceResponse<bool>> AddProduct(ProductDto productDto)
         {
             // Validate the product name

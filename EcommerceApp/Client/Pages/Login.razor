@@ -64,7 +64,6 @@
             await CartService.GetCartItemsCount();
             ShowSnackbar();
             // Wait 1 second so it shows the snackbar before redirecting.
-            await Task.Delay(1000);
             NavigationManager.NavigateTo("/");
         } else
         {

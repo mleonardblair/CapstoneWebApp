@@ -93,6 +93,8 @@ else
             {
                 Product.Id = Id;
                 var response = await httpClient.PutAsJsonAsync($"api/products/admin/{Id}", Product);
+                // redirect to product list page for admin
+                NavigationManager.NavigateTo("/admin-dashboard/products");
             }
             catch (Exception ex)
             {
@@ -101,7 +103,10 @@ else
 
         }
     }
-
+    /// <summary>
+    /// When called this method loads the category names from the server and populates the dictionary
+    /// </summary>
+    /// <returns></returns>
     private async Task LoadCategoryNames()
     {
         var response = await CategoryService.GetCategoryNamesAsync();
@@ -115,6 +120,11 @@ else
             Console.WriteLine("Failed to load category names");
         }
     }
+    /// <summary>
+    /// This method is called by the MudSelect component to get the category name for the given category ID
+    /// </summary>
+    /// <param name="categoryId"></param>
+    /// <returns></returns>
     private string GetCategoryName(Guid categoryId)
     {
         if (categoryNames.TryGetValue(categoryId, out var name))

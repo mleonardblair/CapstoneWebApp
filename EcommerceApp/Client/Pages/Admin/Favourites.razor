@@ -1,21 +1,36 @@
-﻿@page "/account-dashboard/favorites"
+﻿@page "/account-dashboard/favourites"
 @using System.Security.Claims;
 @inject IFavouriteService FavouriteService
 @inject AuthenticationStateProvider AuthenticationStateProvider
 
-<PageTitle>Favourites</PageTitle>
+
+<PageTitle>Wishlist</PageTitle>
 
 @if (_isLoading)
 {
-    <p>Loading...</p>
+     <div class="d-flex justify-content-center align-items-center" style="height: 100vh;">
+<MudProgressCircular Color="Color.Primary" Size="Size.Large" Indeterminate="true" />
+         </div>
 }
-else if (!_favourites.Any())
+else if (FavouriteService.Favourites== null || FavouriteService.Favourites.Count == 0)
 {
-    <p>No favourites found.</p>
+    <div class="d-flex justify-content-center align-items-center" style="height:100vh">
+
+    <div class="">
+        <MudText Typo="Typo.h5"> You've Not Favourited Anything.</MudText>
+    </div>
+    <div class="">
+        <MudText Typo="Typo.h5"> To Add Favourites Go To </MudText>
+
+        <a href="/shop/products/1" style="color:blue:"><MudText Typo="Typo.h5"> The Shop </MudText></a>
+
+        <MudText Typo="Typo.h5"> Page.</MudText>
+    </div>
+    </div>
 }
 else
 {
-    <MudTable Items="@_favourites">
+    <MudTable Items="@FavouriteService.Favourites">
         <HeaderContent>
             <MudTh>Favourite</MudTh>
             <MudTh>Price</MudTh>
@@ -32,57 +47,79 @@ else
         </RowTemplate>
     </MudTable>
 }
-
+<ReusableResultSnackbar @ref="@resultSnackbar"
+                        Message="@FavouriteService.SnackMessage"
+                        Severity="@FavouriteService.Severity" />
 @code {
-    private List<FavouriteProductResponse> _favourites = new();
     private bool _isLoading = true;
-
+    private ReusableResultSnackbar? resultSnackbar;
+    /// <summary>
+    /// This method is called when the component is initialized.
+    /// </summary>
+    /// <returns></returns>
     protected override async Task OnInitializedAsync()
     {
-        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-        var user = authState.User;
+        FavouriteService.FavouritesChanged += StateHasChanged;
 
-        if (user.Identity.IsAuthenticated)
+        FavouriteService.UserId = await GetUserIdAsync();
+        if (FavouriteService.UserId.HasValue)
         {
-            var userId = await GetUserIdAsync();
-            // Use userId as needed, for example:
-            if (userId.HasValue)
-            {
-                
-                await LoadFavourites(userId);
-            }
+            await LoadFavourites(FavouriteService.UserId);
         }
 
         _isLoading = false;
     }
 
+    /// <summary>
+    /// Called when the component is disposed.
+    /// </summary>
+    public void Dispose()
+    {
+        FavouriteService.FavouritesChanged -= StateHasChanged;
+    }
+    /// <summary>
+    /// This method loads the favourites for the specified user.
+    /// </summary>
+    /// <param name="userId"></param>
+    /// <returns></returns>
     private async Task LoadFavourites(Guid? userId)
     {
-        var result = await FavouriteService.GetFavouritesByUserId(userId);
-        if (result.Success)
-        {
-            _favourites = result.Data;
-        }
-        else
-        {
-            // Handle the error case, e.g., show a notification to the user.
-        }
+        FavouriteService.Favourites = (await FavouriteService.GetFavouritesByUserId(userId)).Data;
+        StateHasChanged();
+
     }
 
+    /// <summary>
+    /// This method removes the specified favourite.
+    /// </summary>
+    /// <param name="favouriteId"></param>
+    /// <returns></returns>
     private async Task RemoveFavourite(Guid favouriteId)
     {
         var result = await FavouriteService.DeleteFavouriteAsync(favouriteId);
         if (result.Success)
         {
-            // Optionally, show a success notification to the user.
-            // Remove the favourite from the UI list.
-            _favourites.RemoveAll(f => f.FavouriteId == favouriteId);
+            FavouriteService.SnackMessage = $"Favourite removed successfully.";
+            FavouriteService.Severity = Severity.Success;
+
         }
         else
         {
-            // Optionally, show an error notification to the user.
+            FavouriteService.SnackMessage = $"Favourite removed failed!.";
+            FavouriteService.Severity = Severity.Error;
         }
+        resultSnackbar?.Show();
+        FavouriteService?.ResetSnackbarMessage();
+        await LoadFavourites(FavouriteService.UserId);
+
+
+        // No need to manually update the list or call StateHasChanged here
     }
+
+    /// <summary>
+    /// This method gets the current user's ID.
+    /// </summary>
+    /// <returns></returns>
     private async Task<Guid?> GetUserIdAsync()
     {
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();

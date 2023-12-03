@@ -40,7 +40,7 @@ namespace EcommerceApp.Server.Services.ProductService
         // Add admin methods
         Task<ServiceResponse<List<ProductDto>>> GetAdminProducts();
         // Delete admin method
-        Task<ServiceResponse<List<ProductDto>>> DeleteProduct(Guid productId);
+        Task<ServiceResponse<bool>> DeleteProduct(Guid productId);
         // Update admin method
         Task<ServiceResponse<bool>> UpdateProduct(ProductDto productDto);
         // Add admin method
