@@ -89,4 +89,4 @@ This is a full-stack e-commerce application built with **Blazor WebAssembly** fo
 
 ## 🚧 Project Status
 
-This project is under active development as part of a capstone initiative. Contributions, suggestions, and testing feedback are welcome.
+This project is under active development as part of an expanded initiative. Contributions, suggestions, and testing feedback are welcome.
