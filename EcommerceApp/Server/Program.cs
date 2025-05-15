@@ -21,7 +21,7 @@ using System.Text;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-var connectionString = builder.Configuration.GetConnectionString("AzureDBConnection");
+var connectionString = builder.Configuration.GetConnectionString("DevelopmentLocalConnection");
 builder.Services.AddSingleton(x => new BlobServiceClient(builder.Configuration.GetConnectionString("AzureBlobStorage")));
 builder.Services.AddSwaggerGen(c =>
 {
@@ -48,8 +48,8 @@ builder.Services.AddScoped<IProductTagService, ProductTagService>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
 builder.Services.AddScoped<ICartService, CartService>();
 builder.Services.AddScoped<IFavouriteService, FavouriteService>();
-builder.Services.AddScoped<ISiteService, SiteService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<ISiteService, SiteService>();
 // Add HttpContextAccessor
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

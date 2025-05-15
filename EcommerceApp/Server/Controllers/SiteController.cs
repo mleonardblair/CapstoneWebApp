@@ -68,7 +68,7 @@ namespace EcommerceApp.Server.Controllers
         }
 
         /// <summary>
-        /// When called this method will create a 
+        /// When called this method will create a  
         /// </summary>
         /// <param name="file"></param>
         /// <returns></returns>
@@ -104,7 +104,10 @@ namespace EcommerceApp.Server.Controllers
         }
 
 
-
+        /// <summary>
+        /// This method will return the gallery data for testing and for display.
+        /// </summary>
+        /// <returns></returns>
         [HttpGet("gallery")]
         public async Task<ActionResult<ServiceResponse<GalleryDto>>> GetGallery()
         {

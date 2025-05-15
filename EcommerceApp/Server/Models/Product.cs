@@ -19,7 +19,9 @@ namespace EcommerceApp.Server.Models
         public decimal Price { get; set; }
         public string ImageURI { get; set; }
         public string ImagesJson { get; set; } = JsonConvert.SerializeObject(new string[0]);
+        [NotMapped]
         public bool Visible { get; set; } = true;
+        [NotMapped]
         public bool Deleted { get; set; } = false;
         [NotMapped]
         public bool Editing { get; set; } = false;
@@ -56,6 +58,7 @@ namespace EcommerceApp.Server.Models
         [Required]
         public DateTime DateCreated { get; set; } = DateTime.UtcNow;
         public DateTime DateModified { get; set; }
+
 
         public ICollection<ProductTag> ProductTags { get; set; } = new List<ProductTag>();
         public ICollection<Favourite> Favourites { get; set; } = new List<Favourite>();

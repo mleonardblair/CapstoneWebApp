@@ -58,7 +58,7 @@ namespace EcommerceApp.Server.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Addresses");
+                    b.ToTable("Addresses", (string)null);
                 });
 
             modelBuilder.Entity("EcommerceApp.Server.Models.ApplicationUser", b =>
@@ -106,7 +106,7 @@ namespace EcommerceApp.Server.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("ApplicationUsers");
+                    b.ToTable("ApplicationUsers", (string)null);
                 });
 
             modelBuilder.Entity("EcommerceApp.Server.Models.CartItem", b =>
@@ -133,7 +133,7 @@ namespace EcommerceApp.Server.Migrations
 
                     b.HasIndex("ShoppingCartId");
 
-                    b.ToTable("CartItems");
+                    b.ToTable("CartItems", (string)null);
                 });
 
             modelBuilder.Entity("EcommerceApp.Server.Models.Category", b =>
@@ -169,7 +169,7 @@ namespace EcommerceApp.Server.Migrations
                     b.HasIndex("Name")
                         .IsUnique();
 
-                    b.ToTable("Categories");
+                    b.ToTable("Categories", (string)null);
                 });
 
             modelBuilder.Entity("EcommerceApp.Server.Models.Favourite", b =>
@@ -197,7 +197,7 @@ namespace EcommerceApp.Server.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("Favourites");
+                    b.ToTable("Favourites", (string)null);
                 });
 
             modelBuilder.Entity("EcommerceApp.Server.Models.Order", b =>
@@ -234,7 +234,7 @@ namespace EcommerceApp.Server.Migrations
 
                     b.HasIndex("ApplicationUserId");
 
-                    b.ToTable("Orders");
+                    b.ToTable("Orders", (string)null);
                 });
 
             modelBuilder.Entity("EcommerceApp.Server.Models.OrderItem", b =>
@@ -261,7 +261,7 @@ namespace EcommerceApp.Server.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("OrderItems");
+                    b.ToTable("OrderItems", (string)null);
                 });
 
             modelBuilder.Entity("EcommerceApp.Server.Models.PageModels.AboutUs", b =>
@@ -291,7 +291,7 @@ namespace EcommerceApp.Server.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("AboutUs");
+                    b.ToTable("AboutUs", (string)null);
                 });
 
             modelBuilder.Entity("EcommerceApp.Server.Models.PageModels.Banner", b =>
@@ -309,7 +309,7 @@ namespace EcommerceApp.Server.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Banners");
+                    b.ToTable("Banners", (string)null);
                 });
 
             modelBuilder.Entity("EcommerceApp.Server.Models.PageModels.ContactUs", b =>
@@ -335,7 +335,7 @@ namespace EcommerceApp.Server.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("ContactUs");
+                    b.ToTable("ContactUs", (string)null);
                 });
 
             modelBuilder.Entity("EcommerceApp.Server.Models.PageModels.FAQ", b =>
@@ -353,7 +353,7 @@ namespace EcommerceApp.Server.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("FAQs");
+                    b.ToTable("FAQs", (string)null);
                 });
 
             modelBuilder.Entity("EcommerceApp.Server.Models.PageModels.FAQAnswer", b =>
@@ -373,7 +373,7 @@ namespace EcommerceApp.Server.Migrations
 
                     b.HasIndex("FAQId");
 
-                    b.ToTable("FAQAnswer");
+                    b.ToTable("FAQAnswer", (string)null);
                 });
 
             modelBuilder.Entity("EcommerceApp.Server.Models.PageModels.FAQQuestion", b =>
@@ -393,7 +393,7 @@ namespace EcommerceApp.Server.Migrations
 
                     b.HasIndex("FAQId");
 
-                    b.ToTable("FAQQuestion");
+                    b.ToTable("FAQQuestion", (string)null);
                 });
 
             modelBuilder.Entity("EcommerceApp.Server.Models.PageModels.Gallery", b =>
@@ -415,7 +415,16 @@ namespace EcommerceApp.Server.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Galleries");
+                    b.ToTable("Galleries", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("1215b4fe-a07b-4170-8b78-107124917635"),
+                            DateModified = new DateTime(2023, 11, 30, 16, 27, 3, 297, DateTimeKind.Utc).AddTicks(1802),
+                            Subtitle = "This is where I host work and whatnot.",
+                            Title = "Gallery"
+                        });
                 });
 
             modelBuilder.Entity("EcommerceApp.Server.Models.PageModels.GalleryImage", b =>
@@ -435,7 +444,39 @@ namespace EcommerceApp.Server.Migrations
 
                     b.HasIndex("GalleryId");
 
-                    b.ToTable("GalleryImage");
+                    b.ToTable("GalleryImage", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("e3d66492-0eb0-461a-a195-aef955a8ae76"),
+                            GalleryId = new Guid("1215b4fe-a07b-4170-8b78-107124917635"),
+                            ImageURI = "https://ecommerceblobstorage.blob.core.windows.net/sitecontent/wreath1.jpg"
+                        },
+                        new
+                        {
+                            Id = new Guid("f5591a44-9496-4028-acbc-f56d5ebbcb0a"),
+                            GalleryId = new Guid("1215b4fe-a07b-4170-8b78-107124917635"),
+                            ImageURI = "https://ecommerceblobstorage.blob.core.windows.net/sitecontent/wreath2.jpg"
+                        },
+                        new
+                        {
+                            Id = new Guid("d3ecb623-0bf9-4ffe-aaf2-ecfe2b4bc35e"),
+                            GalleryId = new Guid("1215b4fe-a07b-4170-8b78-107124917635"),
+                            ImageURI = "https://ecommerceblobstorage.blob.core.windows.net/sitecontent/wreath3.jpg"
+                        },
+                        new
+                        {
+                            Id = new Guid("68481ff9-3e3d-41df-8518-65a3bcf1df55"),
+                            GalleryId = new Guid("1215b4fe-a07b-4170-8b78-107124917635"),
+                            ImageURI = "https://ecommerceblobstorage.blob.core.windows.net/sitecontent/wreath4.jpg"
+                        },
+                        new
+                        {
+                            Id = new Guid("d0993a6c-9f3b-4be9-8f97-ae00e7dbb6d1"),
+                            GalleryId = new Guid("1215b4fe-a07b-4170-8b78-107124917635"),
+                            ImageURI = "https://ecommerceblobstorage.blob.core.windows.net/sitecontent/wreath5.jpg"
+                        });
                 });
 
             modelBuilder.Entity("EcommerceApp.Server.Models.Payment", b =>
@@ -471,7 +512,7 @@ namespace EcommerceApp.Server.Migrations
                     b.HasIndex("OrderId")
                         .IsUnique();
 
-                    b.ToTable("Payments");
+                    b.ToTable("Payments", (string)null);
                 });
 
             modelBuilder.Entity("EcommerceApp.Server.Models.Product", b =>
@@ -488,9 +529,6 @@ namespace EcommerceApp.Server.Migrations
 
                     b.Property<DateTime>("DateModified")
                         .HasColumnType("datetime2");
-
-                    b.Property<bool>("Deleted")
-                        .HasColumnType("bit");
 
                     b.Property<string>("Description")
                         .IsRequired()
@@ -515,14 +553,11 @@ namespace EcommerceApp.Server.Migrations
                     b.Property<int>("StockQuantity")
                         .HasColumnType("int");
 
-                    b.Property<bool>("Visible")
-                        .HasColumnType("bit");
-
                     b.HasKey("Id");
 
                     b.HasIndex("CategoryId");
 
-                    b.ToTable("Products");
+                    b.ToTable("Products", (string)null);
                 });
 
             modelBuilder.Entity("EcommerceApp.Server.Models.ProductTag", b =>
@@ -546,7 +581,7 @@ namespace EcommerceApp.Server.Migrations
 
                     b.HasIndex("TagId");
 
-                    b.ToTable("ProductTags");
+                    b.ToTable("ProductTags", (string)null);
                 });
 
             modelBuilder.Entity("EcommerceApp.Server.Models.Report", b =>
@@ -582,7 +617,7 @@ namespace EcommerceApp.Server.Migrations
 
                     b.HasIndex("OrderId");
 
-                    b.ToTable("Reports");
+                    b.ToTable("Reports", (string)null);
                 });
 
             modelBuilder.Entity("EcommerceApp.Server.Models.Review", b =>
@@ -623,7 +658,7 @@ namespace EcommerceApp.Server.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("Reviews");
+                    b.ToTable("Reviews", (string)null);
                 });
 
             modelBuilder.Entity("EcommerceApp.Server.Models.ShoppingCart", b =>
@@ -641,7 +676,7 @@ namespace EcommerceApp.Server.Migrations
                     b.HasIndex("ApplicationUserId")
                         .IsUnique();
 
-                    b.ToTable("Carts");
+                    b.ToTable("Carts", (string)null);
                 });
 
             modelBuilder.Entity("EcommerceApp.Server.Models.Tag", b =>
@@ -667,61 +702,61 @@ namespace EcommerceApp.Server.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Tags");
+                    b.ToTable("Tags", (string)null);
 
                     b.HasData(
                         new
                         {
-                            Id = new Guid("75f37107-b795-4b83-8254-5c3becc01932"),
-                            DateCreated = new DateTime(2023, 12, 1, 5, 33, 42, 924, DateTimeKind.Utc).AddTicks(552),
+                            Id = new Guid("21d4d664-5f52-4046-8479-c814cce76a0c"),
+                            DateCreated = new DateTime(2023, 11, 30, 16, 27, 3, 297, DateTimeKind.Utc).AddTicks(4011),
                             DateModified = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Description = "Outdoor and indoor ornaments that add flair to living spaces and gardens.",
                             Name = "Ornament"
                         },
                         new
                         {
-                            Id = new Guid("ad42d995-e00a-485e-b6f0-2ec59d8758f0"),
-                            DateCreated = new DateTime(2023, 12, 1, 5, 33, 42, 924, DateTimeKind.Utc).AddTicks(558),
+                            Id = new Guid("6a537f7f-47f7-4d7a-88e4-84cdacb09099"),
+                            DateCreated = new DateTime(2023, 11, 30, 16, 27, 3, 297, DateTimeKind.Utc).AddTicks(4017),
                             DateModified = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Description = "Items related to garden decorations and maintenance, including plants, tools, and accessories.",
                             Name = "Garden"
                         },
                         new
                         {
-                            Id = new Guid("fc8a181c-35cd-4558-a2ec-3139b941c375"),
-                            DateCreated = new DateTime(2023, 12, 1, 5, 33, 42, 924, DateTimeKind.Utc).AddTicks(559),
+                            Id = new Guid("42f3b662-e785-4544-91da-d5e31773168e"),
+                            DateCreated = new DateTime(2023, 11, 30, 16, 27, 3, 297, DateTimeKind.Utc).AddTicks(4019),
                             DateModified = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Description = "Circular arrangements of flowers, leaves, or other materials, often used for decorative purposes or special occasions.",
                             Name = "Wreaths"
                         },
                         new
                         {
-                            Id = new Guid("de31ef9c-9a0c-4b85-a0a0-1b6b7c89b2f6"),
-                            DateCreated = new DateTime(2023, 12, 1, 5, 33, 42, 924, DateTimeKind.Utc).AddTicks(561),
+                            Id = new Guid("a9aa398d-7eb4-4363-9015-55c4985d1c07"),
+                            DateCreated = new DateTime(2023, 11, 30, 16, 27, 3, 297, DateTimeKind.Utc).AddTicks(4020),
                             DateModified = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Description = "A form of textile produced using knotting techniques, often used for wall hangings, plant hangers, and more.",
                             Name = "Macrame"
                         },
                         new
                         {
-                            Id = new Guid("429922b6-76f6-42c5-8d55-8378f63aef42"),
-                            DateCreated = new DateTime(2023, 12, 1, 5, 33, 42, 924, DateTimeKind.Utc).AddTicks(564),
+                            Id = new Guid("3980c22a-c22a-40c5-b87e-3694ad7d04fc"),
+                            DateCreated = new DateTime(2023, 11, 30, 16, 27, 3, 297, DateTimeKind.Utc).AddTicks(4024),
                             DateModified = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Description = "The art of beautiful handwriting, often used in invitations, letters, and decorative texts.",
                             Name = "Calligraphy"
                         },
                         new
                         {
-                            Id = new Guid("982915e2-9e4b-45b7-b54c-42d211d753b5"),
-                            DateCreated = new DateTime(2023, 12, 1, 5, 33, 42, 924, DateTimeKind.Utc).AddTicks(566),
+                            Id = new Guid("356fce6f-1981-450a-a627-a919516c396b"),
+                            DateCreated = new DateTime(2023, 11, 30, 16, 27, 3, 297, DateTimeKind.Utc).AddTicks(4025),
                             DateModified = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Description = "The craft of decorating fabric using a needle to apply thread or yarn, often used in apparel, home decor, and artworks.",
                             Name = "Embroidery"
                         },
                         new
                         {
-                            Id = new Guid("86e94a2f-2aef-49c7-85eb-3dc5ac4b717b"),
-                            DateCreated = new DateTime(2023, 12, 1, 5, 33, 42, 924, DateTimeKind.Utc).AddTicks(567),
+                            Id = new Guid("bd8805f9-b048-47fe-aae5-d0c44c88cee8"),
+                            DateCreated = new DateTime(2023, 11, 30, 16, 27, 3, 297, DateTimeKind.Utc).AddTicks(4058),
                             DateModified = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Description = "Items that serve a decorative purpose, enhancing the aesthetics of a space without serving a practical function.",
                             Name = "Decorative"
@@ -757,7 +792,7 @@ namespace EcommerceApp.Server.Migrations
 
                     b.HasIndex("ApplicationUserId");
 
-                    b.ToTable("UserAddresses");
+                    b.ToTable("UserAddresses", (string)null);
                 });
 
             modelBuilder.Entity("EcommerceApp.Server.Models.CartItem", b =>

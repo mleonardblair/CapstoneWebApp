@@ -3,6 +3,7 @@ using EcommerceApp.Shared.DTOs;
 using EcommerceApp.Shared.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace EcommerceApp.Server.Controllers
 {
@@ -12,14 +13,73 @@ namespace EcommerceApp.Server.Controllers
     {
         private readonly BlobServiceClient _blobServiceClient;
         private readonly IConfiguration _configuration;
+        private readonly ISiteService _siteService;
 
-        public BlobController(BlobServiceClient blobServiceClient, IConfiguration configuration)
+        public BlobController(BlobServiceClient blobServiceClient, IConfiguration configuration, ISiteService siteService)
         {
             _blobServiceClient = blobServiceClient;
             _configuration = configuration;
+            _siteService = siteService;
         }
 
+        [HttpPost("uploadlocal")]
+        public async Task<ActionResult<ServiceResponse<BlobUploadResult>>> UploadLocal(IFormFile file)
+        {
+            var response = new ServiceResponse<BlobUploadResult>();
 
+            try
+            {
+                Console.WriteLine($"Received local file upload: {file.FileName}, size: {file.Length}");
+
+                // Create uploads directory if it doesn't exist
+                var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
+                Directory.CreateDirectory(uploadsFolder);
+
+                // Generate unique filename to prevent overwriting
+                var uniqueFileName = Guid.NewGuid().ToString() + "_" + file.FileName;
+                var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                // Save file to disk
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await file.CopyToAsync(stream);
+                }
+
+                // Create result with local URL
+                var result = new BlobUploadResult
+                {
+                    FileUrl = $"/uploads/{uniqueFileName}",
+                    IsUploaded = true
+                };
+
+                // Save to database using SiteService
+                var dbResponse = await _siteService.AddGalleryImageAsync(result.FileUrl);
+
+                if (dbResponse.Success)
+                {
+                    response.Success = true;
+                    response.Message = "File uploaded and saved to database successfully!";
+                    response.Data = result;
+                    Console.WriteLine($"File uploaded successfully: {result.FileUrl}");
+                    return Ok(response);
+                }
+                else
+                {
+                    response.Success = false;
+                    response.Message = $"File uploaded but failed to save to database: {dbResponse.Message}";
+                    response.Data = result;
+                    Console.WriteLine($"Database save failed: {dbResponse.Message}");
+                    return Ok(response);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Exception in UploadLocal: {ex.Message}");
+                response.Success = false;
+                response.Message = ex.Message;
+                return BadRequest(response);
+            }
+        }
         [HttpPost]
         public async Task<BlobUploadResult> UploadToBlob(IFormFile file)
         {
@@ -68,6 +128,7 @@ namespace EcommerceApp.Server.Controllers
             return result;
         }
 
+       
 
         [HttpPost("upload")]
         public async Task<ActionResult<ServiceResponse<BlobUploadResult>>> Upload(IFormFile file)

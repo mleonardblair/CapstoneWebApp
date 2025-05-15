@@ -78,9 +78,13 @@ public class MappingProfile : Profile
 
         /** SITE CONTENT MAPS*/
         // Gallery
-        CreateMap<Gallery, GalleryDto>();
-        CreateMap<GalleryDto, Gallery>();
 
+        CreateMap<Gallery, GalleryDto>()
+    .ForMember(dest => dest.GalleryImages, opt => opt.MapFrom(src =>
+        src.GalleryImages.Select(gi => gi.ImageURI).ToList()));
+
+        CreateMap<GalleryDto, Gallery>()
+            .ForMember(dest => dest.GalleryImages, opt => opt.Ignore());
         // FAQ
         CreateMap<FAQ, FAQDto>();
         CreateMap<FAQDto, FAQ>();
