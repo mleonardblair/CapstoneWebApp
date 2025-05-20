@@ -9,6 +9,6 @@ namespace EcommerceApp.Server.Services.SiteService
         Task<ServiceResponse<GalleryDto>> GetGalleryDataAsync();
 
         // New method for adding gallery images to database
-        Task<ServiceResponse<bool>> AddGalleryImageAsync(string imageUrl);
+        Task<ServiceResponse<string>> AddGalleryImageAsync(string imageUrl);
     }
 }

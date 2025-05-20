@@ -11,16 +11,21 @@ namespace EcommerceApp.Server.Services.SiteService
     {
         private readonly AppDbContext _context;
         private readonly IMapper _mapper;
+        private readonly ILogger<SiteService> _logger;
 
-        public SiteService(AppDbContext context, IMapper mapper)
+        public SiteService(AppDbContext context, IMapper mapper, ILogger<SiteService> logger)
         {
             _context = context;
             _mapper = mapper;
+            _logger = logger;
         }
         public async Task<ServiceResponse<GalleryDto>> GetGalleryDataAsync()
         {
             var response = new ServiceResponse<GalleryDto>();
-            var gallery = await _context.Galleries.FirstOrDefaultAsync();
+            var gallery = await _context.Galleries
+    .Include(g => g.GalleryImages)
+    .FirstOrDefaultAsync();
+
             if (gallery != null)
             {
                 var galleryDto = _mapper.Map<GalleryDto>(gallery);
@@ -30,51 +35,50 @@ namespace EcommerceApp.Server.Services.SiteService
             }
             return response;
         }
-        public async Task<ServiceResponse<bool>> AddGalleryImageAsync(string imageUrl)
+        public async Task<ServiceResponse<string>> AddGalleryImageAsync(string fileUrl)
         {
-            var response = new ServiceResponse<bool>();
+            var response = new ServiceResponse<string>();
 
+            // 🔍 Step 1: Get the default gallery
+            var gallery = await _context.Galleries
+                .FirstOrDefaultAsync(); // or use a fixed ID
+
+            if (gallery == null)
+            {
+                response.Success = false;
+                response.Message = "Default gallery not found.";
+                return response;
+            }
+
+            // 🖼️ Step 2: Create the new image and attach to gallery
+            var newImage = new GalleryImage
+            {
+                Id = Guid.NewGuid(),
+                ImageURI = fileUrl,
+                GalleryId = gallery.Id
+            };
+            _logger.BeginScope("Adding new image to gallery: {ImageURI}", fileUrl);
+            _context.GalleryImages.Add(newImage);
+            gallery.DateModified = DateTime.UtcNow;
+
+            // 💾 Step 3: Save
             try
             {
-                var gallery = await _context.Galleries
-                    .Include(g => g.GalleryImages)
-                    .FirstOrDefaultAsync();
-
-                if (gallery == null)
-                {
-                    gallery = new Gallery
-                    {
-                        Id = Guid.NewGuid(),
-                        Title = "Gallery",
-                        Subtitle = "Image Gallery",
-                        DateModified = DateTime.UtcNow
-                    };
-                    _context.Galleries.Add(gallery);
-                }
-
-                gallery.GalleryImages.Add(new GalleryImage
-                {
-                    Id = Guid.NewGuid(),
-                    ImageURI = imageUrl,
-                    GalleryId = gallery.Id
-                });
-
-                gallery.DateModified = DateTime.UtcNow;
                 await _context.SaveChangesAsync();
-
                 response.Success = true;
-                response.Data = true;
-                response.Message = "Gallery image added successfully";
+                response.Message = "Image added to gallery.";
+                response.Data = newImage.Id.ToString();
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error adding gallery image: {ex.Message}");
+                _logger.LogError(ex, "Failed to save gallery image");
                 response.Success = false;
-                response.Message = ex.Message;
+                response.Message = "Failed to save image to gallery.";
             }
 
             return response;
         }
+
     }
 
 }

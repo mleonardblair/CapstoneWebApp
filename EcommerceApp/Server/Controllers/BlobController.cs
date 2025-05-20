@@ -14,12 +14,18 @@ namespace EcommerceApp.Server.Controllers
         private readonly BlobServiceClient _blobServiceClient;
         private readonly IConfiguration _configuration;
         private readonly ISiteService _siteService;
+        private readonly ILogger<BlobController> _logger;
 
-        public BlobController(BlobServiceClient blobServiceClient, IConfiguration configuration, ISiteService siteService)
+        public BlobController(
+            BlobServiceClient blobServiceClient,
+            IConfiguration configuration,
+            ISiteService siteService,
+            ILogger<BlobController> logger)
         {
             _blobServiceClient = blobServiceClient;
             _configuration = configuration;
             _siteService = siteService;
+            _logger = logger;
         }
 
         [HttpPost("uploadlocal")]
@@ -29,12 +35,13 @@ namespace EcommerceApp.Server.Controllers
 
             try
             {
-                Console.WriteLine($"Received local file upload: {file.FileName}, size: {file.Length}");
+                _logger.LogInformation("Received local file upload: {FileName}, size: {Size}", file.FileName, file.Length);
 
                 // Create uploads directory if it doesn't exist
                 var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
+                _logger.LogInformation("Resolved uploads folder path: {Path}", uploadsFolder);
                 Directory.CreateDirectory(uploadsFolder);
-
+                    
                 // Generate unique filename to prevent overwriting
                 var uniqueFileName = Guid.NewGuid().ToString() + "_" + file.FileName;
                 var filePath = Path.Combine(uploadsFolder, uniqueFileName);

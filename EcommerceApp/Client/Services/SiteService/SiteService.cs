@@ -26,9 +26,10 @@ namespace EcommerceApp.Client.Services.SiteService
 
         public async Task<GalleryDto> GetGalleryAsync()
         {
-            var response = await _httpClient.GetFromJsonAsync<GalleryDto>("api/site/gallery");
-            if (response != null)
-                return response;
+            var response = await _httpClient.GetFromJsonAsync<ServiceResponse<GalleryDto>>("api/site/gallery");
+
+            if (response != null && response.Success)
+                return response.Data;
             throw new InvalidOperationException("Failed to load gallery.");
         }
 
@@ -47,11 +48,13 @@ namespace EcommerceApp.Client.Services.SiteService
 
                 // Use the local upload endpoint
                 var response = await _httpClient.PostAsync("api/blob/uploadlocal", content);
-
+                Console.WriteLine($"[CLIENT] Uploading to: api/blob/uploadlocal");
+                Console.WriteLine($"[CLIENT] File: {file.Name}, Size: {file.Size}");
                 if (response.IsSuccessStatusCode)
                 {
                     var serviceResponse = await response.Content.ReadFromJsonAsync<ServiceResponse<BlobUploadResult>>();
-                    Console.WriteLine($"Upload response: {serviceResponse?.Success}, Message: {serviceResponse?.Message}");
+                    Console.WriteLine($"[CLIENT] Upload result: {serviceResponse?.Success}, message: {serviceResponse?.Message}, fileUrl: {serviceResponse?.Data?.FileUrl}");
+
                     return serviceResponse?.Success ?? false;
                 }
 

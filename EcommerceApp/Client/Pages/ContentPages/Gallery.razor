@@ -14,12 +14,24 @@
         <MudText Typo="Typo.body1" Style="text-align: center;">Welcome to the gallery!</MudText>
         <MudGrid Class="login-grid" Style="justify-content: center; align-items: center; height: 60%;">
             <MudItem xs="12" lg="6" xl="6" Style="align-self: center; height: inherit;">
-  
+
                 <MudCarousel Class="mud-carousel" ShowArrows="true" ShowBullets="true"
                              EnableSwipeGesture="true" AutoCycle="@_autocycle"
-                             TData="string" Style="height: 40vh; position: relative;"
-                             ItemsSource="galleryDto?.GalleryImages">
-                    @if (galleryDto != null)
+                             TData="string" Style="height: 40vh; position: relative;">
+
+                    @if (galleryDto == null)
+                    {
+                        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1;">
+                            <MudProgressCircular Color="Color.Dark" Size="Size.Large" Indeterminate="true" />
+                        </div>
+                    }
+                    else if (!galleryDto.GalleryImages.Any())
+                    {
+                        <MudCarouselItem>
+                            <MudText>No images found in the gallery.</MudText>
+                        </MudCarouselItem>
+                    }
+                    else
                     {
                         @foreach (var imageUrl in galleryDto.GalleryImages)
                         {
@@ -28,13 +40,9 @@
                             </MudCarouselItem>
                         }
                     }
-                    else
-                    {
-                        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1;">
-                            <MudProgressCircular Color="Color.Dark" Size="Size.Large" Indeterminate="true" />
-                        </div>
-                    }
+
                 </MudCarousel>
+
 
 
                 @if (SiteService.Role == "Admin")
@@ -65,6 +73,7 @@
 
 @code {
     // Existing properties
+
     private int selectedIndex = 1;
     private MudCarousel<string> _carousel = new MudCarousel<string>();
     private bool isAdmin = false;
@@ -76,6 +85,19 @@
     {
         SiteService.Role = await AuthService.GetUserRole();
         galleryDto = await SiteService.GetGalleryAsync();
+
+        Console.WriteLine($"[DEBUG] Number of images in galleryDto: {galleryDto?.GalleryImages?.Count}");
+        if (galleryDto?.GalleryImages != null)
+        {
+
+            foreach (var img in galleryDto.GalleryImages)
+            {
+                Console.WriteLine($"[DEBUG] Image URL: {img}");
+            }
+        }
+
+
+        
     }
 
     private async Task UploadFiles(IBrowserFile file)

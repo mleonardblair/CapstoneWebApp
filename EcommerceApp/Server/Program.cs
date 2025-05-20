@@ -19,6 +19,10 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
+// Logging configuration (defaults to Console + Debug)
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
+builder.Logging.AddDebug();
 
 // Add services to the container.
 var connectionString = builder.Configuration.GetConnectionString("DevelopmentLocalConnection");
@@ -68,8 +72,11 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 var app = builder.Build();
 // Configure the HTTP request pipeline.
+Console.WriteLine($"[ENV CHECK] Environment: {app.Environment.EnvironmentName}");
+
 if (app.Environment.IsDevelopment())
 {
+    app.UseStaticFiles();
     app.UseDeveloperExceptionPage();
     app.UseWebAssemblyDebugging();
     app.UseSwagger();  // Enable middleware to serve generated Swagger as a JSON endpoint.

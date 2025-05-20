@@ -26,7 +26,8 @@ namespace EcommerceApp.Server.Data
         public DbSet<Tag> Tags { get; set; }
         public DbSet<ApplicationUser> ApplicationUsers { get; set; }
         public DbSet<UserAddress> UserAddresses { get; set; }
-        public DbSet<Models.PageModels.Gallery> Galleries { get; set; }
+        public DbSet<Gallery> Galleries { get; set; }
+        public DbSet<GalleryImage> GalleryImages { get; set; }
         public DbSet<FAQ> FAQs { get; set; }
         public DbSet<AboutUs> AboutUs { get; set; }
         public DbSet<ContactUs> ContactUs { get; set; }
